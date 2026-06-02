@@ -29,6 +29,19 @@ const TITLE_MAP: Record<string, string> = {
   'TEST': 'QA Engineer',
   'UI/UX': 'Designer',
   'DESIGNER': 'Designer',
+  'GRAPHIC': 'Designer',
+  'PRODUCT DESIGN': 'Designer',
+  'INFRASTRUCTURE': 'Cloud Engineer',
+  'SYSTEMS ENGINEER': 'Software Engineer',
+  'EMBEDDED': 'Embedded Engineer',
+  'FIRMWARE': 'Embedded Engineer',
+  'BLOCKCHAIN': 'Web3 Developer',
+  'ETHEREUM': 'Web3 Developer',
+  'SMART CONTRACT': 'Web3 Developer',
+  'SALESFORCE': 'Salesforce Developer',
+  'SAP': 'ERP Consultant',
+  'ORACLE': 'Database Administrator',
+  'DBA': 'Database Administrator',
 };
 
 export function normalizeTitle(title: string): string {

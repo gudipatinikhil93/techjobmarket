@@ -1,30 +1,32 @@
 import type { APIRoute } from 'astro';
 import { LinkedInAdapter, WellfoundAdapter } from '../../scraper/adapter';
+import { InternshalaScraper } from '../../scraper/internshala';
+import { FounditScraper } from '../../scraper/foundit';
+import { getTCSScraper, getInfosysScraper } from '../../scraper/companies';
 import { processAndStoreJobs, captureSnapshots } from '../../services/jobService';
 
 export const POST: APIRoute = async () => {
   const apiToken = import.meta.env.APIFY_API_TOKEN || process.env.APIFY_API_TOKEN;
 
-  if (!apiToken) {
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: 'APIFY_API_TOKEN is missing. Please configure it in your environment variables to enable real scraping.' 
-    }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
   try {
-    const linkedin = new LinkedInAdapter(apiToken);
-    const wellfound = new WellfoundAdapter(apiToken);
+    const scrapers = [];
+    
+    // Add Apify scrapers if token available
+    if (apiToken) {
+      scrapers.push(new LinkedInAdapter(apiToken).scrape());
+      scrapers.push(new WellfoundAdapter(apiToken).scrape());
+    }
 
-    const [liJobs, wfJobs] = await Promise.all([
-      linkedin.scrape(),
-      wellfound.scrape()
-    ]);
+    // Add direct scrapers
+    scrapers.push(new InternshalaScraper().scrape(5));
+    scrapers.push(new FounditScraper().scrape(5));
+    scrapers.push(getTCSScraper().scrape(3));
+    scrapers.push(getInfosysScraper().scrape(3));
 
-    const allJobs = [...liJobs, ...wfJobs];
+    const jobResults = await Promise.allSettled(scrapers);
+    const allJobs = jobResults
+      .filter((r): r is PromiseFulfilledResult<any[]> => r.status === 'fulfilled')
+      .flatMap(r => r.value);
     
     if (allJobs.length > 0) {
       await processAndStoreJobs(allJobs);

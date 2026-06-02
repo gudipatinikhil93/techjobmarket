@@ -25,19 +25,28 @@ const footerSections = [
       { href: "#", label: "Contact" },
     ],
   },
+  {
+    title: "Popular Roles",
+    links: [
+      { href: "/role/Software%20Engineer", label: "Software Engineer" },
+      { href: "/role/Frontend%20Developer", label: "Frontend Developer" },
+      { href: "/role/Data%20Analyst", label: "Data Analyst" },
+      { href: "/role/Product%20Manager", label: "Product Manager" },
+    ],
+  },
 ];
 ---
 
 <footer class="border-t border-white/10 bg-black py-20">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
-      <div class="col-span-2 lg:col-span-2">
+      <div class="col-span-2 lg:col-span-1">
         <a href="/" class="flex items-center gap-2 mb-6">
           <div class="h-5 w-5 bg-white rounded-sm rotate-45"></div>
           <span class="text-lg font-bold">JobMarketIndia</span>
         </a>
         <p class="text-sm text-muted-foreground max-w-xs mb-8">
-          The intelligence platform for the Indian job market. Data-driven insights for professionals and companies.
+          The intelligence platform for the <strong>current job market in India</strong>. Providing real-time insights into 2026 hiring trends and salary data.
         </p>
         <div class="flex gap-4">
           <!-- Social icons placeholder -->

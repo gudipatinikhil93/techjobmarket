@@ -27,6 +27,17 @@ const navLinks = [
     </div>
     
     <div class="flex items-center gap-4">
+      <form action="/search" method="GET" class="hidden lg:block relative">
+        <input 
+          type="text" 
+          name="q" 
+          placeholder="Search roles..." 
+          class="w-48 xl:w-64 h-9 bg-white/5 border border-white/10 rounded-lg px-3 text-xs text-white placeholder:text-muted-foreground focus:outline-none focus:border-brand-cyan/50 transition-all"
+        />
+        <kbd class="absolute right-2 top-2 h-5 select-none items-center gap-1 rounded border border-white/10 bg-white/5 px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 flex pointer-events-none">
+          <span class="text-xs">/</span>
+        </kbd>
+      </form>
       <a href="/about" class="hidden sm:block text-sm font-medium text-muted-foreground hover:text-white transition-colors">
         About
       </a>

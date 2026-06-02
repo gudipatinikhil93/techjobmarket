@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { searchRoles } from '../services/outlookService';
+
+const q = Astro.url.searchParams.get('q') || '';
+const results = q ? await searchRoles(q) : [];
+
+const statusColors = {
+  Growing: 'text-green-400',
+  Stable: 'text-brand-cyan',
+  Declining: 'text-orange-400',
+  Oversaturated: 'text-brand-magenta',
+};
+---
+
+<Layout title={`Search Results for "${q}" | JobMarketIndia`}>
+  <Navbar />
+  
+  <main class="py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl font-bold text-white mb-8">Search Results for "{q}"</h1>
+      
+      {results.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {results.map(role => (
+            <a href={`/role/${encodeURIComponent(role.role)}`} class="rounded-xl border border-white/10 bg-card p-6 hover:border-brand-cyan/30 transition-all group">
+              <div class="flex justify-between items-start mb-4">
+                <span class={`text-xs font-bold uppercase ${statusColors[role.status]}`}>
+                  {role.status}
+                </span>
+                <span class="text-xs text-muted-foreground">{role.job_count} jobs</span>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-4 group-hover:text-brand-cyan transition-colors">{role.role}</h3>
+              <p class="text-sm text-muted-foreground mb-4">
+                Market Avg: ₹{Math.round(role.market_avg_min/100000)}L - ₹{Math.round(role.market_avg_max/100000)}L
+              </p>
+              <span class="text-sm font-bold text-brand-cyan">View Intelligence →</span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-20 rounded-2xl border border-dashed border-white/10">
+          <p class="text-muted-foreground text-lg mb-4">No specific intelligence found for "{q}".</p>
+          <a href="/roles" class="text-brand-cyan font-bold hover:underline">Explore all roles →</a>
+        </div>
+      )}
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

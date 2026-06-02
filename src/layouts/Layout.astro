@@ -4,12 +4,21 @@ import "../styles/global.css";
 interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
+	canonicalURL?: string;
+	type?: string;
 }
 
 const { 
 	title = "JobMarketIndia | India's Job Market Intelligence", 
-	description = "Modern India-focused job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time."
+	description = "Modern India-focused job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
+	image = "/og-image.png",
+	canonicalURL = new URL(Astro.url.pathname, 'https://jobmarketindia.com').toString(),
+	type = "website"
 } = Astro.props;
+
+const siteName = "JobMarketIndia";
+const twitterHandle = "@JobMarketIndia"; // Placeholder
 ---
 
 <!doctype html>
@@ -20,8 +29,60 @@ const {
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
+		
+		<!-- Primary Meta Tags -->
 		<title>{title}</title>
+		<meta name="title" content={title} />
 		<meta name="description" content={description} />
+		<meta name="robots" content="index, follow" />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={type} />
+		<meta property="og:url" content={Astro.url} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(image, Astro.url)} />
+		<meta property="og:site_name" content={siteName} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={Astro.url} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+		<meta property="twitter:site" content={twitterHandle} />
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href={canonicalURL} />
+		
+		<!-- Structured Data -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebSite",
+				"name": "JobMarketIndia",
+				"alternateName": "JMI",
+				"url": "https://jobmarketindia.com",
+				"potentialAction": {
+					"@type": "SearchAction",
+					"target": "https://jobmarketindia.com/search?q={search_term_string}",
+					"query-input": "required name=search_term_string"
+				}
+			}
+		</script>
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "Organization",
+				"name": "JobMarketIndia",
+				"url": "https://jobmarketindia.com",
+				"logo": "https://jobmarketindia.com/favicon.svg",
+				"sameAs": [
+					"https://twitter.com/jobmarketindia",
+					"https://linkedin.com/company/jobmarketindia"
+				]
+			}
+		</script>
 	</head>
 	<body class="min-h-screen selection:bg-brand-cyan selection:text-black">
 		<slot />

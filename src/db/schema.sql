@@ -151,16 +151,30 @@ FROM jobs
 GROUP BY skill
 ORDER BY job_count DESC;
 
--- Analytics View: Salary Benchmarks
-CREATE OR REPLACE VIEW salary_benchmarks AS
+-- Analytics View: Role Classification
+-- Classifies roles as Growing, Stable, Declining, or Oversaturated
+CREATE OR REPLACE VIEW role_intelligence AS
+WITH role_stats AS (
+    SELECT 
+        role,
+        job_count,
+        growth_percentage,
+        CASE 
+            WHEN growth_percentage > 20 THEN 'Growing'
+            WHEN growth_percentage < -20 THEN 'Declining'
+            WHEN job_count > 500 AND growth_percentage BETWEEN -10 AND 10 THEN 'Oversaturated'
+            ELSE 'Stable'
+        END as status
+    FROM trending_roles
+)
 SELECT 
-    normalized_title as role,
-    ROUND(AVG(salary_min), 0) as avg_min,
-    ROUND(AVG(salary_max), 0) as avg_max
-FROM jobs
-WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
-GROUP BY normalized_title
-ORDER BY avg_max DESC;
+    rs.*,
+    sb.avg_min as market_avg_min,
+    sb.avg_max as market_avg_max,
+    (SELECT ARRAY_AGG(DISTINCT city) FROM (SELECT city FROM jobs WHERE normalized_title = rs.role GROUP BY city ORDER BY COUNT(*) DESC LIMIT 3) t) as top_cities,
+    (SELECT ARRAY_AGG(DISTINCT s) FROM (SELECT unnest(skills) as s FROM jobs WHERE normalized_title = rs.role GROUP BY s ORDER BY COUNT(*) DESC LIMIT 5) t) as key_skills
+FROM role_stats rs
+LEFT JOIN salary_benchmarks sb ON rs.role = sb.role;
 
 CREATE OR REPLACE FUNCTION get_skill_growth()
 RETURNS TABLE (skill TEXT, growth_percentage NUMERIC) AS $$
