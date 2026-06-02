@@ -48,27 +48,36 @@ const sectorComparison = [
         </div>
 
         <div class="relative h-64 flex items-end gap-2 md:gap-4">
-          <!-- Background Grid -->
-          <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
-            {[1, 2, 3, 4].map(_ => <div class="w-full h-px bg-white/5"></div>)}
-          </div>
-          
-          {monthlyTrends.map(item => (
-            <div class="flex-1 flex flex-col items-center gap-4 group">
-              <div class="relative w-full">
-                <!-- Bar -->
-                <div 
-                  class="w-full bg-gradient-to-t from-brand-cyan/20 to-brand-cyan rounded-t-sm transition-all duration-700 group-hover:to-white group-hover:shadow-[0_0_20px_rgba(80,227,194,0.3)]"
-                  style={`height: ${item.value}%`}
-                ></div>
-                <!-- Tooltip (hidden by default) -->
-                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  Index: {item.value}
-                </div>
+          {monthlyTrends.length > 0 ? (
+            <>
+              <!-- Background Grid -->
+              <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                {[1, 2, 3, 4].map(_ => <div class="w-full h-px bg-white/5"></div>)}
               </div>
-              <span class="text-[10px] font-mono text-muted-foreground rotate-45 md:rotate-0">{item.month}</span>
+              
+              {monthlyTrends.map(item => (
+                <div class="flex-1 flex flex-col items-center gap-4 group h-full justify-end">
+                  <div class="relative w-full h-full flex items-end">
+                    <!-- Bar -->
+                    <div 
+                      class="w-full bg-gradient-to-t from-brand-cyan/20 to-brand-cyan rounded-t-sm transition-all duration-700 group-hover:to-white group-hover:shadow-[0_0_20px_rgba(80,227,194,0.3)]"
+                      style={`height: ${item.value}%`}
+                    ></div>
+                    <!-- Tooltip -->
+                    <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                      Index: {item.value.toFixed(1)}
+                    </div>
+                  </div>
+                  <span class="text-[10px] font-mono text-muted-foreground rotate-45 md:rotate-0 whitespace-nowrap">{item.month}</span>
+                </div>
+              ))}
+            </>
+          ) : (
+            <div class="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
+              <p class="text-white font-mono text-sm mb-2">Insufficient historical data</p>
+              <p class="text-muted-foreground text-xs text-center px-4">Velocity Index requires at least 2 months of market snapshots to calculate trajectories.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 

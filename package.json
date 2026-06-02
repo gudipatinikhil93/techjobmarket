@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "pipeline:update": "tsx scripts/pipeline.ts",
+    "scrape:test": "tsx scripts/test-scrape.ts"
   },
   "dependencies": {
     "@astrojs/vercel": "^10.0.8",
@@ -24,5 +26,11 @@
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vite": "^7.1.0"
   }
 }

@@ -3,15 +3,19 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import DataCard from '../components/DataCard.astro';
-import { getTrendingRoles, getTopCities } from '../services/jobService';
+import { getTrendingRoles, getTopCities, getMarketPulse } from '../services/jobService';
+import { getLatestInsights } from '../services/aiService';
 
 // Fetch real data from services
 const realTrendingRoles = await getTrendingRoles();
+const realTopCities = await getTopCities();
+const marketPulse = await getMarketPulse();
+const marketInsights = await getLatestInsights();
 
 const trendingRoles = realTrendingRoles.length > 0 
   ? realTrendingRoles.map(r => ({
       role: r.role,
-      growth: `+${Math.floor(Math.random() * 60 + 20)}%`, // Mocked growth for now
+      growth: `+${r.growth_percentage}%`,
       demand: r.job_count > 50 ? "Critical" : "High"
     }))
   : [
@@ -21,18 +25,18 @@ const trendingRoles = realTrendingRoles.length > 0
     { role: "Cloud Security", growth: "+112%", demand: "Critical" },
   ];
 
-const topCities = [
-  { city: "Bengaluru", hiringIndex: 9.8, trend: "Stable" },
-  { city: "Hyderabad", hiringIndex: 8.5, trend: "Rising" },
-  { city: "Pune", hiringIndex: 7.2, trend: "Rising" },
-  { city: "Gurugram", hiringIndex: 8.1, trend: "Stable" },
-];
-
-const marketInsights = [
-  "Global Capability Centres (GCCs) are driving 60% of new tech hiring in India.",
-  "Average salary hikes for niche AI roles have touched 45% Y-o-Y.",
-  "Tier-2 cities like Jaipur and Indore are seeing a 30% surge in remote tech roles.",
-];
+const topCities = realTopCities.length > 0
+  ? realTopCities.map(c => ({
+      city: c.city,
+      hiringIndex: Math.min(10, (c.job_count / 100) + 5), // Basic index formula
+      trend: "Rising"
+    }))
+  : [
+    { city: "Bengaluru", hiringIndex: 9.8, trend: "Stable" },
+    { city: "Hyderabad", hiringIndex: 8.5, trend: "Rising" },
+    { city: "Pune", hiringIndex: 7.2, trend: "Rising" },
+    { city: "Gurugram", hiringIndex: 8.1, trend: "Stable" },
+  ];
 ---
 
 <Layout>
@@ -58,12 +62,12 @@ const marketInsights = [
 						Real-time data visualization of hiring trends, salary benchmarks, and skill demand across India's booming economy. Bloomberg-level insights, simplified for you.
 					</p>
 					<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-						<button class="w-full sm:w-auto rounded-pill bg-white px-8 py-3 text-sm font-bold text-black hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5">
-							View Market Report
-						</button>
-						<button class="w-full sm:w-auto rounded-pill border border-white/10 bg-white/5 px-8 py-3 text-sm font-bold text-white hover:bg-white/10 transition-all active:scale-95">
+						<a href="/roles" class="w-full sm:w-auto rounded-pill bg-white px-8 py-3 text-sm font-bold text-black text-center hover:bg-white/90 transition-all active:scale-95 shadow-xl shadow-white/5">
+							Explore Roles
+						</a>
+						<a href="/skills" class="w-full sm:w-auto rounded-pill border border-white/10 bg-white/5 px-8 py-3 text-sm font-bold text-white text-center hover:bg-white/10 transition-all active:scale-95">
 							Explore Skills →
-						</button>
+						</a>
 					</div>
 				</div>
 
@@ -71,27 +75,27 @@ const marketInsights = [
 				<div class="mt-24 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 					<DataCard 
 						title="Hiring Index" 
-						value="8.4" 
-						trend={{ value: "1.2%", isUp: true }}
-						description="Current hiring velocity compared to 2025."
+						value={marketPulse.hiringIndex.toFixed(1)} 
+						trend={{ value: "Live", isUp: true }}
+						description="Current hiring velocity based on active volume."
 					/>
 					<DataCard 
 						title="Avg. Tech Salary" 
-						value="₹18.5 LPA" 
-						trend={{ value: "8%", isUp: true }}
-						description="Median package for 5+ years experience."
+						value={marketPulse.avgSalary > 0 ? `₹${(marketPulse.avgSalary / 100000).toFixed(1)} LPA` : "₹18.5 LPA"} 
+						trend={{ value: marketPulse.avgSalary > 0 ? "Real-time" : "Benchmark", isUp: true }}
+						description="Median package across all indexed roles."
 					/>
 					<DataCard 
 						title="Open Roles" 
-						value="425k+" 
-						trend={{ value: "12k", isUp: false }}
-						description="Total active listings in major tech hubs."
+						value={`${(marketPulse.totalJobs / 1000).toFixed(1)}k+`} 
+						trend={{ value: `${marketPulse.recentJobs}`, isUp: marketPulse.recentJobs > 0 }}
+						description="Total active listings in our database."
 					/>
 					<DataCard 
-						title="Layoff Index" 
-						value="Low" 
+						title="Market Stability" 
+						value="High" 
 						trend={{ value: "Stable", isUp: true }}
-						description="Current market stability rating."
+						description="Current market resilience rating."
 					/>
 				</div>
 			</div>

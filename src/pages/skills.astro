@@ -2,17 +2,23 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import { getTopSkills, getSkillGrowth } from '../services/jobService';
 
-const skills = [
-  { name: "Generative AI", growth: "+145%", difficulty: "Critical", categories: ["LLMs", "RAG", "Prompt Eng"], trend: "up" },
-  { name: "LLM Operations (LLMOps)", growth: "+82%", difficulty: "Very High", categories: ["Vector DBs", "Model Finetuning"], trend: "up" },
-  { name: "React / Next.js 16", growth: "+34%", difficulty: "High", categories: ["Server Actions", "Partial Prerendering"], trend: "stable" },
-  { name: "Cloud Native Security", growth: "+56%", difficulty: "Very High", categories: ["Zero Trust", "eBPF", "Wasm"], trend: "up" },
-  { name: "Cybersecurity (AI-driven)", growth: "+68%", difficulty: "Critical", categories: ["Threat Intel", "Automated Response"], trend: "up" },
-  { name: "Data Engineering (Real-time)", growth: "+42%", difficulty: "High", categories: ["Kafka", "Apache Flink", "Iceberg"], trend: "up" },
-  { name: "Quantum Computing Basics", growth: "+12%", difficulty: "Experimental", categories: ["Quantum Algos", "Qiskit"], trend: "rising" },
-  { name: "Sustainability Tech", growth: "+28%", difficulty: "Medium", categories: ["Carbon Accounting", "Green Code"], trend: "rising" },
-];
+const dbSkills = await getTopSkills();
+const skillGrowthData = await getSkillGrowth();
+
+const skills = dbSkills.length > 0
+  ? dbSkills.map(s => {
+      const growthInfo = skillGrowthData?.find((g: any) => g.skill === s.skill);
+      return {
+        name: s.skill,
+        growth: growthInfo ? `+${growthInfo.growth_percentage}%` : "Insufficient Data",
+        difficulty: s.job_count > 100 ? "Critical" : "High",
+        categories: ["Tech"],
+        trend: growthInfo && growthInfo.growth_percentage > 0 ? "up" : "stable"
+      };
+    })
+  : [];
 ---
 
 <Layout title="Trending Tech Skills 2026 | JobMarketIndia">

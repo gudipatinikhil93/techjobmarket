@@ -2,8 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import { getAllCities } from '../services/jobService';
 
-const cities = [
+const fallbackCities = [
   { name: "Bengaluru", index: 9.8, industries: ["Generative AI", "SaaS", "Fintech"], status: "Peak", description: "The Silicon Valley of India continues to lead in GenAI and DeepTech investments." },
   { name: "Hyderabad", index: 9.4, industries: ["Cloud Computing", "Semiconductors", "Global Capability Centers"], status: "High Growth", description: "Massive expansion of GCCs and high-end cloud infrastructure projects." },
   { name: "Pune", index: 8.7, industries: ["Automotive Tech", "Product Engineering", "Cybersecurity"], status: "Stable", description: "Solid demand in specialized engineering and the growing EV tech sector." },
@@ -13,6 +14,18 @@ const cities = [
   { name: "Noida", index: 8.1, industries: ["IT Services", "Data Centers", "Mobile Tech"], status: "Growing", description: "Emerging as a major hub for data centers and large-scale IT operations." },
   { name: "Ahmedabad", index: 7.8, industries: ["Manufacturing Tech", "Fintech", "Renewable Energy"], status: "Emerging", description: "Rapid growth in tech-enabled manufacturing and renewable energy systems." },
 ];
+
+const dbCities = await getAllCities();
+
+const cities = dbCities.length > 0 
+  ? dbCities.map(c => ({
+      name: c.city,
+      index: Math.min(10, (c.job_count / 100) + 5).toFixed(1),
+      industries: ["Tech", "IT Services", "Engineering"],
+      status: c.job_count > 50 ? "Peak" : "High Growth",
+      description: `Major hub with ${c.job_count} active job listings.`
+    }))
+  : fallbackCities;
 ---
 
 <Layout title="Top Hiring Cities in India 2026 | JobMarketIndia">

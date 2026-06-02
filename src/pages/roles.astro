@@ -2,8 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+import { getAllRoles } from '../services/jobService';
 
-const roles = [
+const fallbackRoles = [
   { name: "AI Engineer", category: "Engineering", salary: "₹15L - ₹45L", demand: "Critical" },
   { name: "Full Stack Developer", category: "Engineering", salary: "₹8L - ₹30L", demand: "High" },
   { name: "Product Manager", category: "Product", salary: "₹12L - ₹40L", demand: "High" },
@@ -13,6 +14,17 @@ const roles = [
   { name: "DevOps Engineer", category: "Infrastructure", salary: "₹10L - ₹32L", demand: "High" },
   { name: "Cybersecurity Analyst", category: "Security", salary: "₹12L - ₹38L", demand: "Very High" },
 ];
+
+const dbRoles = await getAllRoles();
+
+const roles = dbRoles.length > 0
+  ? dbRoles.map(r => ({
+      name: r.role,
+      category: "Tech",
+      salary: "Market Rate",
+      demand: r.job_count > 50 ? "Critical" : "High"
+    }))
+  : fallbackRoles;
 ---
 
 <Layout title="Trending Job Roles in India | JobMarketIndia">

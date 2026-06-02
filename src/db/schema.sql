@@ -30,6 +30,33 @@ CREATE TABLE title_mappings (
     normalized_title TEXT NOT NULL
 );
 
+-- Snapshot Tables for Historical Tracking
+CREATE TABLE role_snapshots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role TEXT NOT NULL,
+    job_count INTEGER NOT NULL,
+    avg_salary_min NUMERIC,
+    avg_salary_max NUMERIC,
+    captured_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE city_snapshots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    city TEXT NOT NULL,
+    job_count INTEGER NOT NULL,
+    avg_salary NUMERIC,
+    captured_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- AI Insights Table
+CREATE TABLE ai_insights (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    insight_type TEXT NOT NULL, -- 'weekly_summary', 'role_deep_dive', etc.
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Seed some normalization patterns
 INSERT INTO title_mappings (original_pattern, normalized_title) VALUES
 ('SDE', 'Software Engineer'),
@@ -43,15 +70,37 @@ INSERT INTO title_mappings (original_pattern, normalized_title) VALUES
 ('Cloud Security', 'Cloud Security'),
 ('DevOps Engineer', 'DevOps Engineer');
 
--- Analytics View: Trending Roles (simplified)
+-- Analytics View: Trending Roles with Real Growth
+-- This view compares the last 7 days vs the 7 days before that
 CREATE OR REPLACE VIEW trending_roles AS
+WITH current_period AS (
+    SELECT 
+        normalized_title as role,
+        COUNT(*) as current_count
+    FROM jobs
+    WHERE normalized_title IS NOT NULL 
+      AND posted_at > NOW() - INTERVAL '7 days'
+    GROUP BY normalized_title
+),
+previous_period AS (
+    SELECT 
+        normalized_title as role,
+        COUNT(*) as previous_count
+    FROM jobs
+    WHERE normalized_title IS NOT NULL 
+      AND posted_at <= NOW() - INTERVAL '7 days' 
+      AND posted_at > NOW() - INTERVAL '14 days'
+    GROUP BY normalized_title
+)
 SELECT 
-    normalized_title as role,
-    COUNT(*) as job_count,
-    COUNT(*) FILTER (WHERE posted_at > NOW() - INTERVAL '7 days') as recent_count
-FROM jobs
-WHERE normalized_title IS NOT NULL
-GROUP BY normalized_title
+    COALESCE(c.role, p.role) as role,
+    COALESCE(c.current_count, 0) as job_count,
+    CASE 
+        WHEN COALESCE(p.previous_count, 0) = 0 THEN 100 -- Default to 100% if no previous data
+        ELSE ROUND(((c.current_count::numeric - p.previous_count::numeric) / p.previous_count::numeric) * 100, 2)
+    END as growth_percentage
+FROM current_period c
+FULL OUTER JOIN previous_period p ON c.role = p.role
 ORDER BY job_count DESC;
 
 -- Analytics View: Top Cities
@@ -59,7 +108,83 @@ CREATE OR REPLACE VIEW top_cities AS
 SELECT 
     city,
     COUNT(*) as job_count,
-    AVG((salary_min + salary_max) / 2) as avg_salary
+    ROUND(AVG((salary_min + salary_max) / 2), 0) as avg_salary
 FROM jobs
 GROUP BY city
 ORDER BY job_count DESC;
+
+-- Snapshot Capture Functions
+CREATE OR REPLACE FUNCTION capture_role_snapshots() 
+RETURNS void AS $$
+BEGIN
+    INSERT INTO role_snapshots (role, job_count, avg_salary_min, avg_salary_max)
+    SELECT 
+        normalized_title,
+        COUNT(*),
+        AVG(salary_min),
+        AVG(salary_max)
+    FROM jobs
+    WHERE normalized_title IS NOT NULL
+    GROUP BY normalized_title;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION capture_city_snapshots() 
+RETURNS void AS $$
+BEGIN
+    INSERT INTO city_snapshots (city, job_count, avg_salary)
+    SELECT 
+        city,
+        COUNT(*),
+        AVG((salary_min + salary_max) / 2)
+    FROM jobs
+    GROUP BY city;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Analytics View: Skills
+CREATE OR REPLACE VIEW top_skills AS
+SELECT 
+    unnest(skills) as skill,
+    COUNT(*) as job_count
+FROM jobs
+GROUP BY skill
+ORDER BY job_count DESC;
+
+-- Analytics View: Salary Benchmarks
+CREATE OR REPLACE VIEW salary_benchmarks AS
+SELECT 
+    normalized_title as role,
+    ROUND(AVG(salary_min), 0) as avg_min,
+    ROUND(AVG(salary_max), 0) as avg_max
+FROM jobs
+WHERE salary_min IS NOT NULL AND salary_max IS NOT NULL
+GROUP BY normalized_title
+ORDER BY avg_max DESC;
+
+CREATE OR REPLACE FUNCTION get_skill_growth()
+RETURNS TABLE (skill TEXT, growth_percentage NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    WITH current_period AS (
+        SELECT unnest(skills) as s, COUNT(*) as c
+        FROM jobs
+        WHERE posted_at > NOW() - INTERVAL '7 days'
+        GROUP BY s
+    ),
+    previous_period AS (
+        SELECT unnest(skills) as s, COUNT(*) as c
+        FROM jobs
+        WHERE posted_at <= NOW() - INTERVAL '7 days' AND posted_at > NOW() - INTERVAL '14 days'
+        GROUP BY s
+    )
+    SELECT 
+        COALESCE(curr.s, prev.s) as skill,
+        CASE 
+            WHEN COALESCE(prev.c, 0) = 0 THEN 100::numeric
+            ELSE ROUND(((curr.c::numeric - prev.c::numeric) / prev.c::numeric) * 100, 2)
+        END as growth_percentage
+    FROM current_period curr
+    FULL OUTER JOIN previous_period prev ON curr.s = prev.s;
+END;
+$$ LANGUAGE plpgsql;
