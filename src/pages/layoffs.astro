@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const layoffs = [
+  { company: "CloudScale India", sector: "Infrastructure", impact: "15%", count: "450", date: "Mar 2026", reason: "AI Automation" },
+  { company: "FinFlow", sector: "Fintech", impact: "8%", count: "120", date: "Feb 2026", reason: "Restructuring" },
+  { company: "EduSpark", sector: "EdTech", impact: "25%", count: "800", date: "Jan 2026", reason: "Market Correction" },
+  { company: "Z-Logistics", sector: "Logistics", impact: "10%", count: "300", date: "Jan 2026", reason: "Robotization" },
+  { company: "MetaBuild", sector: "PropTech", impact: "12%", count: "180", date: "Dec 2025", reason: "Strategic Pivot" },
+  { company: "HealthNode", sector: "HealthTech", impact: "5%", count: "60", date: "Nov 2025", reason: "Efficiency Drive" },
+];
+
+const totalImpacted = layoffs.reduce((acc, curr) => acc + parseInt(curr.count), 0);
+---
+
+<Layout title="Layoff Tracker 2026 | JobMarketIndia">
+  <Navbar />
+  
+  <main class="py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div>
+          <h1 class="text-4xl font-bold text-white mb-4 text-balance">Layoff Tracker</h1>
+          <p class="text-muted-foreground text-lg max-w-xl">Monitoring workforce changes across the Indian tech ecosystem. Data is verified through internal reporting and public filings.</p>
+        </div>
+        <div class="bg-card border border-white/10 p-6 rounded-xl flex gap-8">
+          <div>
+            <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Total Impacted (2026)</p>
+            <p class="text-3xl font-bold text-brand-magenta">{totalImpacted.toLocaleString()}</p>
+          </div>
+          <div class="w-px bg-white/10"></div>
+          <div>
+            <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Avg. Impact</p>
+            <p class="text-3xl font-bold text-white">12.4%</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        {layoffs.map(item => (
+          <div class="group flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 p-6 rounded-xl border border-white/10 bg-card/50 hover:bg-card hover:border-white/20 transition-all">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-1">
+                <h3 class="text-xl font-bold text-white">{item.company}</h3>
+                <span class="text-[10px] bg-white/5 text-muted-foreground px-2 py-0.5 rounded font-mono uppercase">{item.sector}</span>
+              </div>
+              <p class="text-sm text-muted-foreground">Primary Reason: <span class="text-white/70">{item.reason}</span></p>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-8 md:gap-16 w-full md:w-auto">
+              <div>
+                <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Impact</p>
+                <p class="text-lg font-bold text-brand-magenta">{item.impact}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Employees</p>
+                <p class="text-lg font-bold text-white">{item.count}</p>
+              </div>
+              <div>
+                <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Date</p>
+                <p class="text-lg font-bold text-white/60">{item.date}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-20 p-8 rounded-2xl border border-white/5 bg-white/[0.01] text-center">
+        <h3 class="text-xl font-bold text-white mb-2">Notice anything missing?</h3>
+        <p class="text-muted-foreground text-sm mb-6 max-w-md mx-auto">Our tracker relies on anonymous reports and public data. Help us keep the community informed.</p>
+        <button class="px-6 py-2 rounded-pill border border-white/20 text-white font-medium hover:bg-white/5 transition-colors">
+          Submit Anonymous Tip
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>
