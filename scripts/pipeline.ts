@@ -1,56 +1,60 @@
 import 'dotenv/config';
-import { LinkedInAdapter, WellfoundAdapter } from '../src/scraper/adapter';
 import { IndeedPlaywrightScraper } from '../src/scraper/indeedPlaywright';
-import { getGoogleScraper, getMicrosoftScraper, getMetaScraper } from '../src/scraper/companies';
+import { GreenhouseAdapter } from '../src/scraper/greenhouse';
+import { LeverAdapter } from '../src/scraper/lever';
+import { AshbyAdapter } from '../src/scraper/ashby';
+import { RemoteOKAdapter } from '../src/scraper/remoteok';
 import { processAndStoreJobs, captureSnapshots } from '../src/services/jobService';
 import { generateWeeklyInsights } from '../src/services/aiService';
 
 async function main() {
-  const apiToken = process.env.APIFY_API_TOKEN;
-
   console.log('--- STARTING ENHANCED CAREER INTELLIGENCE PIPELINE ---');
+  console.log(`Time: ${new Date().toISOString()}`);
 
   try {
-    const scrapers = [];
-    
-    if (apiToken) {
-      console.log('Adding Apify scrapers...');
-      scrapers.push(new LinkedInAdapter(apiToken).scrape());
-      scrapers.push(new WellfoundAdapter(apiToken).scrape());
-    }
+    const scrapers = [
+      new GreenhouseAdapter().scrape(),
+      new LeverAdapter().scrape(),
+      new AshbyAdapter().scrape(),
+      new RemoteOKAdapter().scrape(),
+      // Keep Indeed but perhaps limit it or keep it as is
+      new IndeedPlaywrightScraper().scrape(20) 
+    ];
 
-    console.log('Adding direct scrapers (Indeed, US Companies)...');
-    scrapers.push(new IndeedPlaywrightScraper().scrape(10));
-    scrapers.push(getGoogleScraper().scrape(5));
-    scrapers.push(getMicrosoftScraper().scrape(5));
-    scrapers.push(getMetaScraper().scrape(5));
+    console.log(`[Pipeline] Triggering ${scrapers.length} scraping sources concurrently...`);
 
     const jobResults = await Promise.allSettled(scrapers);
     const allJobs = jobResults
       .filter((r): r is PromiseFulfilledResult<any[]> => r.status === 'fulfilled')
       .flatMap(r => r.value);
 
-    console.log(`Fetched ${allJobs.length} total raw jobs from all sources.`);
+    console.log(`[Pipeline] Fetched ${allJobs.length} total raw jobs from all sources.`);
+
+    const failedCount = jobResults.filter(r => r.status === 'rejected').length;
+    if (failedCount > 0) {
+      console.warn(`[Pipeline] ${failedCount} sources failed to fetch data.`);
+    }
 
     // 2. Processing & Storage
     if (allJobs.length > 0) {
-      console.log('Processing and storing jobs...');
-      await processAndStoreJobs(allJobs);
+      console.log('[Pipeline] Processing and storing jobs...');
+      const storedCount = await processAndStoreJobs(allJobs);
+      console.log(`[Pipeline] Successfully processed and stored jobs.`);
     } else {
-      console.log('No new jobs fetched, skipping storage.');
+      console.log('[Pipeline] No new jobs fetched, skipping storage.');
     }
 
     // 3. Snapshots (Historical Tracking)
-    console.log('Capturing historical snapshots...');
+    console.log('[Pipeline] Capturing historical snapshots...');
     await captureSnapshots();
 
     // 4. AI Insights
-    console.log('Generating AI insights...');
+    console.log('[Pipeline] Generating AI insights...');
     await generateWeeklyInsights();
 
     console.log('--- PIPELINE COMPLETED SUCCESSFULLY ---');
   } catch (error) {
-    console.error('Pipeline failed:', error);
+    console.error('[Pipeline] Pipeline failed:', error);
     process.exit(1);
   }
 }

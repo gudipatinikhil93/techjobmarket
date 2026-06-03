@@ -58,7 +58,7 @@ export class IndeedPlaywrightScraper {
             });
           }
         } catch (jobError) {
-          console.error('[Indeed] Error parsing card:', jobError.message);
+          console.error('[Indeed] Error parsing card:', jobError instanceof Error ? jobError.message : String(jobError));
         }
       }
 

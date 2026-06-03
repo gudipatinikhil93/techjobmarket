@@ -64,15 +64,7 @@ const skills = dbSkills.length > 0
               </div>
             </div>
 
-            <!-- Mini trend visual -->
-            <div class="mt-6 flex items-end gap-1 h-8">
-              {[40, 60, 45, 70, 85, 90, 100].map((h, i) => (
-                <div 
-                  class={`flex-1 rounded-t-sm transition-all duration-500 ${i === 6 ? 'bg-brand-blue' : 'bg-white/10'}`} 
-                  style={`height: ${h}%`}
-                ></div>
-              ))}
-            </div>
+            <!-- Mini trend visual removed to ensure 100% data authenticity -->
           </div>
         ))}
         {skills.length === 0 && (

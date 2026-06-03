@@ -12,6 +12,9 @@ const TITLE_MAP: Record<string, string> = {
   'DATA ENGINEER': 'Data Engineer',
   'MACHINE LEARNING': 'AI/ML Engineer',
   'AI ENGINEER': 'AI/ML Engineer',
+  'LLM': 'AI/ML Engineer',
+  'NLP': 'AI/ML Engineer',
+  'DEEP LEARNING': 'AI/ML Engineer',
   'PRODUCT MANAGER': 'Product Manager',
   'PRODUCT OWNER': 'Product Manager',
   'DEVOPS': 'DevOps Engineer',
@@ -27,6 +30,7 @@ const TITLE_MAP: Record<string, string> = {
   'FLUTTER': 'Mobile Developer',
   'QA': 'QA Engineer',
   'TEST': 'QA Engineer',
+  'SDET': 'QA Engineer',
   'UI/UX': 'Designer',
   'DESIGNER': 'Designer',
   'GRAPHIC': 'Designer',
@@ -42,6 +46,11 @@ const TITLE_MAP: Record<string, string> = {
   'SAP': 'ERP Consultant',
   'ORACLE': 'Database Administrator',
   'DBA': 'Database Administrator',
+  'SOLUTIONS ARCHITECT': 'Solutions Architect',
+  'ENGINEERING MANAGER': 'Engineering Manager',
+  'DIRECTOR OF ENGINEERING': 'Engineering Manager',
+  'CTO': 'Executive',
+  'VP OF ENGINEERING': 'Executive'
 };
 
 export function normalizeTitle(title: string): string {
@@ -73,25 +82,45 @@ export function normalizeCity(city: string): string {
     'SAN FRANCISCO': 'San Francisco',
     'SF': 'San Francisco',
     'BAY AREA': 'San Francisco',
+    'PALO ALTO': 'San Francisco',
+    'SAN JOSE': 'San Francisco',
+    'MOUNTAIN VIEW': 'San Francisco',
+    'MENLO PARK': 'San Francisco',
+    'SUNNYVALE': 'San Francisco',
     'NEW YORK': 'New York',
     'NYC': 'New York',
+    'BROOKLYN': 'New York',
     'AUSTIN': 'Austin',
     'SEATTLE': 'Seattle',
+    'BELLEVUE': 'Seattle',
+    'REDMOND': 'Seattle',
     'BOSTON': 'Boston',
+    'CAMBRIDGE': 'Boston',
     'CHICAGO': 'Chicago',
     'LOS ANGELES': 'Los Angeles',
     'LA': 'Los Angeles',
+    'SANTA MONICA': 'Los Angeles',
     'DENVER': 'Denver',
     'BOULDER': 'Denver',
     'MIAMI': 'Miami',
     'ATLANTA': 'Atlanta',
+    'WASHINGTON': 'Washington DC',
+    'DC': 'Washington DC',
+    'SAN DIEGO': 'Los Angeles',
     'REMOTE': 'Remote',
+    'ANYWHERE': 'Remote',
+    'WORLDWIDE': 'Remote',
+    'UNITED STATES': 'Remote', // Often means remote US
+    'US': 'Remote'
   };
 
   const upperCity = city.toUpperCase();
   for (const [key, value] of Object.entries(hubMap)) {
     if (upperCity.includes(key)) return value;
   }
+
+  // If not a known hub, just return the raw city or a generic 'Remote' if it implies remote
+  if (upperCity.includes('REMOTE') || upperCity.includes('ANYWHERE')) return 'Remote';
 
   return city.trim();
 }

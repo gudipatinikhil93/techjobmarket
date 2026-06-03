@@ -2,61 +2,193 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import { getAllRoles } from '../services/jobService';
+import { getMarketOutlook } from '../services/outlookService';
 
-const fallbackRoles = [
-  { name: "AI Engineer", category: "Engineering", salary: "$140k - $220k", demand: "Critical" },
-  { name: "Full Stack Developer", category: "Engineering", salary: "$110k - $160k", demand: "High" },
-  { name: "Product Manager", category: "Product", salary: "$130k - $180k", demand: "High" },
-  { name: "Data Scientist", category: "Data", salary: "$125k - $175k", demand: "Very High" },
-  { name: "Cloud Architect", category: "Infrastructure", salary: "$160k - $240k", demand: "Critical" },
-  { name: "UI/UX Designer", category: "Design", salary: "$95k - $150k", demand: "Medium" },
-  { name: "DevOps Engineer", category: "Infrastructure", salary: "$130k - $190k", demand: "High" },
-  { name: "Cybersecurity Analyst", category: "Security", salary: "$115k - $170k", demand: "Very High" },
-];
+const allRoles = await getMarketOutlook();
+// Filter out extreme noise if needed, but show all with data
+const displayRoles = allRoles.filter(r => r.jobCount > 0);
 
-const dbRoles = await getAllRoles();
+const formatSalary = (min: number, max: number) => {
+  if (!min || !max) return 'Market Rate';
+  return `$${(min/1000).toFixed(0)}k - $${(max/1000).toFixed(0)}k`;
+};
 
-const roles = dbRoles.length > 0
-  ? dbRoles.map(r => ({
-      name: r.role,
-      category: "Tech",
-      salary: "Market Rate",
-      demand: r.job_count > 50 ? "Critical" : "High"
-    }))
-  : fallbackRoles;
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Growing': return 'text-brand-cyan bg-brand-cyan/10 border-brand-cyan/20';
+    case 'Declining': return 'text-brand-magenta bg-brand-magenta/10 border-brand-magenta/20';
+    case 'Oversaturated': return 'text-orange-400 bg-orange-400/10 border-orange-400/20';
+    default: return 'text-brand-blue bg-brand-blue/10 border-brand-blue/20';
+  }
+};
 ---
 
 <Layout 
-  title="Trending Tech Job Roles in US 2026 | Current Job Market Analysis"
-  description="Explore the most in-demand job roles in the US tech market. Analyze salary benchmarks, hiring demand, and growth trends for 2026."
+  title="Tech Role Market Intelligence | US Job Market"
+  description="High-density data terminal for tracking US tech roles. Compare salaries, hiring demand, and growth trajectories."
 >
   <Navbar />
   
-  <main class="py-24">
+  <main class="py-24 bg-black min-h-screen">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-16">
-        <h1 class="text-4xl font-bold text-white mb-4">Trending Job Roles</h1>
-        <p class="text-muted-foreground text-lg">In-depth analysis of the most in-demand roles in the US tech ecosystem.</p>
-      </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {roles.map(role => (
-          <a href={`/role/${encodeURIComponent(role.name)}`} class="rounded-xl border border-white/10 bg-card p-6 hover:border-brand-cyan/30 transition-all group">
-            <div class="flex justify-between items-start mb-4">
-              <span class="text-xs font-mono text-brand-cyan uppercase tracking-widest">{role.category}</span>
-              <span class={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${role.demand === 'Critical' ? 'bg-brand-magenta/20 text-brand-magenta' : 'bg-brand-cyan/20 text-brand-cyan'}`}>
-                {role.demand}
-              </span>
-            </div>
-            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand-cyan transition-colors">{role.name}</h3>
-            <p class="text-sm text-muted-foreground mb-6">Average Base Salary: <span class="text-white font-medium">{role.salary}</span></p>
-            <span class="text-sm font-bold text-white/50 group-hover:text-white transition-colors">View detailed breakdown →</span>
-          </a>
-        ))}
+      <!-- Header -->
+      <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">Role Intelligence Terminal</h1>
+          <p class="text-muted-foreground max-w-2xl text-sm md:text-base">Comprehensive, data-driven analysis of role demand, compensation realities, and market trajectories across the US tech sector.</p>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input 
+              type="text" 
+              id="roleSearch" 
+              placeholder="Search roles..." 
+              class="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-brand-cyan/50 focus:ring-1 focus:ring-brand-cyan/50 transition-all"
+            >
+          </div>
+          <select id="statusFilter" class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-cyan/50 transition-all appearance-none cursor-pointer">
+            <option value="all">All Outlooks</option>
+            <option value="Growing">Growing</option>
+            <option value="Stable">Stable</option>
+            <option value="Oversaturated">Oversaturated</option>
+            <option value="Declining">Declining</option>
+          </select>
+        </div>
       </div>
+
+      <!-- Data Table -->
+      <div class="rounded-xl border border-white/10 bg-white/[0.01] overflow-hidden overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap" id="rolesTable">
+          <thead class="bg-white/[0.03] border-b border-white/10 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            <tr>
+              <th scope="col" class="px-6 py-4 font-medium cursor-pointer hover:text-white transition-colors" data-sort="role">Role / Domain <span class="sort-icon"></span></th>
+              <th scope="col" class="px-6 py-4 font-medium cursor-pointer hover:text-white transition-colors" data-sort="outlook">Market Outlook <span class="sort-icon"></span></th>
+              <th scope="col" class="px-6 py-4 font-medium cursor-pointer hover:text-white transition-colors" data-sort="salary">Avg Base Salary <span class="sort-icon"></span></th>
+              <th scope="col" class="px-6 py-4 font-medium cursor-pointer hover:text-white transition-colors" data-sort="openings">Active Openings <span class="sort-icon">▼</span></th>
+              <th scope="col" class="px-6 py-4 font-medium cursor-pointer hover:text-white transition-colors" data-sort="trend">Momentum <span class="sort-icon"></span></th>
+              <th scope="col" class="px-6 py-4 font-medium hidden lg:table-cell">Top City</th>
+              <th scope="col" class="px-6 py-4 font-medium hidden xl:table-cell">Market Insight</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5 text-white/80" id="rolesBody">
+            {displayRoles.map((role) => (
+              <tr class="hover:bg-white/[0.02] transition-colors group cursor-pointer" onclick={`window.location.href='/role/${encodeURIComponent(role.role)}'`} data-role={role.role.toLowerCase()} data-status={role.status} data-jobcount={role.jobCount} data-salary={role.avgSalaryMin} data-growth={role.growthPercentage}>
+                <td class="px-6 py-4 font-bold text-white group-hover:text-brand-cyan transition-colors">{role.role}</td>
+                <td class="px-6 py-4">
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(role.status)}`}>
+                    {role.status}
+                  </span>
+                </td>
+                <td class="px-6 py-4 font-mono">{formatSalary(role.avgSalaryMin, role.avgSalaryMax)}</td>
+                <td class="px-6 py-4 font-mono">{role.jobCount}</td>
+                <td class="px-6 py-4 font-mono">
+                  <span class={role.growthPercentage > 0 ? 'text-brand-cyan' : role.growthPercentage < 0 ? 'text-brand-magenta' : 'text-white/50'}>
+                    {role.growthPercentage > 0 ? '+' : ''}{role.growthPercentage}%
+                  </span>
+                </td>
+                <td class="px-6 py-4 hidden lg:table-cell text-muted-foreground">{role.topCities[0] || 'Remote'}</td>
+                <td class="px-6 py-4 hidden xl:table-cell text-xs text-muted-foreground max-w-[300px] truncate" title={role.insight}>
+                  {role.insight}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {displayRoles.length === 0 && (
+           <div class="p-12 text-center text-muted-foreground">
+             No role data found in the current snapshot.
+           </div>
+        )}
+      </div>
+
     </div>
   </main>
   
   <Footer />
 </Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('roleSearch') as HTMLInputElement;
+    const statusFilter = document.getElementById('statusFilter') as HTMLSelectElement;
+    const tableBody = document.getElementById('rolesBody');
+    const rows = Array.from(tableBody?.querySelectorAll('tr') || []);
+    const headers = document.querySelectorAll('th[data-sort]');
+
+    let currentSort = 'openings';
+    let currentDir = 'desc';
+
+    function filterAndSort() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+
+      // Filter
+      let visibleRows = rows.filter(row => {
+        const role = row.getAttribute('data-role') || '';
+        const status = row.getAttribute('data-status') || '';
+        
+        const matchesSearch = role.includes(searchTerm);
+        const matchesStatus = statusValue === 'all' || status === statusValue;
+        
+        return matchesSearch && matchesStatus;
+      });
+
+      // Sort
+      visibleRows.sort((a, b) => {
+        let valA: any = a.getAttribute(`data-${currentSort}`);
+        let valB: any = b.getAttribute(`data-${currentSort}`);
+
+        if (currentSort === 'jobcount' || currentSort === 'salary' || currentSort === 'growth') {
+           valA = parseFloat(valA) || 0;
+           valB = parseFloat(valB) || 0;
+           return currentDir === 'asc' ? valA - valB : valB - valA;
+        } else {
+           valA = String(valA);
+           valB = String(valB);
+           return currentDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+      });
+
+      // Render
+      if (tableBody) {
+        tableBody.innerHTML = '';
+        visibleRows.forEach(row => tableBody.appendChild(row));
+      }
+    }
+
+    searchInput?.addEventListener('input', filterAndSort);
+    statusFilter?.addEventListener('change', filterAndSort);
+
+    headers.forEach(header => {
+      header.addEventListener('click', () => {
+        const sortKey = header.getAttribute('data-sort');
+        // map header sort key to data attributes
+        let attrKey = sortKey;
+        if (sortKey === 'outlook') attrKey = 'status';
+        if (sortKey === 'openings') attrKey = 'jobcount';
+        if (sortKey === 'trend') attrKey = 'growth';
+
+        if (currentSort === attrKey) {
+          currentDir = currentDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort = attrKey || 'jobcount';
+          currentDir = 'desc'; // default to desc for new sort
+        }
+
+        // Update icons
+        headers.forEach(h => {
+           const icon = h.querySelector('.sort-icon');
+           if (icon) icon.textContent = '';
+        });
+        const activeIcon = header.querySelector('.sort-icon');
+        if (activeIcon) activeIcon.textContent = currentDir === 'asc' ? '▲' : '▼';
+
+        filterAndSort();
+      });
+    });
+  });
+</script>

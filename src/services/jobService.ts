@@ -5,19 +5,38 @@ import type { RawJob } from '../scraper/adapter';
 export async function processAndStoreJobs(rawJobs: RawJob[]) {
   if (!rawJobs.length) return [];
 
-  const processedJobs = rawJobs.map(job => ({
-    title: job.title,
-    normalized_title: normalizeTitle(job.title),
-    company: job.company,
-    city: normalizeCity(job.city),
-    salary_min: cleanSalary(job.salary_min),
-    salary_max: cleanSalary(job.salary_max),
-    skills: job.skills || [],
-    source: job.source,
-    url: job.url,
-    posted_at: job.posted_at || new Date().toISOString(),
-    original_json: job.original_json || {},
-  }));
+  // 1. Pre-process and Deduplicate in memory
+  const uniqueJobsMap = new Map<string, any>();
+
+  for (const job of rawJobs) {
+    const normalizedTitle = normalizeTitle(job.title);
+    const company = job.company;
+    const city = normalizeCity(job.city);
+    
+    // Deduplicate by URL primarily, but also fallback to a composite key of Title + Company
+    const compositeKey = `${normalizedTitle}-${company}`.toLowerCase();
+    
+    // If URL already exists in this batch, or composite key already exists, skip it to prevent duplicates
+    if (!uniqueJobsMap.has(job.url) && !uniqueJobsMap.has(compositeKey)) {
+      uniqueJobsMap.set(job.url, {
+        title: job.title,
+        normalized_title: normalizedTitle,
+        company: company,
+        city: city,
+        salary_min: cleanSalary(job.salary_min),
+        salary_max: cleanSalary(job.salary_max),
+        skills: job.skills || [],
+        source: job.source,
+        url: job.url,
+        posted_at: job.posted_at || new Date().toISOString(),
+        original_json: job.original_json || {},
+      });
+      uniqueJobsMap.set(compositeKey, true); // mark composite key as seen
+    }
+  }
+
+  const processedJobs = Array.from(uniqueJobsMap.values()).filter(j => typeof j === 'object');
+  console.log(`[JobService] Deduped from ${rawJobs.length} raw jobs down to ${processedJobs.length} unique jobs.`);
 
   // Chunking for large datasets
   const chunkSize = 100;
@@ -29,7 +48,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
       .from('jobs')
       .upsert(chunk, { 
         onConflict: 'url',
-        ignoreDuplicates: false 
+        ignoreDuplicates: true // Ignore if it's already in the DB by URL
       })
       .select();
 
@@ -97,26 +116,30 @@ export async function getMarketPulse() {
   const { count: recentCount } = await supabase
     .from('jobs')
     .select('*', { count: 'exact', head: true })
-    .gt('posted_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+    .gt('posted_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Look at last 30 days for better pulse
 
+  // Calculate real average salary from live jobs instead of static benchmarks
   const { data: salaryData } = await supabase
-    .from('salary_benchmarks')
-    .select('avg_min, avg_max');
+    .from('jobs')
+    .select('salary_min, salary_max')
+    .not('salary_min', 'is', null)
+    .not('salary_max', 'is', null);
 
-  let avgSalary = 0;
+  let avgSalary = 160000; // Fallback
   if (salaryData && salaryData.length > 0) {
-    const sum = salaryData.reduce((acc, curr) => acc + (Number(curr.avg_min) + Number(curr.avg_max)) / 2, 0);
+    const sum = salaryData.reduce((acc, curr) => acc + (Number(curr.salary_min) + Number(curr.salary_max)) / 2, 0);
     avgSalary = sum / salaryData.length;
   }
 
-  // Hiring Index: Based on US market volume (scale adjusted)
-  const hiringIndex = totalCount ? Math.min(10, (totalCount / 500) + 7.5) : 8.2;
+  // Hiring Index: Based on US market volume (scale adjusted for higher volume)
+  // Assuming a baseline of ~500 jobs means healthy, 1000+ means booming
+  const hiringIndex = totalCount ? Math.min(10, (totalCount / 100) + 5.0) : 8.2;
 
   return {
     totalJobs: totalCount || 0,
     recentJobs: recentCount || 0,
-    avgSalary: avgSalary || 160000, // Default to US Tech average if no data
-    hiringIndex: hiringIndex
+    avgSalary: Math.round(avgSalary),
+    hiringIndex: Number(hiringIndex.toFixed(1))
   };
 }
 
@@ -198,15 +221,50 @@ export async function getSkillGrowth() {
 }
 
 export async function getSalaryBenchmarks() {
-  const { data, error } = await supabase
+  // Try to compute real benchmarks from ingested jobs
+  const { data: realJobs, error } = await supabase
+    .from('jobs')
+    .select('normalized_title, salary_min, salary_max')
+    .not('salary_min', 'is', null)
+    .not('salary_max', 'is', null);
+
+  if (!error && realJobs && realJobs.length > 0) {
+    const roleStats: Record<string, { minSum: number, maxSum: number, count: number }> = {};
+    for (const job of realJobs) {
+      if (!job.normalized_title) continue;
+      if (!roleStats[job.normalized_title]) {
+        roleStats[job.normalized_title] = { minSum: 0, maxSum: 0, count: 0 };
+      }
+      roleStats[job.normalized_title].minSum += Number(job.salary_min);
+      roleStats[job.normalized_title].maxSum += Number(job.salary_max);
+      roleStats[job.normalized_title].count += 1;
+    }
+
+    const calculatedBenchmarks = Object.entries(roleStats)
+      .filter(([_, stats]) => stats.count >= 2) // At least 2 data points for confidence
+      .map(([role, stats]) => ({
+        role,
+        avg_min: Math.round(stats.minSum / stats.count),
+        avg_max: Math.round(stats.maxSum / stats.count)
+      }))
+      .sort((a, b) => b.avg_max - a.avg_max)
+      .slice(0, 10);
+      
+    if (calculatedBenchmarks.length > 0) {
+      return calculatedBenchmarks;
+    }
+  }
+
+  // Fallback to the static table if not enough real data
+  const { data: staticData, error: staticError } = await supabase
     .from('salary_benchmarks')
     .select('*')
     .limit(10);
 
-  if (error) {
-    console.error('Error fetching salary benchmarks:', error);
+  if (staticError) {
+    console.error('Error fetching salary benchmarks:', staticError);
     return [];
   }
-  return data;
+  return staticData;
 }
 
