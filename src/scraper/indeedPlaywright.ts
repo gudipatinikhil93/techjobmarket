@@ -39,12 +39,14 @@ export class IndeedPlaywrightScraper {
           const url = await el.$eval('h3.jobTitle a', node => (node as HTMLAnchorElement).href).catch(() => '');
           const location = await el.$eval('[data-testid="text-location"]', node => node.textContent?.trim() || 'United States').catch(() => 'United States');
           const salaryText = await el.$eval('.salary-snippet-container, .estimated-salary', node => node.textContent?.trim() || '').catch(() => '');
+          const descriptionSnippet = await el.$eval('.css-146c3p1, .jobMetaDataGroup, .job-snippet', node => node.textContent?.trim() || '').catch(() => '');
           
           if (title && company && url) {
             jobs.push({
               title,
               company,
               city: location,
+              description: descriptionSnippet,
               source: 'Indeed',
               url,
               salary_text: salaryText,
@@ -53,7 +55,8 @@ export class IndeedPlaywrightScraper {
               original_json: {
                 scraped_at: new Date().toISOString(),
                 source_site: 'Indeed',
-                salary_raw: salaryText
+                salary_raw: salaryText,
+                snippet: descriptionSnippet
               }
             });
           }

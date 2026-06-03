@@ -2,6 +2,7 @@ export interface RawJob {
   title: string;
   company: string;
   city: string;
+  description?: string;
   salary_text?: string;
   salary_min?: number;
   salary_max?: number;

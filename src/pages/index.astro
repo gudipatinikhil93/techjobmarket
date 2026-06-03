@@ -5,10 +5,11 @@ import Footer from '../components/Footer.astro';
 import { getTopCities, getMarketPulse, getHiringTrends, getSalaryBenchmarks } from '../services/jobService';
 import { getMarketOutlook } from '../services/outlookService';
 import { getLatestInsights } from '../services/aiService';
+import FAQSection from '../components/FAQSection.astro';
 
 // Fetch real data from services
 const marketPulse = await getMarketPulse();
-const marketInsights = await getLatestInsights();
+const aiIntelligence = await getLatestInsights();
 const topCities = await getTopCities();
 const salaryBenchmarks = await getSalaryBenchmarks();
 const hiringTrends = await getHiringTrends();
@@ -29,6 +30,66 @@ const topCity = topCities && topCities.length > 0 ? topCities[0] : null;
 
 // Format numbers
 const formatSalary = (num: number) => `$${(num / 1000).toFixed(0)}k`;
+
+const FAQ_CONTENT = [
+  {
+    question: "How is the current job market?",
+    answer: `The current US tech job market in 2026 is dynamic, characterized by significant shifts. While there's a hiring slowdown in some areas, particularly after recent layoffs, demand for specialized skills in AI, cloud computing, and advanced software engineering remains robust. Our data indicates a cautious but active market, with companies prioritizing efficiency and high-impact roles. For software engineers, adapting to AI hiring trends and focusing on in-demand cloud skills is crucial.`
+  },
+  {
+    question: "What is the current job market like?",
+    answer: `The 2026 job market is competitive, especially in tech, due to factors like oversaturation in generalist roles and a focus on AI-driven efficiency. We're observing a dual market: high demand for niche, AI-fluent professionals and increased competition for entry-level or less specialized positions. Remote work opportunities continue to be prevalent, but companies are becoming more selective. Understanding current job market trends 2026 is vital for effective job searching.`
+  },
+  {
+    question: "How to keep skills current in changing job market?",
+    answer: `To keep skills current in today's rapidly changing job market, continuous learning is paramount. Focus on emerging software engineering trends, particularly in AI, machine learning, and cloud native technologies. Our analytics show a rising demand for skills in areas like generative AI, MLOps, and secure cloud infrastructure. Regularly upskilling through certifications, open-source contributions, and practical projects is key to staying competitive and mitigating the impact of hiring slowdowns or layoffs.`
+  },
+  {
+    question: "How bad is the current job market?",
+    answer: `While the narrative of the "bad job market" is influenced by recent layoffs and a general hiring slowdown, especially in tech, it's more nuanced. Data suggests the market isn't universally "bad" but rather highly selective. Companies are hiring strategically, leading to increased competition for many roles. The current IT job market in US is strong for specific skill sets, particularly those related to cloud and AI demand. Job seekers need to differentiate themselves with highly relevant, future-proof skills.`
+  },
+  {
+    question: "How is the current IT job market in US?",
+    answer: `The current IT job market in US is undergoing a transformation driven by cloud adoption and AI integration. There's a significant demand for cloud architects, AI/ML engineers, cybersecurity specialists, and data scientists. However, traditional IT roles may face oversaturation and increased competition. The tech hiring slowdown has made companies more stringent in their requirements, emphasizing practical experience and specialized certifications. Remote work trends continue to shape geographic distribution of opportunities.`
+  },
+  {
+    question: "Why is current job market so bad?",
+    answer: `The perception of the current job market being "bad" stems from several factors, including significant layoffs in 2023-2024, a general economic uncertainty leading to hiring slowdowns, and the rapid pace of technological change (especially AI hiring trends) which necessitates new skill sets. Additionally, oversaturation in certain tech fields contributes to heightened competition, making it challenging for some job seekers. This is particularly noticeable in the Gen Z job market struggles, as many entry-level roles have fewer openings.`
+  },
+  {
+    question: "Which jobs are in demand in the USA?",
+    answer: `In the USA, jobs in high demand are heavily concentrated in specialized tech roles. Key areas include AI/Machine Learning Engineering, Cloud Architecture (AWS, Azure, GCP), Data Science, Cybersecurity, DevOps, and Full-stack Software Development with expertise in modern frameworks. Healthcare tech, fintech, and renewable energy sectors also show robust growth. These roles often require strong problem-solving skills and continuous learning to keep pace with software engineering trends.`
+  },
+  {
+    question: "Which country is no 1 in employment?",
+    answer: `Determining which country is "number 1 in employment" is complex and depends on various metrics like unemployment rates, labor force participation, and quality of employment. Historically, countries with strong economies and proactive labor policies tend to lead. For specific tech roles, countries investing heavily in R&D and innovation, often driven by cloud/AI demand, may offer abundant opportunities. However, our focus is on the US tech market, where employment trends are influenced by specific industry shifts and AI hiring.`
+  },
+  {
+    question: "Why is Gen Z struggling to find jobs?",
+    answer: `Gen Z is struggling to find jobs due to a confluence of factors, including entering a job market marked by hiring slowdowns and increased competition following recent layoffs. Many entry-level positions require prior experience, creating a "catch-22." Additionally, the rapid evolution of software engineering trends and AI hiring means that academic qualifications alone may not suffice, necessitating practical, in-demand skills. Oversaturation in popular fields also contributes to their job market struggles.`
+  },
+  {
+    question: "Which country is the most unemployed?",
+    answer: `Identifying the "most unemployed" country fluctuates based on global economic conditions, geopolitical events, and methodologies for calculating unemployment. Our platform specializes in the US tech job market, where the focus is on specific industry-level unemployment and underemployment patterns, rather than national comparisons. Global unemployment data is typically tracked by international organizations like the ILO.`
+  },
+  {
+    question: "What country has the least job opportunities?",
+    answer: `The country with the "least job opportunities" is often characterized by economic instability, limited industrial development, or significant political challenges, leading to high unemployment and low labor force participation. These conditions can vary significantly over time. For tech professionals, regions with limited digital infrastructure, low investment in innovation, or a lack of cloud/AI demand would naturally present fewer opportunities. Our expertise lies in analyzing the current US tech job market.`
+  },
+];
+
+const jsonLdSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": FAQ_CONTENT.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
 ---
 
 <Layout 
@@ -117,7 +178,7 @@ const formatSalary = (num: number) => `$${(num / 1000).toFixed(0)}k`;
 						<span class="text-xs font-bold uppercase tracking-widest text-white/50">Intelligence<br/>Briefing</span>
 					</div>
 					<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1 w-full">
-						{marketInsights.slice(0, 3).map((insight: string) => (
+						{aiIntelligence.intelligence_briefing.map((insight: string) => (
 							<p class="text-sm text-muted-foreground leading-relaxed border-l-2 border-white/10 pl-4 py-1">
 								{insight}
 							</p>
@@ -324,7 +385,34 @@ const formatSalary = (num: number) => `$${(num / 1000).toFixed(0)}k`;
 			</div>
 		</section>
 
+		<!-- FAQ Section -->
+		<FAQSection faqs={FAQ_CONTENT} />
+
+		<!-- 6. AI PROFESSIONAL ANALYSIS -->
+		<section class="py-20 lg:py-32 bg-white/[0.02] border-t border-white/5">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="max-w-3xl">
+					<div class="flex items-center gap-2 mb-6">
+						<span class="px-2 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/30 text-[10px] font-mono text-brand-cyan uppercase tracking-tighter">AI Intelligence</span>
+						<h2 class="text-2xl font-bold text-white">Professional Market Analysis</h2>
+					</div>
+					<div class="prose prose-invert max-w-none">
+						<p class="text-lg text-muted-foreground leading-relaxed whitespace-pre-wrap">
+							{aiIntelligence.professional_analysis}
+						</p>
+					</div>
+					{aiIntelligence.data_limitations && (
+						<p class="mt-8 text-xs font-mono text-muted-foreground/50 italic">
+							Note: {aiIntelligence.data_limitations} (Confidence Score: {aiIntelligence.confidence_score})
+						</p>
+					)}
+				</div>
+			</div>
+		</section>
+
 	</main>
+
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLdSchema)} />
 
 	<Footer />
 </Layout>

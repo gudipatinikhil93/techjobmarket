@@ -84,6 +84,7 @@ export async function getTrendingRoles() {
   const { data, error } = await supabase
     .from('trending_roles')
     .select('*')
+    .order('growth_percentage', { ascending: false })
     .limit(8);
 
   if (error) {
@@ -92,6 +93,80 @@ export async function getTrendingRoles() {
   }
 
   return data;
+}
+
+export async function getDecliningRoles() {
+  const { data, error } = await supabase
+    .from('trending_roles')
+    .select('*')
+    .order('growth_percentage', { ascending: true })
+    .limit(8);
+
+  if (error) {
+    console.error('Error fetching declining roles:', error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function getRemoteTrend() {
+  const { count: totalCount } = await supabase
+    .from('jobs')
+    .select('*', { count: 'exact', head: true });
+
+  const { count: remoteCount } = await supabase
+    .from('jobs')
+    .select('*', { count: 'exact', head: true })
+    .eq('city', 'Remote');
+
+  if (!totalCount) return { percentage: 0, total: 0, remote: 0 };
+  
+  return {
+    total: totalCount,
+    remote: remoteCount || 0,
+    percentage: Number(((remoteCount || 0) / totalCount * 100).toFixed(1))
+  };
+}
+
+export async function getAIHiringMomentum() {
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('normalized_title, skills');
+
+  if (error || !data) return { percentage: 0 };
+
+  const aiJobs = data.filter(job => 
+    job.normalized_title?.toLowerCase().includes('ai') || 
+    job.normalized_title?.toLowerCase().includes('machine learning') ||
+    job.skills?.some(s => s.toLowerCase().includes('ai') || s.toLowerCase().includes('llm') || s.toLowerCase().includes('gpt'))
+  );
+
+  return {
+    percentage: Number((aiJobs.length / data.length * 100).toFixed(1)),
+    count: aiJobs.length
+  };
+}
+
+export async function getJuniorHiringDifficulty() {
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('title');
+
+  if (error || !data) return { percentage: 0 };
+
+  const juniorJobs = data.filter(job => 
+    job.title.toLowerCase().includes('junior') || 
+    job.title.toLowerCase().includes('entry') ||
+    job.title.toLowerCase().includes('intern') ||
+    job.title.toLowerCase().includes('associate')
+  );
+
+  // In this context, "difficulty" is inverse of volume. Lower volume = Higher difficulty.
+  return {
+    percentage: Number((juniorJobs.length / data.length * 100).toFixed(1)),
+    count: juniorJobs.length
+  };
 }
 
 export async function getTopCities() {

@@ -1,0 +1,72 @@
+---
+interface Props {
+  faqs: { question: string; answer: string }[];
+}
+
+const { faqs } = Astro.props;
+---
+
+<section class="py-20 lg:py-32 border-t border-white/5 bg-black">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+      <p class="text-muted-foreground max-w-2xl mx-auto">
+        Deep dive into common queries about the US Tech Job Market with data-driven insights.
+      </p>
+    </div>
+
+    <div class="max-w-3xl mx-auto">
+      {faqs.map((faq, index) => (
+        <div class="border border-white/10 rounded-lg mb-4 bg-white/[0.02]">
+          <button
+            class="faq-question flex justify-between items-center w-full p-5 text-lg font-semibold text-white hover:text-brand-cyan transition-colors"
+            aria-expanded="false"
+            aria-controls={`faq-answer-${index}`}
+          >
+            {faq.question}
+            <svg class="w-6 h-6 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div id={`faq-answer-${index}`} class="faq-answer hidden p-5 pt-0 text-muted-foreground prose prose-invert max-w-none">
+            <p>{faq.answer}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('.faq-question');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const answer = button.nextElementSibling;
+        const svg = button.querySelector('svg');
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+        // Close all other open answers
+        buttons.forEach(otherButton => {
+          if (otherButton !== button) {
+            otherButton.setAttribute('aria-expanded', 'false');
+            otherButton.nextElementSibling.classList.add('hidden');
+            otherButton.querySelector('svg').classList.remove('rotate-180');
+          }
+        });
+
+        // Toggle current answer
+        if (isExpanded) {
+          button.setAttribute('aria-expanded', 'false');
+          answer.classList.add('hidden');
+          svg.classList.remove('rotate-180');
+        } else {
+          button.setAttribute('aria-expanded', 'true');
+          answer.classList.remove('hidden');
+          svg.classList.add('rotate-180');
+        }
+      });
+    });
+  });
+</script>

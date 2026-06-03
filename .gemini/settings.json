@@ -4,17 +4,21 @@
       "httpUrl": "https://mcp.docs.astro.build/mcp"
     }
   },
+  "billing": {
+    "overageStrategy": "never"
+  },
   "ui": {
     "footer": {
       "hideContextPercentage": false,
       "showLabels": true,
       "items": [
-        "cwd",
-        "sandbox",
+        "reset",
+        "quota",
+        "auth",
         "model",
         "context",
-        "quota",
-        "reset"
+        "cwd",
+        "sandbox"
       ]
     }
   }
