@@ -1,6 +1,6 @@
 # Local Development Setup Guide
 
-Welcome to the setup guide for **JobMarketIndia**. This document covers the steps required to get the application running locally, including setting up the database, external APIs, and the backend pipeline.
+Welcome to the setup guide for the **US Tech Job Market Intelligence** platform. This document covers the steps required to get the application running locally, including setting up the database, external APIs, and the backend pipeline.
 
 ## 1. Prerequisites
 - Node.js >= 22.12.0

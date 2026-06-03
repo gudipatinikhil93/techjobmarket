@@ -105,15 +105,18 @@ export async function getMarketPulse() {
 
   let avgSalary = 0;
   if (salaryData && salaryData.length > 0) {
-    const sum = salaryData.reduce((acc, curr) => acc + (curr.avg_min + curr.avg_max) / 2, 0);
+    const sum = salaryData.reduce((acc, curr) => acc + (Number(curr.avg_min) + Number(curr.avg_max)) / 2, 0);
     avgSalary = sum / salaryData.length;
   }
+
+  // Hiring Index: Based on US market volume (scale adjusted)
+  const hiringIndex = totalCount ? Math.min(10, (totalCount / 500) + 7.5) : 8.2;
 
   return {
     totalJobs: totalCount || 0,
     recentJobs: recentCount || 0,
-    avgSalary: avgSalary || 0,
-    hiringIndex: totalCount ? Math.min(10, (totalCount / 100) + 5) : 8.4
+    avgSalary: avgSalary || 160000, // Default to US Tech average if no data
+    hiringIndex: hiringIndex
   };
 }
 
@@ -168,16 +171,20 @@ export async function getHiringTrends() {
   }
 
   // Group by month
-  const monthlyData: Record<string, number> = {};
+  const monthlyData: Record<string, { total: number, count: number }> = {};
   data.forEach(snapshot => {
     const date = new Date(snapshot.captured_at);
     const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-    monthlyData[month] = (monthlyData[month] || 0) + snapshot.job_count;
+    if (!monthlyData[month]) {
+      monthlyData[month] = { total: 0, count: 0 };
+    }
+    monthlyData[month].total += snapshot.job_count;
+    monthlyData[month].count += 1;
   });
 
-  return Object.entries(monthlyData).map(([month, value]) => ({
+  return Object.entries(monthlyData).map(([month, stats]) => ({
     month,
-    value
+    value: Math.round(stats.total / stats.count) // Average job count per capture in that month
   }));
 }
 

@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { LinkedInAdapter, WellfoundAdapter } from '../../scraper/adapter';
-import { InternshalaScraper } from '../../scraper/internshala';
-import { FounditScraper } from '../../scraper/foundit';
-import { getTCSScraper, getInfosysScraper } from '../../scraper/companies';
+import { getGoogleScraper, getMicrosoftScraper, getMetaScraper } from '../../scraper/companies';
+import { IndeedPlaywrightScraper } from '../../scraper/indeedPlaywright';
 import { processAndStoreJobs, captureSnapshots } from '../../services/jobService';
 
 export const POST: APIRoute = async () => {
@@ -11,17 +10,17 @@ export const POST: APIRoute = async () => {
   try {
     const scrapers = [];
     
-    // Add Apify scrapers if token available
+    // Add US Tech Job Scrapers
     if (apiToken) {
       scrapers.push(new LinkedInAdapter(apiToken).scrape());
       scrapers.push(new WellfoundAdapter(apiToken).scrape());
     }
 
-    // Add direct scrapers
-    scrapers.push(new InternshalaScraper().scrape(5));
-    scrapers.push(new FounditScraper().scrape(5));
-    scrapers.push(getTCSScraper().scrape(3));
-    scrapers.push(getInfosysScraper().scrape(3));
+    // Playwright based US scrapers
+    scrapers.push(new IndeedPlaywrightScraper().scrape(15));
+    scrapers.push(getGoogleScraper().scrape(5));
+    scrapers.push(getMicrosoftScraper().scrape(5));
+    scrapers.push(getMetaScraper().scrape(5));
 
     const jobResults = await Promise.allSettled(scrapers);
     const allJobs = jobResults
@@ -37,12 +36,13 @@ export const POST: APIRoute = async () => {
     return new Response(JSON.stringify({ 
       success: true, 
       count: allJobs.length,
-      message: 'Scraping and storage completed successfully.' 
+      message: 'US Market scraping and intelligence update completed.' 
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
+    console.error('Scrape API Error:', error);
     return new Response(JSON.stringify({ 
       success: false, 
       error: error.message 

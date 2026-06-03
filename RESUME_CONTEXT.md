@@ -1,4 +1,4 @@
-# Resume Context - Job Market India
+# Resume Context - US Tech Job Market Intelligence
 
 ## Current Product State
 The application is in a "Feature Complete Beta" state. The visual identity and core data structures are finalized. Data is flowing from Supabase to the UI on the most critical pages.

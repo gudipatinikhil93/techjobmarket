@@ -1,5 +1,5 @@
 import { chromium } from 'playwright';
-import type { RawJob, JobScraper } from './adapter';
+import { JobScraper, type RawJob } from './adapter';
 
 export class CompanyScraper extends JobScraper {
   constructor(private companyName: string, private careersUrl: string, private selector: string) {
@@ -29,7 +29,6 @@ export class CompanyScraper extends JobScraper {
 
       for (const el of jobElements.slice(0, limit)) {
         try {
-          // generic extraction logic - might need specific adjustments per company
           const title = await el.textContent().then(t => t?.trim() || '');
           const url = await el.$eval('a', node => (node as HTMLAnchorElement).href).catch(() => this.careersUrl);
           
@@ -37,7 +36,7 @@ export class CompanyScraper extends JobScraper {
             jobs.push({
               title,
               company: this.companyName,
-              city: 'India',
+              city: 'United States',
               source: 'Direct',
               url,
               posted_at: new Date().toISOString(),
@@ -61,6 +60,6 @@ export class CompanyScraper extends JobScraper {
   }
 }
 
-export const getTCSScraper = () => new CompanyScraper('TCS', 'https://www.tcs.com/careers/india', '.card-container');
-export const getInfosysScraper = () => new CompanyScraper('Infosys', 'https://career.infosys.com/joblist', '.job-list-item');
-export const getAccentureScraper = () => new CompanyScraper('Accenture', 'https://www.accenture.com/in-en/careers/jobsearch', '.job-card');
+export const getGoogleScraper = () => new CompanyScraper('Google', 'https://careers.google.com/jobs/results/', '.gc-card');
+export const getMicrosoftScraper = () => new CompanyScraper('Microsoft', 'https://jobs.careers.microsoft.com/global/en/search', '.job-item');
+export const getMetaScraper = () => new CompanyScraper('Meta', 'https://www.metacareers.com/jobs', '.job-listing');

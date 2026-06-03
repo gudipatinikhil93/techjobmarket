@@ -1,4 +1,4 @@
-# Project Status - Job Market India
+# Project Status - US Tech Job Market Intelligence
 
 ## Current Architecture
 - **Framework:** AstroJS 4.x (SSR Mode)

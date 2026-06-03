@@ -7,7 +7,7 @@ CREATE TABLE jobs (
     city TEXT NOT NULL,
     salary_min NUMERIC,
     salary_max NUMERIC,
-    currency TEXT DEFAULT 'INR',
+    currency TEXT DEFAULT 'USD',
     skills TEXT[] DEFAULT '{}',
     source TEXT NOT NULL,
     posted_at TIMESTAMP WITH TIME ZONE,
@@ -28,6 +28,15 @@ CREATE INDEX idx_jobs_company ON jobs(company);
 CREATE TABLE title_mappings (
     original_pattern TEXT PRIMARY KEY,
     normalized_title TEXT NOT NULL
+);
+
+-- Salary Benchmarks Table (US Market)
+CREATE TABLE salary_benchmarks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role TEXT UNIQUE NOT NULL,
+    avg_min NUMERIC NOT NULL,
+    avg_max NUMERIC NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Snapshot Tables for Historical Tracking
@@ -57,7 +66,7 @@ CREATE TABLE ai_insights (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Seed some normalization patterns
+-- Seed normalization patterns for US Tech Roles
 INSERT INTO title_mappings (original_pattern, normalized_title) VALUES
 ('SDE', 'Software Engineer'),
 ('Software Engineer', 'Software Engineer'),
@@ -68,7 +77,22 @@ INSERT INTO title_mappings (original_pattern, normalized_title) VALUES
 ('Data Scientist', 'Data Scientist'),
 ('Product Manager', 'Product Manager'),
 ('Cloud Security', 'Cloud Security'),
-('DevOps Engineer', 'DevOps Engineer');
+('DevOps Engineer', 'DevOps Engineer'),
+('Platform Engineer', 'Platform Engineer'),
+('SRE', 'Site Reliability Engineer');
+
+-- Seed Salary Benchmarks (Initial US Estimates)
+INSERT INTO salary_benchmarks (role, avg_min, avg_max) VALUES
+('Software Engineer', 110000, 165000),
+('Backend Developer', 120000, 180000),
+('Frontend Developer', 115000, 170000),
+('Full Stack Developer', 120000, 185000),
+('AI Engineer', 150000, 250000),
+('Data Scientist', 130000, 190000),
+('Product Manager', 125000, 180000),
+('Cloud Security', 140000, 210000),
+('DevOps Engineer', 135000, 200000),
+('Site Reliability Engineer', 140000, 210000);
 
 -- Analytics View: Trending Roles with Real Growth
 -- This view compares the last 7 days vs the 7 days before that

@@ -55,23 +55,24 @@ function normalizeTitle(title) {
   }
   return title.replace(/\s*\(.*\)\s*/g, "").replace(/\s*-\s*.*$/g, "").trim();
 }
-function cleanSalary(salary) {
-  if (salary === void 0 || isNaN(salary) || salary === 0) return null;
-  return salary;
-}
 function normalizeCity(city) {
   if (!city) return "Remote";
   const hubMap = {
-    "BENGALURU": "Bengaluru",
-    "BANGALORE": "Bengaluru",
-    "HYDERABAD": "Hyderabad",
-    "PUNE": "Pune",
-    "GURUGRAM": "Gurugram",
-    "GURGAON": "Gurugram",
-    "NOIDA": "Noida",
-    "MUMBAI": "Mumbai",
-    "CHENNAI": "Chennai",
-    "DELHI": "Delhi",
+    "SAN FRANCISCO": "San Francisco",
+    "SF": "San Francisco",
+    "BAY AREA": "San Francisco",
+    "NEW YORK": "New York",
+    "NYC": "New York",
+    "AUSTIN": "Austin",
+    "SEATTLE": "Seattle",
+    "BOSTON": "Boston",
+    "CHICAGO": "Chicago",
+    "LOS ANGELES": "Los Angeles",
+    "LA": "Los Angeles",
+    "DENVER": "Denver",
+    "BOULDER": "Denver",
+    "MIAMI": "Miami",
+    "ATLANTA": "Atlanta",
     "REMOTE": "Remote"
   };
   const upperCity = city.toUpperCase();
@@ -79,6 +80,19 @@ function normalizeCity(city) {
     if (upperCity.includes(key)) return value;
   }
   return city.trim();
+}
+function cleanSalary(salary) {
+  if (salary === void 0 || salary === null || salary === "") return null;
+  if (typeof salary === "number") {
+    if (isNaN(salary) || salary === 0) return null;
+    return salary;
+  }
+  const cleanStr = salary.replace(/[$,kK]/g, (match) => {
+    if (match.toLowerCase() === "k") return "000";
+    return "";
+  }).replace(/,/g, "");
+  const num = parseFloat(cleanStr);
+  return isNaN(num) || num === 0 ? null : num;
 }
 
 async function processAndStoreJobs(rawJobs) {
@@ -142,14 +156,16 @@ async function getMarketPulse() {
   const { data: salaryData } = await supabase.from("salary_benchmarks").select("avg_min, avg_max");
   let avgSalary = 0;
   if (salaryData && salaryData.length > 0) {
-    const sum = salaryData.reduce((acc, curr) => acc + (curr.avg_min + curr.avg_max) / 2, 0);
+    const sum = salaryData.reduce((acc, curr) => acc + (Number(curr.avg_min) + Number(curr.avg_max)) / 2, 0);
     avgSalary = sum / salaryData.length;
   }
+  const hiringIndex = totalCount ? Math.min(10, totalCount / 500 + 7.5) : 8.2;
   return {
     totalJobs: totalCount || 0,
     recentJobs: recentCount || 0,
-    avgSalary: avgSalary || 0,
-    hiringIndex: totalCount ? Math.min(10, totalCount / 100 + 5) : 8.4
+    avgSalary: avgSalary || 16e4,
+    // Default to US Tech average if no data
+    hiringIndex
   };
 }
 async function getAllCities() {
@@ -176,6 +192,28 @@ async function getTopSkills() {
   }
   return data;
 }
+async function getHiringTrends() {
+  const { data, error } = await supabase.from("role_snapshots").select("captured_at, job_count").order("captured_at", { ascending: true });
+  if (error) {
+    console.error("Error fetching hiring trends:", error);
+    return [];
+  }
+  const monthlyData = {};
+  data.forEach((snapshot) => {
+    const date = new Date(snapshot.captured_at);
+    const month = date.toLocaleString("default", { month: "short", year: "2-digit" });
+    if (!monthlyData[month]) {
+      monthlyData[month] = { total: 0, count: 0 };
+    }
+    monthlyData[month].total += snapshot.job_count;
+    monthlyData[month].count += 1;
+  });
+  return Object.entries(monthlyData).map(([month, stats]) => ({
+    month,
+    value: Math.round(stats.total / stats.count)
+    // Average job count per capture in that month
+  }));
+}
 async function getSkillGrowth() {
   const { data, error } = await supabase.rpc("get_skill_growth");
   if (error) {
@@ -193,4 +231,4 @@ async function getSalaryBenchmarks() {
   return data;
 }
 
-export { getTrendingRoles as a, getAllCities as b, captureSnapshots as c, getAllRoles as d, getSalaryBenchmarks as e, getTopSkills as f, getTopCities as g, getSkillGrowth as h, getMarketPulse as i, processAndStoreJobs as p };
+export { getTrendingRoles as a, getAllCities as b, captureSnapshots as c, getAllRoles as d, getSalaryBenchmarks as e, getTopSkills as f, getTopCities as g, getSkillGrowth as h, getHiringTrends as i, getMarketPulse as j, processAndStoreJobs as p };

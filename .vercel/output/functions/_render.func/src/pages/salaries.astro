@@ -9,16 +9,16 @@ const dbSalaries = await getSalaryBenchmarks();
 const salaryData = dbSalaries.length > 0
   ? dbSalaries.map(s => ({
       role: s.role,
-      avgMin: (s.avg_min / 100000).toFixed(1),
-      avgMax: (s.avg_max / 100000).toFixed(1),
-      avgLpa: (((s.avg_min + s.avg_max) / 2) / 100000).toFixed(1)
+      avgMin: (s.avg_min / 1000).toFixed(0),
+      avgMax: (s.avg_max / 1000).toFixed(0),
+      avgMedian: (((s.avg_min + s.avg_max) / 2) / 1000).toFixed(0)
     }))
   : [];
 ---
 
 <Layout 
-  title="Software Engineer Salaries in India 2026 | Average Tech Pay Scales"
-  description="How much do software engineers make in the current job market in India? Explore average salaries, LPA ranges, and salary benchmarks for 2026."
+  title="Software Engineer Salaries in US 2026 | Tech Pay Scales"
+  description="How much do software engineers make in the current US tech job market? Explore average salaries, compensation ranges, and trends for 2026."
 >
   <Navbar />
   
@@ -26,7 +26,7 @@ const salaryData = dbSalaries.length > 0
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Salary Benchmarks</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">Average LPA (Lakhs Per Annum) ranges by role across major Indian tech hubs.</p>
+        <p class="text-muted-foreground text-lg max-w-2xl">Average annual base salary ranges (USD) by role across major US tech hubs.</p>
       </div>
 
       <!-- Search Section -->
@@ -49,8 +49,8 @@ const salaryData = dbSalaries.length > 0
           <thead>
             <tr class="border-b border-white/10 text-left bg-white/[0.02]">
               <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest">Job Role</th>
-              <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest">Avg. Min (LPA)</th>
-              <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest">Avg. Max (LPA)</th>
+              <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest">Avg. Min</th>
+              <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest">Avg. Max</th>
               <th class="py-6 px-6 text-sm font-mono text-muted-foreground uppercase tracking-widest text-brand-cyan">Estimated Median</th>
             </tr>
           </thead>
@@ -60,18 +60,18 @@ const salaryData = dbSalaries.length > 0
                 <td class="py-6 px-6">
                   <span class="text-lg font-bold text-white group-hover:text-brand-cyan transition-colors">{item.role}</span>
                 </td>
-                <td class="py-6 px-6 text-white/70">₹{item.avgMin}L</td>
-                <td class="py-6 px-6 text-white/70">₹{item.avgMax}L</td>
+                <td class="py-6 px-6 text-white/70">${item.avgMin}k</td>
+                <td class="py-6 px-6 text-white/70">${item.avgMax}k</td>
                 <td class="py-6 px-6">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-cyan/10 text-brand-cyan">
-                    ₹{item.avgLpa} LPA
+                    ${item.avgMedian}k
                   </span>
                 </td>
               </tr>
             )) : (
               <tr>
                 <td colspan="4" class="py-12 text-center text-muted-foreground italic">
-                  No salary data available yet. Scrape more jobs to populate benchmarks.
+                  No salary data available yet. Pipeline is scraping current US tech job salaries.
                 </td>
               </tr>
             )}
@@ -106,13 +106,13 @@ const salaryData = dbSalaries.length > 0
         <div class="p-8 rounded-2xl border border-white/10 bg-card">
           <h3 class="text-xl font-bold text-white mb-4">Stock Options & RSUs</h3>
           <p class="text-muted-foreground text-sm leading-relaxed">
-            In 2026, many Indian startups have pivoted to "Cash-First" models. Early-stage equity is being replaced by quarterly performance-linked liquidity events. Public companies continue to offer RSUs with 4-year vesting, but with shorter cliffs (6 months).
+            In 2026, many US tech companies are re-evaluating compensation. While FAANG and public companies continue to offer generous RSUs with 4-year vesting, early-stage startups are increasingly relying on higher base salaries or quarterly performance-linked bonuses to remain competitive.
           </p>
         </div>
         <div class="p-8 rounded-2xl border border-white/10 bg-card">
           <h3 class="text-xl font-bold text-white mb-4">The "GenAI Premium"</h3>
           <p class="text-muted-foreground text-sm leading-relaxed">
-            Engineers with proven experience in custom model training or RAG-at-scale are commanding a 40-60% premium over traditional full-stack roles. We've seen "Talent Wars" in Bengaluru resulting in signing bonuses exceeding ₹15L for senior AI architects.
+            Engineers with proven experience in custom model training or RAG-at-scale are commanding a 25-40% premium over traditional full-stack roles. We've seen "Talent Wars" in San Francisco resulting in base salaries exceeding $200k for senior AI architects.
           </p>
         </div>
       </div>

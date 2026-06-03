@@ -1,8 +1,7 @@
 import 'dotenv/config';
 import { LinkedInAdapter, WellfoundAdapter } from '../src/scraper/adapter';
-import { InternshalaScraper } from '../src/scraper/internshala';
-import { FounditScraper } from '../src/scraper/foundit';
-import { getTCSScraper, getInfosysScraper } from '../src/scraper/companies';
+import { IndeedPlaywrightScraper } from '../src/scraper/indeedPlaywright';
+import { getGoogleScraper, getMicrosoftScraper, getMetaScraper } from '../src/scraper/companies';
 import { processAndStoreJobs, captureSnapshots } from '../src/services/jobService';
 import { generateWeeklyInsights } from '../src/services/aiService';
 
@@ -20,11 +19,11 @@ async function main() {
       scrapers.push(new WellfoundAdapter(apiToken).scrape());
     }
 
-    console.log('Adding direct scrapers (Internshala, Foundit, Companies)...');
-    scrapers.push(new InternshalaScraper().scrape(10));
-    scrapers.push(new FounditScraper().scrape(10));
-    scrapers.push(getTCSScraper().scrape(5));
-    scrapers.push(getInfosysScraper().scrape(5));
+    console.log('Adding direct scrapers (Indeed, US Companies)...');
+    scrapers.push(new IndeedPlaywrightScraper().scrape(10));
+    scrapers.push(getGoogleScraper().scrape(5));
+    scrapers.push(getMicrosoftScraper().scrape(5));
+    scrapers.push(getMetaScraper().scrape(5));
 
     const jobResults = await Promise.allSettled(scrapers);
     const allJobs = jobResults

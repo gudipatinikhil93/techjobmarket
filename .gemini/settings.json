@@ -3,5 +3,19 @@
     "Astro-docs": {
       "httpUrl": "https://mcp.docs.astro.build/mcp"
     }
+  },
+  "ui": {
+    "footer": {
+      "hideContextPercentage": false,
+      "showLabels": true,
+      "items": [
+        "cwd",
+        "sandbox",
+        "model",
+        "context",
+        "quota",
+        "reset"
+      ]
+    }
   }
 }

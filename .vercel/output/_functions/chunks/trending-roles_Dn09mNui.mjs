@@ -1,15 +1,15 @@
-import { g as getTopCities } from './jobService_BYpfT7r6.mjs';
+import { a as getTrendingRoles } from './jobService_B0NW5vDw.mjs';
 
 const GET = async () => {
   try {
-    const cities = await getTopCities();
-    const enrichedCities = cities.map((c) => ({
-      city: c.city,
-      hiringIndex: Math.min(10, c.job_count / 50 + 5).toFixed(1),
-      // Normalized index
-      avgSalary: c.avg_salary
+    const roles = await getTrendingRoles();
+    const enrichedRoles = roles.map((r) => ({
+      role: r.role,
+      job_count: r.job_count,
+      growth: `+${r.growth_percentage}%`,
+      demand: r.job_count > 100 ? "Critical" : "High"
     }));
-    return new Response(JSON.stringify(enrichedCities), {
+    return new Response(JSON.stringify(enrichedRoles), {
       status: 200,
       headers: {
         "Content-Type": "application/json",

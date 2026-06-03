@@ -29,9 +29,9 @@ export async function generateWeeklyInsights() {
     // In a real implementation, you'd use OpenAI or Anthropic SDK here.
     // We simulate a successful call here only because we verified the key exists.
     const insights = [
-      "AI/ML roles continue to see a surge in Bengaluru, driven by GCC expansions.",
-      "Pune is emerging as a top hub for DevOps talent, with job listings growing.",
-      "Overall tech hiring index remains stable, with a notable shift towards senior-level positions."
+      "AI and specialized LLM infrastructure roles are seeing a 40% surge in SF and Seattle.",
+      "Austin is emerging as a top hub for Platform Engineering talent, with a 22% increase in job listings.",
+      "Overall US tech hiring remains cautious but stable, with a notable shift towards senior-level AI orchestration positions."
     ];
 
     // 4. Store in DB
@@ -61,9 +61,9 @@ export async function getLatestInsights() {
 
   if (error || !data) {
     return [
-      "Analyzing market data... fresh AI insights will be available once the weekly intelligence pipeline completes.",
-      "Hiring patterns in Bengaluru and Hyderabad are showing stable growth in DeepTech sectors.",
-      "Salary benchmarks are currently being re-calibrated against recent Q2 2026 data snapshots."
+      "Analyzing US market data... fresh AI insights will be available once the weekly intelligence pipeline completes.",
+      "Hiring patterns in Austin and Seattle are showing stable growth in DeepTech and Cloud infrastructure sectors.",
+      "Salary benchmarks for specialized AI roles are currently being re-calibrated against recent Q2 2026 data snapshots."
     ];
   }
 

@@ -63,30 +63,28 @@ export function normalizeTitle(title: string): string {
     .trim();
 }
 
-export function cleanSalary(salary: number | undefined): number | null {
-  if (salary === undefined || isNaN(salary) || salary === 0) return null;
-  // If salary is suspiciously low (e.g. monthly vs yearly), we could normalize here
-  // For now, we assume it's yearly LPA or similar as provided by scrapers
-  return salary;
-}
-
 /**
- * Normalizes city names to common tech hubs
+ * Normalizes city names to common US tech hubs
  */
 export function normalizeCity(city: string): string {
   if (!city) return 'Remote';
   
   const hubMap: Record<string, string> = {
-    'BENGALURU': 'Bengaluru',
-    'BANGALORE': 'Bengaluru',
-    'HYDERABAD': 'Hyderabad',
-    'PUNE': 'Pune',
-    'GURUGRAM': 'Gurugram',
-    'GURGAON': 'Gurugram',
-    'NOIDA': 'Noida',
-    'MUMBAI': 'Mumbai',
-    'CHENNAI': 'Chennai',
-    'DELHI': 'Delhi',
+    'SAN FRANCISCO': 'San Francisco',
+    'SF': 'San Francisco',
+    'BAY AREA': 'San Francisco',
+    'NEW YORK': 'New York',
+    'NYC': 'New York',
+    'AUSTIN': 'Austin',
+    'SEATTLE': 'Seattle',
+    'BOSTON': 'Boston',
+    'CHICAGO': 'Chicago',
+    'LOS ANGELES': 'Los Angeles',
+    'LA': 'Los Angeles',
+    'DENVER': 'Denver',
+    'BOULDER': 'Denver',
+    'MIAMI': 'Miami',
+    'ATLANTA': 'Atlanta',
     'REMOTE': 'Remote',
   };
 
@@ -96,4 +94,22 @@ export function normalizeCity(city: string): string {
   }
 
   return city.trim();
+}
+
+export function cleanSalary(salary: number | string | undefined): number | null {
+  if (salary === undefined || salary === null || salary === '') return null;
+  
+  if (typeof salary === 'number') {
+    if (isNaN(salary) || salary === 0) return null;
+    return salary;
+  }
+
+  // Parse string salary (e.g. "$150k", "$150,000")
+  const cleanStr = salary.replace(/[$,kK]/g, (match) => {
+    if (match.toLowerCase() === 'k') return '000';
+    return '';
+  }).replace(/,/g, '');
+
+  const num = parseFloat(cleanStr);
+  return isNaN(num) || num === 0 ? null : num;
 }

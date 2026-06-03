@@ -21,8 +21,8 @@ const statusColors = {
 ---
 
 <Layout 
-  title={`${intelligence.role} Market Outlook & Salary in India 2026 | JobMarketIndia`}
-  description={`What is the current job market like for ${intelligence.role} in India? Discover 2026 salary trends, top hiring cities, and key skills for ${intelligence.role} positions.`}
+  title={`${intelligence.role} Market Outlook & Salary in US 2026 | TechJobMarket`}
+  description={`What is the current job market like for ${intelligence.role}? Discover 2026 salary trends, top hiring cities, and key skills for ${intelligence.role} positions in the US.`}
 >
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -32,19 +32,19 @@ const statusColors = {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://jobmarketindia.com"
+        "item": "https://techjobmarket.com"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Roles",
-        "item": "https://jobmarketindia.com/roles"
+        "item": "https://techjobmarket.com/roles"
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": intelligence.role,
-        "item": `https://jobmarketindia.com/role/${role}`
+        "item": `https://techjobmarket.com/role/${role}`
       }
     ]
   })} />
@@ -68,13 +68,13 @@ const statusColors = {
         <div class="lg:col-span-2 space-y-12">
           <div>
             <div class="flex items-center gap-4 mb-4">
-              <h1 class="text-4xl font-bold text-white tracking-tight">{intelligence.role} Job Market India</h1>
+              <h1 class="text-4xl font-bold text-white tracking-tight">{intelligence.role} Job Market US</h1>
               <span class={`px-3 py-1 rounded-full text-xs font-bold uppercase ${statusColors[intelligence.status]}`}>
                 {intelligence.status}
               </span>
             </div>
             <p class="text-xl text-muted-foreground leading-relaxed">
-              Analysis of the <strong>current job market for {intelligence.role}</strong> in India. {intelligence.insight}
+              Analysis of the <strong>current job market for {intelligence.role}</strong> in the US. {intelligence.insight}
             </p>
           </div>
 
@@ -90,9 +90,9 @@ const statusColors = {
               </p>
             </div>
             <div class="rounded-xl border border-white/10 bg-card p-6">
-              <span class="text-xs font-mono text-muted-foreground uppercase tracking-widest">Avg. LPA 2026</span>
+              <span class="text-xs font-mono text-muted-foreground uppercase tracking-widest">Avg Base 2026</span>
               <p class="text-3xl font-bold text-white mt-2">
-                ₹{Math.round(intelligence.avgSalaryMin / 100000)}L - ₹{Math.round(intelligence.avgSalaryMax / 100000)}L
+                ${Math.round(intelligence.avgSalaryMin / 1000)}k - ${Math.round(intelligence.avgSalaryMax / 1000)}k
               </p>
             </div>
           </div>
@@ -102,8 +102,8 @@ const statusColors = {
             <div class="prose prose-invert max-w-none">
               <p>
                 Based on current market data, the role of <strong>{intelligence.role}</strong> is currently seeing a 
-                {intelligence.status.toLowerCase()} trend in the Indian tech ecosystem. The average salary range in India for this position currently spans from 
-                ₹{intelligence.avgSalaryMin.toLocaleString('en-IN')} to ₹{intelligence.avgSalaryMax.toLocaleString('en-IN')} per annum, reflecting the <strong>current job market trends</strong> for 2026.
+                {intelligence.status.toLowerCase()} trend in the US tech ecosystem. The average base salary range in the US for this position currently spans from 
+                ${intelligence.avgSalaryMin.toLocaleString('en-US')} to ${intelligence.avgSalaryMax.toLocaleString('en-US')} per annum, reflecting the <strong>current job market trends</strong> for 2026.
               </p>
               <p>
                 The highest demand for <strong>{intelligence.role}</strong> is currently concentrated in major hubs like <strong>{intelligence.topCities.join(', ')}</strong>. 
@@ -144,7 +144,7 @@ const statusColors = {
           <div class="p-6 rounded-xl bg-brand-magenta/10 border border-brand-magenta/20">
              <h4 class="font-bold text-white mb-2">Data Transparency</h4>
              <p class="text-xs text-muted-foreground">
-               This intelligence is generated based on {intelligence.jobCount} real-time job listings from Indeed, Wellfound, and direct career pages. Analytics are updated weekly.
+               This intelligence is generated based on {intelligence.jobCount} real-time job listings from Indeed US, Wellfound, and direct career pages. Analytics are updated weekly.
              </p>
           </div>
         </div>

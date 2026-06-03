@@ -40,10 +40,6 @@
 			"dest": "_render"
 		},
 		{
-			"src": "^/layoffs/?$",
-			"dest": "_render"
-		},
-		{
 			"src": "^/role/([^/]+?)/?$",
 			"dest": "_render"
 		},

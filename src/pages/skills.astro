@@ -22,8 +22,8 @@ const skills = dbSkills.length > 0
 ---
 
 <Layout 
-  title="Top Tech Skills in Demand India 2026 | Job Market Trends"
-  description="What skills are in demand for the current job market in India? Explore trending technical skills, growth percentages, and upskilling paths for 2026."
+  title="Top Tech Skills in Demand US 2026 | Job Market Trends"
+  description="What skills are in demand for the current US tech job market? Explore trending technical skills, growth percentages, and upskilling paths."
 >
   <Navbar />
   
@@ -31,7 +31,7 @@ const skills = dbSkills.length > 0
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Trending Skills</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">The technical landscape is shifting rapidly. Here are the skills dominating the 2026 talent market.</p>
+        <p class="text-muted-foreground text-lg max-w-2xl">The technical landscape is shifting rapidly. Here are the skills dominating the 2026 US talent market.</p>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -75,49 +75,21 @@ const skills = dbSkills.length > 0
             </div>
           </div>
         ))}
+        {skills.length === 0 && (
+          <div class="col-span-full py-12 text-center text-muted-foreground italic">
+            No skill data available yet. Scraper pipeline is running to analyze current US tech job descriptions.
+          </div>
+        )}
       </div>
 
-      <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="md:col-span-2 p-8 rounded-2xl border border-white/10 bg-card/30 backdrop-blur-sm">
-          <h2 class="text-2xl font-bold text-white mb-6 font-mono">Skill Saturation vs. Demand</h2>
-          <div class="space-y-6">
-            <div>
-              <div class="flex justify-between text-sm mb-2">
-                <span class="text-white">GenAI Engineering</span>
-                <span class="text-brand-cyan">12% Supply / 88% Demand</span>
-              </div>
-              <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                <div class="h-full bg-brand-cyan w-[88%]"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm mb-2">
-                <span class="text-white">Traditional Web Development</span>
-                <span class="text-brand-magenta">74% Supply / 26% Demand</span>
-              </div>
-              <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                <div class="h-full bg-brand-magenta w-[26%]"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm mb-2">
-                <span class="text-white">Cloud Infrastructure</span>
-                <span class="text-brand-blue">45% Supply / 55% Demand</span>
-              </div>
-              <div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                <div class="h-full bg-brand-blue w-[55%]"></div>
-              </div>
-            </div>
-          </div>
+      {skills.length > 0 && (
+        <div class="mt-24 p-8 rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5">
+          <h2 class="text-2xl font-bold text-white mb-6">Market Insight: Skill Evolution</h2>
+          <p class="text-muted-foreground leading-relaxed max-w-3xl">
+            The 2026 US tech market is favoring "T-shaped" professionals who combine deep technical expertise in one area (like AI Orchestration or Cloud Architecture) with a broad understanding of the business value chain. Skills like <strong>{skills[0].name}</strong> and <strong>{skills[1].name}</strong> are currently seeing the highest velocity in job listings across San Francisco and New York.
+          </p>
         </div>
-        <div class="p-8 rounded-2xl border border-white/10 bg-brand-blue/5 flex flex-col justify-center">
-          <h3 class="text-xl font-bold text-white mb-4">Upskilling Path 2026</h3>
-          <p class="text-muted-foreground text-sm mb-6">Transition from Full-stack to AI-agent orchestration is the most common career pivot this year.</p>
-          <button class="w-full py-3 rounded-pill bg-white text-black font-bold text-sm hover:bg-brand-blue hover:text-white transition-all">
-            View Roadmap
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   </main>
   

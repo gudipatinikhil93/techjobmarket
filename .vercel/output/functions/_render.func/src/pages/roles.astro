@@ -5,14 +5,14 @@ import Footer from '../components/Footer.astro';
 import { getAllRoles } from '../services/jobService';
 
 const fallbackRoles = [
-  { name: "AI Engineer", category: "Engineering", salary: "₹15L - ₹45L", demand: "Critical" },
-  { name: "Full Stack Developer", category: "Engineering", salary: "₹8L - ₹30L", demand: "High" },
-  { name: "Product Manager", category: "Product", salary: "₹12L - ₹40L", demand: "High" },
-  { name: "Data Scientist", category: "Data", salary: "₹10L - ₹35L", demand: "Very High" },
-  { name: "Cloud Architect", category: "Infrastructure", salary: "₹20L - ₹55L", demand: "Critical" },
-  { name: "UI/UX Designer", category: "Design", salary: "₹6L - ₹25L", demand: "Medium" },
-  { name: "DevOps Engineer", category: "Infrastructure", salary: "₹10L - ₹32L", demand: "High" },
-  { name: "Cybersecurity Analyst", category: "Security", salary: "₹12L - ₹38L", demand: "Very High" },
+  { name: "AI Engineer", category: "Engineering", salary: "$140k - $220k", demand: "Critical" },
+  { name: "Full Stack Developer", category: "Engineering", salary: "$110k - $160k", demand: "High" },
+  { name: "Product Manager", category: "Product", salary: "$130k - $180k", demand: "High" },
+  { name: "Data Scientist", category: "Data", salary: "$125k - $175k", demand: "Very High" },
+  { name: "Cloud Architect", category: "Infrastructure", salary: "$160k - $240k", demand: "Critical" },
+  { name: "UI/UX Designer", category: "Design", salary: "$95k - $150k", demand: "Medium" },
+  { name: "DevOps Engineer", category: "Infrastructure", salary: "$130k - $190k", demand: "High" },
+  { name: "Cybersecurity Analyst", category: "Security", salary: "$115k - $170k", demand: "Very High" },
 ];
 
 const dbRoles = await getAllRoles();
@@ -28,8 +28,8 @@ const roles = dbRoles.length > 0
 ---
 
 <Layout 
-  title="Trending Job Roles in India 2026 | Current Job Market Analysis"
-  description="Explore the most in-demand job roles in India's current job market. Analyze salary benchmarks, hiring demand, and growth trends for 2026."
+  title="Trending Tech Job Roles in US 2026 | Current Job Market Analysis"
+  description="Explore the most in-demand job roles in the US tech market. Analyze salary benchmarks, hiring demand, and growth trends for 2026."
 >
   <Navbar />
   
@@ -37,7 +37,7 @@ const roles = dbRoles.length > 0
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Trending Job Roles</h1>
-        <p class="text-muted-foreground text-lg">In-depth analysis of the most in-demand roles in India's tech ecosystem.</p>
+        <p class="text-muted-foreground text-lg">In-depth analysis of the most in-demand roles in the US tech ecosystem.</p>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -50,7 +50,7 @@ const roles = dbRoles.length > 0
               </span>
             </div>
             <h3 class="text-xl font-bold text-white mb-2 group-hover:text-brand-cyan transition-colors">{role.name}</h3>
-            <p class="text-sm text-muted-foreground mb-6">Average Package: <span class="text-white font-medium">{role.salary}</span></p>
+            <p class="text-sm text-muted-foreground mb-6">Average Base Salary: <span class="text-white font-medium">{role.salary}</span></p>
             <span class="text-sm font-bold text-white/50 group-hover:text-white transition-colors">View detailed breakdown →</span>
           </a>
         ))}

@@ -2,10 +2,10 @@ import { chromium } from 'playwright';
 import type { RawJob } from './adapter';
 
 export class WellfoundPlaywrightScraper {
-  private baseUrl = 'https://wellfound.com/location/india/software-engineer';
+  private baseUrl = 'https://wellfound.com/location/united-states/software-engineer';
 
   async scrape(limit = 10): Promise<RawJob[]> {
-    console.log(`[Wellfound] Starting manual stealth scrape for India software jobs...`);
+    console.log(`[Wellfound] Starting manual stealth scrape for US software jobs...`);
     const browser = await chromium.launch({ headless: true });
     
     const context = await browser.newContext({
@@ -39,8 +39,6 @@ export class WellfoundPlaywrightScraper {
       const content = await page.content();
       if (content.includes('captcha') || content.includes('DataDome')) {
         console.error('[Wellfound] Still blocked by CAPTCHA.');
-        // If blocked, we'll try one more "human" move - clicking something if possible, 
-        // but likely we need a better URL or proxy.
         return [];
       }
 
@@ -64,7 +62,7 @@ export class WellfoundPlaywrightScraper {
           const title = await el.$eval('h3, h4, [class*="title"]', node => node.textContent?.trim() || '').catch(() => '');
           const company = await el.$eval('[class*="company"], [class*="name"], [class*="styles_name"]', node => node.textContent?.trim() || '').catch(() => '');
           const url = await el.$eval('a[href*="/jobs/"], a[class*="title"]', node => (node as HTMLAnchorElement).href).catch(() => '');
-          const location = await el.$eval('[class*="location"]', node => node.textContent?.trim() || 'India').catch(() => 'India');
+          const location = await el.$eval('[class*="location"]', node => node.textContent?.trim() || 'United States').catch(() => 'United States');
           
           if (title && company && url) {
             jobs.push({

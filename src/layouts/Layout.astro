@@ -10,15 +10,15 @@ interface Props {
 }
 
 const { 
-	title = "JobMarketIndia | India's Job Market Intelligence", 
-	description = "Modern India-focused job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
+	title = "TechJobMarket | US Tech Career Intelligence", 
+	description = "Modern US-focused tech job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
 	image = "/og-image.png",
-	canonicalURL = new URL(Astro.url.pathname, 'https://jobmarketindia.com').toString(),
+	canonicalURL = new URL(Astro.url.pathname, 'https://techjobmarket.com').toString(),
 	type = "website"
 } = Astro.props;
 
-const siteName = "JobMarketIndia";
-const twitterHandle = "@JobMarketIndia"; // Placeholder
+const siteName = "TechJobMarket";
+const twitterHandle = "@TechJobMarket"; // Placeholder
 ---
 
 <!doctype html>
@@ -60,12 +60,12 @@ const twitterHandle = "@JobMarketIndia"; // Placeholder
 			{
 				"@context": "https://schema.org",
 				"@type": "WebSite",
-				"name": "JobMarketIndia",
-				"alternateName": "JMI",
-				"url": "https://jobmarketindia.com",
+				"name": "TechJobMarket",
+				"alternateName": "TJM",
+				"url": "https://techjobmarket.com",
 				"potentialAction": {
 					"@type": "SearchAction",
-					"target": "https://jobmarketindia.com/search?q={search_term_string}",
+					"target": "https://techjobmarket.com/search?q={search_term_string}",
 					"query-input": "required name=search_term_string"
 				}
 			}
@@ -74,12 +74,12 @@ const twitterHandle = "@JobMarketIndia"; // Placeholder
 			{
 				"@context": "https://schema.org",
 				"@type": "Organization",
-				"name": "JobMarketIndia",
-				"url": "https://jobmarketindia.com",
-				"logo": "https://jobmarketindia.com/favicon.svg",
+				"name": "TechJobMarket",
+				"url": "https://techjobmarket.com",
+				"logo": "https://techjobmarket.com/favicon.svg",
 				"sameAs": [
-					"https://twitter.com/jobmarketindia",
-					"https://linkedin.com/company/jobmarketindia"
+					"https://twitter.com/techjobmarket",
+					"https://linkedin.com/company/techjobmarket"
 				]
 			}
 		</script>

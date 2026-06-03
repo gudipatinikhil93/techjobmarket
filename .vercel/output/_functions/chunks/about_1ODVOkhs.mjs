@@ -1,0 +1,30 @@
+import { c as createComponent } from './astro-component__qT9p1E_.mjs';
+import 'piccolore';
+import { o as renderComponent, k as renderTemplate, m as maybeRenderHead } from './entrypoint_Biu5Z-66.mjs';
+import { $ as $$Layout, a as $$Navbar, b as $$Footer } from './Footer_GNxZ3h1o.mjs';
+
+const $$About = createComponent(($$result, $$props, $$slots) => {
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "About TechJobMarket | US Tech Career Intelligence Platform", "description": "Learn more about TechJobMarket, the platform dedicated to providing real-time intelligence on the current US tech job market, hiring trends, and salary data." }, { "default": ($$result2) => renderTemplate` ${renderComponent($$result2, "Navbar", $$Navbar, {})} ${maybeRenderHead()}<main class="py-24"> <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8"> <div class="mb-16 text-center"> <h1 class="text-5xl font-bold text-white mb-6">Democratizing Market Intelligence</h1> <p class="text-xl text-muted-foreground leading-relaxed">TechJobMarket is the definitive intelligence platform for the US tech ecosystem.</p> </div> <div class="prose prose-invert max-w-none"> <section class="mb-16"> <h2 class="text-2xl font-bold text-white mb-4 font-mono uppercase tracking-tight">Our Mission</h2> <p class="text-muted-foreground text-lg leading-relaxed mb-6">
+The US tech job market has traditionally been opaque, with information asymmetry favoring large corporations over individual talent. We started TechJobMarket to bridge this gap. By providing real-time, data-driven insights, we empower professionals to make informed career decisions and help companies benchmark themselves against the best in the industry.
+</p> </section> <section class="mb-16 p-8 rounded-2xl border border-white/10 bg-card"> <h2 class="text-2xl font-bold text-white mb-4 font-mono uppercase tracking-tight">Methodology</h2> <p class="text-muted-foreground leading-relaxed mb-6">
+Our data isn't just "scraped." We use a proprietary multi-signal approach to ensure accuracy:
+</p> <ul class="space-y-4 text-muted-foreground"> <li class="flex gap-4"> <span class="text-brand-cyan font-bold font-mono">01</span> <span><strong>Verified Salary Feed:</strong> Aggregated ranges from verified US job listings and public salary transparency laws.</span> </li> <li class="flex gap-4"> <span><strong>Hiring Velocity:</strong> Real-time tracking of job openings across corporate career portals and US job boards.</span> </li> <li class="flex gap-4"> <span><strong>NLP Sentiment Analysis:</strong> Analysis of public employee discourse and financial filings to predict market movements.</span> </li> </ul> </section> <section class="mb-16 grid grid-cols-1 md:grid-cols-2 gap-12"> <div> <h2 class="text-xl font-bold text-white mb-4">Integrity First</h2> <p class="text-muted-foreground text-sm leading-relaxed">
+We never sell individual data. Our business model is based on aggregated intelligence subscriptions for HR teams and enterprise planning.
+</p> </div> <div> <h2 class="text-xl font-bold text-white mb-4">Independent & Unbiased</h2> <p class="text-muted-foreground text-sm leading-relaxed">
+TechJobMarket is not a recruitment agency. We don't take commissions for placements, ensuring our market reports remain objective.
+</p> </div> </section> <div class="border-t border-white/10 pt-16 text-center"> <p class="text-sm font-mono text-muted-foreground uppercase mb-4 tracking-widest">Built for the future of the US tech workforce</p> <div class="flex justify-center gap-4"> <div class="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center"> <span class="text-white font-bold">𝕏</span> </div> <div class="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center"> <span class="text-white font-bold">in</span> </div> </div> </div> </div> </div> </main> ${renderComponent($$result2, "Footer", $$Footer, {})} ` })}`;
+}, "/home/Nikhil/jobmarketindia/src/pages/about.astro", void 0);
+
+const $$file = "/home/Nikhil/jobmarketindia/src/pages/about.astro";
+const $$url = "/about";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: $$About,
+  file: $$file,
+  url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };
