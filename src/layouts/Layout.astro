@@ -14,13 +14,14 @@ const {
 	title = "TechJobMarket | US Tech Career Intelligence", 
 	description = "Modern US-focused tech job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
 	image = "/og-image.png",
-	canonicalURL = new URL(Astro.url.pathname, 'https://techjobmarket.com').toString(),
+	canonicalURL = Astro.url.href,
 	type = "website",
 	noindex = false
 } = Astro.props;
 
 const siteName = "TechJobMarket";
 const twitterHandle = "@TechJobMarket"; // Placeholder
+const currentOrigin = Astro.url.origin;
 ---
 
 <!doctype html>
@@ -47,7 +48,7 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 		<meta property="og:url" content={canonicalURL} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content={new URL(image, Astro.url.origin)} />
+		<meta property="og:image" content={new URL(image, currentOrigin)} />
 		<meta property="og:site_name" content={siteName} />
 
 		<!-- Twitter -->
@@ -55,40 +56,40 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 		<meta property="twitter:url" content={canonicalURL} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={new URL(image, Astro.url.origin)} />
+		<meta property="twitter:image" content={new URL(image, currentOrigin)} />
 		<meta property="twitter:site" content={twitterHandle} />
 
 		<!-- Canonical URL -->
 		<link rel="canonical" href={canonicalURL} />
 		
 		<!-- Structured Data -->
-		<script type="application/ld+json">
+		<script type="application/ld+json" is:inline define:vars={{ currentOrigin }}>
 			{
 				"@context": "https://schema.org",
 				"@type": "WebSite",
 				"name": "TechJobMarket",
 				"alternateName": "TJM",
-				"url": "https://techjobmarket.com",
+				"url": currentOrigin,
 				"potentialAction": {
 					"@type": "SearchAction",
-					"target": "https://techjobmarket.com/search?q={search_term_string}",
+					"target": `${currentOrigin}/search?q={search_term_string}`,
 					"query-input": "required name=search_term_string"
 				}
 			}
 		</script>
-		<script type="application/ld+json">
+		<script type="application/ld+json" is:inline define:vars={{ currentOrigin }}>
 			{
 				"@context": "https://schema.org",
 				"@type": "Organization",
 				"name": "TechJobMarket",
-				"url": "https://techjobmarket.com",
-				"logo": "https://techjobmarket.com/favicon.svg",
-				"image": "https://techjobmarket.com/og-image.png", // Using the default Open Graph image
+				"url": currentOrigin,
+				"logo": `${currentOrigin}/favicon.svg`,
+				"image": `${currentOrigin}/og-image.png`,
 				"description": "TechJobMarket is a real-time US tech job market intelligence platform providing insights on hiring trends, salaries, and layoffs.",
 				"sameAs": [
 					"https://twitter.com/techjobmarket",
 					"https://linkedin.com/company/techjobmarket",
-					"https://github.com/techjobmarket" // Placeholder, update if actual repo exists
+					"https://github.com/techjobmarket"
 				]
 			}
 		</script>

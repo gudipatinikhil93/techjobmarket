@@ -1,6 +1,13 @@
 name = "techjobmarket-us"
-main = "dist/_worker.js"
 compatibility_date = "2024-11-01"
 
-[site]
-bucket = "./dist"
+[[routes]]
+pattern = "techjobmarket.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.techjobmarket.com"
+custom_domain = true
+
+[observability]
+enabled = true
