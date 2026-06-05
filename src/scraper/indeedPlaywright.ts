@@ -41,6 +41,8 @@ export class IndeedPlaywrightScraper {
           const salaryText = await el.$eval('.salary-snippet-container, .estimated-salary', node => node.textContent?.trim() || '').catch(() => '');
           const descriptionSnippet = await el.$eval('.css-146c3p1, .jobMetaDataGroup, .job-snippet', node => node.textContent?.trim() || '').catch(() => '');
           
+          console.log(`[Indeed] Card: ${title} - Snippet: ${descriptionSnippet.substring(0, 100)}...`);
+
           if (title && company && url) {
             jobs.push({
               title,

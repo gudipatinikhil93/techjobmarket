@@ -7,78 +7,145 @@ import { getTopSkills, getSkillGrowth } from '../services/jobService';
 const dbSkills = await getTopSkills();
 const skillGrowthData = await getSkillGrowth();
 
+// Combine top skills with their growth data if available
 const skills = dbSkills.length > 0
   ? dbSkills.map(s => {
       const growthInfo = skillGrowthData?.find((g: any) => g.skill === s.skill);
+      // Determine a realistic assessment based on job count frequency
+      const demandLevel = s.job_count > 50 ? "Critical" : s.job_count > 20 ? "High" : "Moderate";
+      
       return {
         name: s.skill,
-        growth: growthInfo ? `+${growthInfo.growth_percentage}%` : "Insufficient Data",
-        difficulty: s.job_count > 100 ? "Critical" : "High",
-        categories: ["Tech"],
-        trend: growthInfo && growthInfo.growth_percentage > 0 ? "up" : "stable"
+        count: s.job_count,
+        growth: growthInfo ? (growthInfo.growth_percentage > 0 ? `+${growthInfo.growth_percentage}%` : `${growthInfo.growth_percentage}%`) : "N/A",
+        demand: demandLevel,
       };
     })
   : [];
+
+// Sort by count
+skills.sort((a, b) => b.count - a.count);
 ---
 
 <Layout 
-  title="Top Tech Skills in Demand US 2026 | Job Market Trends"
-  description="What skills are in demand for the current US tech job market? Explore trending technical skills, growth percentages, and upskilling paths."
+  title="Top Tech Skills Demand US 2026 | AI, Software Engineering Trends"
+  description="Discover the most in-demand tech skills in the US job market for 2026. Track AI skills, programming languages, cloud platforms, and software engineering trends with real-time data."
 >
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Real-Time Tech Stack Intelligence US 2026 | TechJobMarket",
+    "description": "Data-driven intelligence on the most demanded technologies, frameworks, and infrastructure across the US job market.",
+    "url": "https://techjobmarket.com/skills",
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "US Tech Skills Demand Dataset",
+      "description": "A dataset of in-demand tech skills in the US, including active mentions, demand status, and trailing growth, extracted directly from job descriptions across the US tech sector.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TechJobMarket"
+      },
+      "url": "https://techjobmarket.com/skills",
+      "keywords": ["tech skills", "programming languages", "frameworks", "cloud platforms", "DevOps", "AI skills", "most demanded tech"],
+      "variableMeasured": [
+        { "@type": "StatisticalVariable", "name": "skill name" },
+        { "@type": "StatisticalVariable", "name": "active mentions", "description": "Number of times the skill is mentioned in active job descriptions" },
+        { "@type": "StatisticalVariable", "name": "demand status", "description": "Categorization of demand level (e.g., Critical, High, Moderate)" },
+        { "@type": "StatisticalVariable", "name": "trailing growth", "description": "Percentage growth or decline in demand for the skill over time" }
+      ],
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://techjobmarket.com/api/skills-data.csv" // Placeholder, if CSV download is available
+      }
+    }
+  }
+  </script>
   <Navbar />
   
-  <main class="py-24">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-16">
-        <h1 class="text-4xl font-bold text-white mb-4">Trending Skills</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">The technical landscape is shifting rapidly. Here are the skills dominating the 2026 US talent market.</p>
+  <main class="py-32 min-h-screen bg-black relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="mb-16 border-b border-white/10 pb-12">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="text-sm font-mono text-brand-cyan tracking-wider uppercase">Technology Intelligence Dashboard</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Live Tech Stack Demand</h1>
+        <p class="text-muted-foreground text-lg max-w-3xl leading-relaxed">
+          Forget subjective trend lists and generic business terms. This dashboard tracks real technology stacks—languages, frameworks, cloud platforms, and infrastructure tooling—extracted directly from the requirements of active US tech job descriptions.
+        </p>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {skills.map(skill => (
-          <div class="rounded-xl border border-white/10 bg-card p-6 hover:border-brand-blue/30 transition-all group relative overflow-hidden">
-            <div class="flex justify-between items-start mb-6">
-              <span class={`text-[10px] font-mono uppercase tracking-widest font-bold px-2 py-0.5 rounded ${
-                skill.difficulty === 'Critical' ? 'bg-brand-magenta/20 text-brand-magenta' : 
-                skill.difficulty === 'Very High' ? 'bg-brand-amber/20 text-brand-amber' : 
-                'bg-brand-cyan/20 text-brand-cyan'
-              }`}>
-                {skill.difficulty}
-              </span>
-              <div class="text-right">
-                <span class="text-xl font-bold text-white block">{skill.growth}</span>
-                <span class="text-[10px] text-muted-foreground uppercase font-mono">YoY Growth</span>
-              </div>
+      {skills.length > 0 ? (
+        <div class="grid grid-cols-1 gap-8">
+          <div class="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="grid grid-cols-12 gap-4 p-6 border-b border-white/10 text-xs font-mono text-muted-foreground uppercase tracking-wider bg-white/[0.02]">
+              <div class="col-span-1 text-center">Rank</div>
+              <div class="col-span-5 md:col-span-4">Technology</div>
+              <div class="col-span-3 md:col-span-3 text-right">Active Mentions</div>
+              <div class="col-span-3 md:col-span-2 text-right">Demand Status</div>
+              <div class="hidden md:block md:col-span-2 text-right">Trailing Growth</div>
             </div>
             
-            <h3 class="text-xl font-bold text-white mb-4 group-hover:text-brand-blue transition-colors">{skill.name}</h3>
-            
-            <div class="space-y-3">
-              <p class="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Sub-specializations</p>
-              <div class="flex flex-wrap gap-2">
-                {skill.categories.map(cat => (
-                  <span class="text-[10px] bg-white/5 text-white/70 px-2 py-1 rounded border border-white/5">
-                    {cat}
-                  </span>
-                ))}
-              </div>
+            <div class="divide-y divide-white/5">
+              {skills.map((skill, index) => (
+                <div class="grid grid-cols-12 gap-4 p-6 items-center hover:bg-white/[0.02] transition-colors group">
+                  <div class="col-span-1 text-center font-mono text-muted-foreground group-hover:text-brand-cyan transition-colors">
+                    {index + 1}
+                  </div>
+                  <div class="col-span-5 md:col-span-4 flex items-center gap-3">
+                    <span class="text-lg font-bold text-white block tracking-tight">{skill.name}</span>
+                  </div>
+                  <div class="col-span-3 md:col-span-3 text-right font-mono text-white">
+                    {skill.count}
+                  </div>
+                  <div class="col-span-3 md:col-span-2 text-right">
+                    <span class={`text-[10px] font-mono uppercase tracking-widest font-bold px-2 py-1 rounded ${
+                      skill.demand === 'Critical' ? 'bg-brand-magenta/20 text-brand-magenta border border-brand-magenta/30' : 
+                      skill.demand === 'High' ? 'bg-brand-amber/20 text-brand-amber border border-brand-amber/30' : 
+                      'bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30'
+                    }`}>
+                      {skill.demand}
+                    </span>
+                  </div>
+                  <div class="hidden md:block md:col-span-2 text-right font-mono text-muted-foreground">
+                    {skill.growth !== 'N/A' ? (
+                      <span class={skill.growth.startsWith('+') ? 'text-emerald-400' : skill.growth.startsWith('-') ? 'text-brand-magenta' : 'text-white'}>
+                        {skill.growth}
+                      </span>
+                    ) : (
+                      'Aggregating...'
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-
-            <!-- Mini trend visual removed to ensure 100% data authenticity -->
           </div>
-        ))}
-        {skills.length === 0 && (
-          <div class="col-span-full py-12 text-center text-muted-foreground italic">
-            No skill data available yet. Scraper pipeline is running to analyze current US tech job descriptions.
-          </div>
-        )}
-      </div>
 
-      {skills.length > 0 && (
-        <div class="mt-24 p-8 rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5">
-          <h2 class="text-2xl font-bold text-white mb-6">Market Insight: Skill Evolution</h2>
-          <p class="text-muted-foreground leading-relaxed max-w-3xl">
-            The 2026 US tech market is favoring "T-shaped" professionals who combine deep technical expertise in one area (like AI Orchestration or Cloud Architecture) with a broad understanding of the business value chain. Skills like <strong>{skills[0].name}</strong> and <strong>{skills[1].name}</strong> are currently seeing the highest velocity in job listings across San Francisco and New York.
+          <div class="mt-12 grid md:grid-cols-2 gap-8">
+            <div class="p-8 rounded-2xl border border-brand-cyan/20 bg-brand-cyan/5">
+              <h2 class="text-xl font-bold text-white mb-4">Market Reality Check</h2>
+              <p class="text-muted-foreground leading-relaxed">
+                The data shows a clear divergence from hype cycles. While AI tools grab headlines, fundamental infrastructure and mature frameworks like <strong>{skills[0]?.name || "Python"}</strong> and <strong>{skills[1]?.name || "JavaScript"}</strong> consistently dominate actual hiring requirements. True market leverage belongs to professionals who pair robust foundational engineering skills with emerging AI capabilities.
+              </p>
+            </div>
+            <div class="p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
+              <h2 class="text-xl font-bold text-white mb-4">Strict Extraction Methodology</h2>
+              <p class="text-muted-foreground leading-relaxed text-sm">
+                Unlike generic keyword matchers, our extraction pipeline uses a strict whitelist of technologies, languages, cloud platforms, and DevOps tooling. We explicitly filter out generic business terms ("marketing", "senior", "finance") to provide a high-fidelity view of the true technical stack required by modern employers.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="py-32 text-center border border-white/10 rounded-2xl bg-white/[0.02]">
+          <div class="h-12 w-12 rounded-full border border-white/10 flex items-center justify-center mb-6 text-brand-cyan mx-auto">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Ingesting Market Data</h3>
+          <p class="text-muted-foreground max-w-md mx-auto">
+            The strict technology extraction pipeline is currently analyzing recent job descriptions. Meaningful stack intelligence will appear here shortly as the dataset reaches confidence thresholds.
           </p>
         </div>
       )}

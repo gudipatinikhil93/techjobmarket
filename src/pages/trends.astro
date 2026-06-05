@@ -24,9 +24,40 @@ const topGrowthTrajetories = marketOutlook
 ---
 
 <Layout 
-  title="Current US Tech Job Market Trends | Hiring Forecast & Analysis"
-  description="Stay ahead with the latest job market trends in the US. Analyze hiring velocity, sector growth, and high-demand roles in real-time."
+  title="US Tech Job Market Trends & Forecast 2026 | Hiring Analysis"
+  description="Stay ahead with the latest US tech job market trends and hiring forecasts for 2026. Analyze growth, decline, AI hiring momentum, and economic shifts impacting the tech industry."
 >
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Current US Tech Job Market Trends | Hiring Forecast & Analysis",
+    "description": "Stay ahead with the latest job market trends in the US. Analyze hiring velocity, sector growth, and high-demand roles in real-time.",
+    "url": "https://techjobmarket.com/trends",
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "US Tech Job Market Trends Dataset",
+      "description": "A dataset of predictive intelligence on sector growth, declining roles, hiring velocity, and macro-economic shifts in the US tech market, providing a comprehensive outlook for career and business strategy.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TechJobMarket"
+      },
+      "url": "https://techjobmarket.com/trends",
+      "keywords": ["job market trends", "hiring forecast", "tech sector growth", "AI hiring trends", "US tech market analysis", "economic shifts tech"],
+      "variableMeasured": [
+        { "@type": "StatisticalVariable", "name": "role outlook", "description": "Status and growth percentage for various tech roles" },
+        { "@type": "StatisticalVariable", "name": "hiring velocity index", "description": "Aggregated demand from snapshot history indicating market activity" },
+        { "@type": "StatisticalVariable", "name": "sector growth", "description": "Growth and decline across different tech sectors" },
+        { "@type": "StatisticalVariable", "name": "role growth trajectories", "description": "Top roles experiencing significant growth in demand" }
+      ],
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://techjobmarket.com/api/trends-data.csv" // Placeholder, if CSV download is available
+      }
+    }
+  }
+  </script>
   <Navbar />
   
   <main class="py-24 bg-black min-h-screen">

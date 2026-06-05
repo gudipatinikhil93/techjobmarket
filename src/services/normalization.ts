@@ -125,6 +125,140 @@ export function normalizeCity(city: string): string {
   return city.trim();
 }
 
+const TECHNOLOGY_DICTIONARY: Record<string, string> = {
+  // Languages
+  'PYTHON': 'Python',
+  'PY': 'Python',
+  'JAVASCRIPT': 'JavaScript',
+  'JS': 'JavaScript',
+  'TYPESCRIPT': 'TypeScript',
+  'TS': 'TypeScript',
+  'GO': 'Go',
+  'GOLANG': 'Go',
+  'RUST': 'Rust',
+  'JAVA': 'Java',
+  'C++': 'C++',
+  'CPP': 'C++',
+  'C#': 'C#',
+  'CSHARP': 'C#',
+  'RUBY': 'Ruby',
+  'PHP': 'PHP',
+  'SWIFT': 'Swift',
+  'KOTLIN': 'Kotlin',
+  'SCALA': 'Scala',
+  
+  // Frontend
+  'REACT': 'React',
+  'REACTJS': 'React',
+  'NEXT.JS': 'Next.js',
+  'NEXTJS': 'Next.js',
+  'VUE': 'Vue.js',
+  'VUEJS': 'Vue.js',
+  'ANGULAR': 'Angular',
+  'SVELTE': 'Svelte',
+  'TAILWIND': 'Tailwind CSS',
+  'TAILWINDCSS': 'Tailwind CSS',
+  
+  // Backend
+  'NODE.JS': 'Node.js',
+  'NODEJS': 'Node.js',
+  'NODE': 'Node.js',
+  'EXPRESS': 'Express',
+  'DJANGO': 'Django',
+  'FASTAPI': 'FastAPI',
+  'SPRING': 'Spring Boot',
+  'SPRINGBOOT': 'Spring Boot',
+  'GRAPHQL': 'GraphQL',
+
+  // Cloud
+  'AWS': 'AWS',
+  'AMAZON WEB SERVICES': 'AWS',
+  'GCP': 'GCP',
+  'GOOGLE CLOUD': 'GCP',
+  'AZURE': 'Azure',
+  'CLOUDFLARE': 'Cloudflare',
+  'VERCEL': 'Vercel',
+
+  // DevOps & Infrastructure
+  'DOCKER': 'Docker',
+  'KUBERNETES': 'Kubernetes',
+  'K8S': 'Kubernetes',
+  'TERRAFORM': 'Terraform',
+  'ANSIBLE': 'Ansible',
+  'JENKINS': 'Jenkins',
+  'HELM': 'Helm',
+  'PROMETHEUS': 'Prometheus',
+  'GRAFANA': 'Grafana',
+  'GITHUB ACTIONS': 'GitHub Actions',
+  'LINUX': 'Linux',
+  'CI/CD': 'CI/CD',
+
+  // Databases
+  'SQL': 'SQL',
+  'POSTGRESQL': 'PostgreSQL',
+  'POSTGRES': 'PostgreSQL',
+  'MYSQL': 'MySQL',
+  'MONGODB': 'MongoDB',
+  'MONGO': 'MongoDB',
+  'REDIS': 'Redis',
+  'ELASTICSEARCH': 'Elasticsearch',
+  'CASSANDRA': 'Cassandra',
+  'DYNAMODB': 'DynamoDB',
+
+  // Data Engineering
+  'SNOWFLAKE': 'Snowflake',
+  'DATABRICKS': 'Databricks',
+  'KAFKA': 'Kafka',
+  'AIRFLOW': 'Airflow',
+  'SPARK': 'Apache Spark',
+  'APACHE SPARK': 'Apache Spark',
+  'HADOOP': 'Hadoop',
+  'PANDAS': 'Pandas',
+  'NUMPY': 'NumPy',
+
+  // AI / ML
+  'TENSORFLOW': 'TensorFlow',
+  'PYTORCH': 'PyTorch',
+  'LANGCHAIN': 'LangChain',
+  'OPENAI': 'OpenAI',
+  'HUGGING FACE': 'Hugging Face',
+  'HUGGINGFACE': 'Hugging Face',
+  'LLM': 'LLM',
+  'SCIKIT-LEARN': 'Scikit-learn',
+  'KUBEFLOW': 'KubeFlow',
+  'PROMPT ENGINEERING': 'Prompt Engineering',
+  'AI': 'AI',
+  'MACHINE LEARNING': 'Machine Learning',
+  'ML': 'Machine Learning'
+};
+
+/**
+ * Extracts skills from text using a STRICT whitelist of actual technologies.
+ * Prevents generic terms like 'senior', 'finance', 'marketing'.
+ */
+export function extractSkills(text: string): string[] {
+  if (!text) return [];
+
+  const foundSkills = new Set<string>();
+
+  // Check against our strict whitelist
+  for (const [alias, canonical] of Object.entries(TECHNOLOGY_DICTIONARY)) {
+    // Special case for C++ to handle + symbols correctly in regex
+    const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // We use a boundary check, but since some tools like Node.js have punctuation,
+    // we need to handle boundaries carefully.
+    // \b doesn't work perfectly for ++ or .js, so we use a more robust regex:
+    const regex = new RegExp(`(?:^|[^a-zA-Z0-9_+#-])${escapedAlias}(?:[^a-zA-Z0-9_+#-]|$)`, 'i');
+    
+    if (regex.test(text)) {
+      foundSkills.add(canonical);
+    }
+  }
+
+  return Array.from(foundSkills);
+}
+
 export function cleanSalary(salary: number | string | undefined): number | null {
   if (salary === undefined || salary === null || salary === '') return null;
   

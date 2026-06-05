@@ -24,9 +24,42 @@ const getStatusColor = (status: string) => {
 ---
 
 <Layout 
-  title="Tech Role Market Intelligence | US Job Market"
-  description="High-density data terminal for tracking US tech roles. Compare salaries, hiring demand, and growth trajectories."
+  title="US Tech Job Market Roles & Hiring Trends 2026 | TechJobMarket"
+  description="Explore the current US tech job market for various roles. Get live data on software engineer demand, AI roles, and compare salaries and growth trajectories for 2026."
 >
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Tech Role Market Intelligence | US Job Market",
+    "description": "High-density data terminal for tracking US tech roles. Compare salaries, hiring demand, and growth trajectories.",
+    "url": "https://techjobmarket.com/roles",
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "US Tech Roles Dataset",
+      "description": "A dataset of current and trending tech roles in the US, including market outlook, average salaries, and active openings, sourced from real-time job listings.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TechJobMarket"
+      },
+      "url": "https://techjobmarket.com/roles",
+      "keywords": ["tech roles", "job market", "salaries", "hiring trends", "software engineer roles", "AI engineer demand"],
+      "variableMeasured": [
+        { "@type": "StatisticalVariable", "name": "role" },
+        { "@type": "StatisticalVariable", "name": "market outlook", "description": "Growth status (Growing, Stable, Declining, Oversaturated)" },
+        { "@type": "StatisticalVariable", "name": "average base salary", "description": "Average minimum and maximum base salary in USD" },
+        { "@type": "StatisticalVariable", "name": "active openings", "description": "Number of active job postings for the role" },
+        { "@type": "StatisticalVariable", "name": "momentum", "description": "Percentage growth or decline in job postings" },
+        { "@type": "StatisticalVariable", "name": "top city", "description": "Leading city for job postings for the role" }
+      ],
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://techjobmarket.com/api/roles-data.csv" // Placeholder, if CSV download is available
+      }
+    }
+  }
+  </script>
   <Navbar />
   
   <main class="py-24 bg-black min-h-screen">

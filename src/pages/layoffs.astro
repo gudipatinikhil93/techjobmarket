@@ -1,0 +1,153 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { getRecentLayoffs, getTopAffectedSectors } from '../services/layoffService';
+
+const recentLayoffs = await getRecentLayoffs(50); // Get more for the dedicated page
+const topSectors = await getTopAffectedSectors(10);
+
+const totalImpacted = recentLayoffs.reduce((acc, curr) => acc + (curr.layoffs_count || 0), 0);
+---
+
+<Layout 
+  title="US Tech Layoff Tracker & Trends 2026 | Impact & Analysis"
+  description="Stay informed on US tech layoffs and corporate restructuring in 2026. Track impacted companies, sectors, and analyze the current job market's volatility."
+>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "US Tech Layoff Tracker 2026 | Workforce Changes",
+    "description": "Track workforce changes, corporate restructuring, and layoff events in the US tech sector for 2026.",
+    "url": "https://techjobmarket.com/layoffs",
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "US Tech Layoffs Dataset",
+      "description": "A dataset of recent layoff events, including company, date, sector, and number of affected employees in the US tech sector, sourced from Layoffs.fyi and public filings.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TechJobMarket"
+      },
+      "url": "https://techjobmarket.com/layoffs",
+      "keywords": ["tech layoffs", "workforce reduction", "corporate restructuring", "job losses", "tech job market"],
+      "variableMeasured": [
+        { "@type": "StatisticalVariable", "name": "company" },
+        { "@type": "StatisticalVariable", "name": "date" },
+        { "@type": "StatisticalVariable", "name": "sector" },
+        { "@type": "StatisticalVariable", "name": "impacted employees", "description": "Number of employees affected by the layoff" },
+        { "@type": "StatisticalVariable", "name": "percentage affected", "description": "Percentage of workforce affected by the layoff" }
+      ],
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://techjobmarket.com/api/layoffs-data.csv" // Placeholder, if CSV download is available
+      }
+    }
+  }
+  </script>
+  <Navbar />
+  
+  <main class="py-24 bg-black min-h-screen selection:bg-brand-magenta/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-12">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">Tech Layoff Tracker</h1>
+          <p class="text-muted-foreground text-lg max-w-xl">Monitoring workforce restructurings across the US tech ecosystem. Data is sourced from Layoffs.fyi and verified public filings.</p>
+        </div>
+        <div class="bg-white/[0.02] border border-white/10 p-6 rounded-2xl flex gap-8">
+          <div>
+            <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Impacted Tracked</p>
+            <p class="text-3xl font-bold text-white">{totalImpacted > 0 ? totalImpacted.toLocaleString() : 'N/A'}</p>
+          </div>
+          <div class="w-px bg-white/10"></div>
+          <div>
+            <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Market State</p>
+            <p class="text-3xl font-bold text-brand-magenta">Volatile</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-4 gap-12">
+        <!-- Sidebar: Analytics -->
+        <div class="lg:col-span-1 space-y-8">
+          <div class="bg-white/[0.02] border border-white/10 rounded-2xl p-6">
+            <h3 class="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-6">Most Affected Sectors</h3>
+            <div class="space-y-4">
+              {topSectors && topSectors.length > 0 ? topSectors.map((sector: any) => {
+                const maxCount = topSectors[0].count;
+                const widthPercent = (sector.count / maxCount) * 100;
+                return (
+                  <div class="group">
+                    <div class="flex justify-between items-end mb-1">
+                      <span class="text-sm font-bold text-white">{sector.sector}</span>
+                      <span class="text-xs font-mono text-brand-magenta">{sector.count}</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div class="h-full bg-brand-magenta rounded-full transition-all" style={`width: ${widthPercent}%`}></div>
+                    </div>
+                  </div>
+                )
+              }) : (
+                <p class="text-sm text-muted-foreground text-center">Aggregating sector data...</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content: Layoffs Feed -->
+        <div class="lg:col-span-3">
+          <h2 class="text-xl font-bold text-white mb-6">Recent Restructurings</h2>
+          {recentLayoffs && recentLayoffs.length > 0 ? (
+            <div class="space-y-4">
+              {recentLayoffs.map((item: any) => (
+                <div class="group flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 p-6 rounded-xl border border-white/10 bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/20 transition-all">
+                  <div class="flex-1 w-full">
+                    <div class="flex items-center justify-between md:justify-start gap-3 mb-2">
+                      <h3 class="text-xl font-bold text-white">{item.company}</h3>
+                      <span class="text-[10px] bg-white/5 text-muted-foreground px-2 py-0.5 rounded font-mono uppercase">{item.sector || 'Tech'}</span>
+                    </div>
+                    {item.source_url ? (
+                      <a href={item.source_url} target="_blank" rel="noopener noreferrer" class="text-xs text-brand-cyan hover:underline">View Source</a>
+                    ) : null}
+                  </div>
+                  
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-12 w-full md:w-auto border-t border-white/5 md:border-t-0 pt-4 md:pt-0 mt-2 md:mt-0">
+                    <div>
+                      <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Impact</p>
+                      <p class="text-lg font-bold text-brand-magenta">
+                        {item.percentage_affected ? `${Math.round(item.percentage_affected * 100)}%` : 'Unknown'}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Employees</p>
+                      <p class="text-lg font-bold text-white">{item.layoffs_count ? `-${item.layoffs_count}` : 'Undisclosed'}</p>
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                      <p class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1">Date</p>
+                      <p class="text-lg font-bold text-white/60">{new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="p-16 rounded-2xl border border-dashed border-white/10 bg-white/[0.01] text-center">
+              <div class="h-20 w-20 bg-brand-cyan/10 rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="h-10 w-10 text-brand-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-white mb-4">Awaiting Data</h2>
+              <p class="text-muted-foreground max-w-lg mx-auto leading-relaxed">
+                Currently fetching the latest restructuring events.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

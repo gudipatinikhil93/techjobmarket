@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { normalizeTitle, cleanSalary, normalizeCity } from './normalization';
+import { normalizeTitle, cleanSalary, normalizeCity, extractSkills } from './normalization';
 import type { RawJob } from '../scraper/adapter';
 
 export async function processAndStoreJobs(rawJobs: RawJob[]) {
@@ -13,6 +13,10 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
     const company = job.company;
     const city = normalizeCity(job.city);
     
+    // Extract skills from title AND description AND any provided skills/tags
+    const textToAnalyze = `${job.title} ${job.description || job.original_json?.snippet || ""} ${(job.skills || []).join(" ")}`;
+    const finalSkills = extractSkills(textToAnalyze);
+
     // Deduplicate by URL primarily, but also fallback to a composite key of Title + Company
     const compositeKey = `${normalizedTitle}-${company}`.toLowerCase();
     
@@ -25,7 +29,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
         city: city,
         salary_min: cleanSalary(job.salary_min),
         salary_max: cleanSalary(job.salary_max),
-        skills: job.skills || [],
+        skills: finalSkills,
         source: job.source,
         url: job.url,
         posted_at: job.posted_at || new Date().toISOString(),
@@ -48,7 +52,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
       .from('jobs')
       .upsert(chunk, { 
         onConflict: 'url',
-        ignoreDuplicates: true // Ignore if it's already in the DB by URL
+        ignoreDuplicates: false // Set to false to update existing jobs with new skills extraction
       })
       .select();
 

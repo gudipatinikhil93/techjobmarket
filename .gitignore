@@ -17,6 +17,10 @@ pnpm-debug.log*
 .env
 .env.production
 
+# Vercel & Cloudflare
+.vercel/
+.cloudflare/
+
 # macOS-specific files
 .DS_Store
 

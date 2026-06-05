@@ -17,9 +17,40 @@ const salaryData = dbSalaries.length > 0
 ---
 
 <Layout 
-  title="Software Engineer Salaries in US 2026 | Tech Pay Scales"
-  description="How much do software engineers make in the current US tech job market? Explore average salaries, compensation ranges, and trends for 2026."
+  title="Software Engineer Salary Trends US 2026 | Tech Compensation Benchmarks"
+  description="Explore current software engineer salary trends in the US tech job market for 2026. Get data-driven insights on compensation, average salaries, and pay scales for various tech roles."
 >
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Software Engineer Salaries in US 2026 | Tech Pay Scales",
+    "description": "How much do software engineers make in the current US tech job market? Explore average salaries, compensation ranges, and trends for 2026.",
+    "url": "https://techjobmarket.com/salaries",
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "US Tech Salary Benchmarks Dataset",
+      "description": "A dataset of average annual base salary ranges (USD) by tech role across major US tech hubs, providing realistic compensation expectations and excluding outlier equity packages.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TechJobMarket"
+      },
+      "url": "https://techjobmarket.com/salaries",
+      "keywords": ["software engineer salaries", "tech pay scales", "compensation trends", "US tech salaries", "developer salaries", "AI engineer salary"],
+      "variableMeasured": [
+        { "@type": "StatisticalVariable", "name": "job role" },
+        { "@type": "StatisticalVariable", "name": "average minimum salary", "description": "Average minimum base salary in USD for the role" },
+        { "@type": "StatisticalVariable", "name": "average maximum salary", "description": "Average maximum base salary in USD for the role" },
+        { "@type": "StatisticalVariable", "name": "estimated median salary", "description": "Estimated median base salary in USD for the role" }
+      ],
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "text/csv",
+        "contentUrl": "https://techjobmarket.com/api/salaries-data.csv" // Placeholder, if CSV download is available
+      }
+    }
+  }
+  </script>
   <Navbar />
   
   <main class="py-24">

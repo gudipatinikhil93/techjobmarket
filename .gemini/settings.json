@@ -9,16 +9,17 @@
   },
   "ui": {
     "footer": {
+      "hideModelInfo": false,
       "hideContextPercentage": false,
       "showLabels": true,
       "items": [
-        "reset",
-        "quota",
-        "auth",
         "model",
         "context",
+        "quota",
         "cwd",
-        "sandbox"
+        "sandbox",
+        "auth",
+        "reset"
       ]
     }
   }

@@ -38,18 +38,18 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />
-		<meta property="og:url" content={Astro.url} />
+		<meta property="og:url" content={canonicalURL} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content={new URL(image, Astro.url)} />
+		<meta property="og:image" content={new URL(image, Astro.url.origin)} />
 		<meta property="og:site_name" content={siteName} />
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={Astro.url} />
+		<meta property="twitter:url" content={canonicalURL} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+		<meta property="twitter:image" content={new URL(image, Astro.url.origin)} />
 		<meta property="twitter:site" content={twitterHandle} />
 
 		<!-- Canonical URL -->
@@ -77,9 +77,12 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 				"name": "TechJobMarket",
 				"url": "https://techjobmarket.com",
 				"logo": "https://techjobmarket.com/favicon.svg",
+				"image": "https://techjobmarket.com/og-image.png", // Using the default Open Graph image
+				"description": "TechJobMarket is a real-time US tech job market intelligence platform providing insights on hiring trends, salaries, and layoffs.",
 				"sameAs": [
 					"https://twitter.com/techjobmarket",
-					"https://linkedin.com/company/techjobmarket"
+					"https://linkedin.com/company/techjobmarket",
+					"https://github.com/techjobmarket" // Placeholder, update if actual repo exists
 				]
 			}
 		</script>

@@ -226,3 +226,22 @@ BEGIN
     FULL OUTER JOIN previous_period prev ON curr.s = prev.s;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Layoffs Table
+CREATE TABLE layoffs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company TEXT NOT NULL,
+    layoffs_count INTEGER,
+    percentage_affected NUMERIC,
+    date DATE NOT NULL,
+    sector TEXT,
+    reason TEXT,
+    source_url TEXT,
+    scraped_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes for layoffs table
+CREATE INDEX idx_layoffs_company ON layoffs(company);
+CREATE INDEX idx_layoffs_date ON layoffs(date);
+CREATE INDEX idx_layoffs_sector ON layoffs(sector);
