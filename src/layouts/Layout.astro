@@ -7,6 +7,7 @@ interface Props {
 	image?: string;
 	canonicalURL?: string;
 	type?: string;
+	noindex?: boolean;
 }
 
 const { 
@@ -14,7 +15,8 @@ const {
 	description = "Modern US-focused tech job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
 	image = "/og-image.png",
 	canonicalURL = new URL(Astro.url.pathname, 'https://techjobmarket.com').toString(),
-	type = "website"
+	type = "website",
+	noindex = false
 } = Astro.props;
 
 const siteName = "TechJobMarket";
@@ -38,7 +40,7 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 		<title>{title}</title>
 		<meta name="title" content={title} />
 		<meta name="description" content={description} />
-		<meta name="robots" content="index, follow" />
+		<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={type} />
@@ -89,6 +91,15 @@ const twitterHandle = "@TechJobMarket"; // Placeholder
 					"https://github.com/techjobmarket" // Placeholder, update if actual repo exists
 				]
 			}
+		</script>
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-2V7Y2B2ZGX"></script>
+		<script is:inline>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+
+			gtag('config', 'G-2V7Y2B2ZGX');
 		</script>
 	</head>
 	<body class="min-h-screen selection:bg-brand-cyan selection:text-black">
