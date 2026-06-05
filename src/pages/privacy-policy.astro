@@ -1,0 +1,126 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const lastUpdated = "June 5, 2026";
+---
+
+<Layout 
+  title="Privacy Policy | TechJobMarket"
+  description="Privacy Policy for TechJobMarket. Learn how we handle data, analytics, and user privacy on our platform."
+>
+  <Navbar />
+  
+  <main class="py-24 bg-black">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16">
+        <h1 class="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
+        <p class="text-muted-foreground font-mono uppercase tracking-widest text-sm">Last Updated: {lastUpdated}</p>
+      </div>
+
+      <div class="prose prose-invert max-w-none">
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">1. Introduction</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            TechJobMarket ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website techjobmarket.com.
+          </p>
+          <p class="text-muted-foreground leading-relaxed">
+            By using our platform, you agree to the collection and use of information in accordance with this policy. We prioritize transparency and the security of any data we handle.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">2. Data Collection</h2>
+          <h3 class="text-xl font-semibold text-white mb-4">Information You Provide</h3>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            We may collect personal information that you voluntarily provide to us when you:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li>Contact us via our contact form (Name, Email, Message).</li>
+            <li>Subscribe to our market intelligence updates.</li>
+            <li>Inquire about API access or enterprise solutions.</li>
+          </ul>
+
+          <h3 class="text-xl font-semibold text-white mb-4">Automatically Collected Data</h3>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            When you visit our site, we automatically collect certain information about your device and usage, including:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li>IP address and browser type.</li>
+            <li>Operating system and device identifiers.</li>
+            <li>Pages visited and duration of stay.</li>
+            <li>Referring URLs and interaction data.</li>
+          </ul>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">3. Use of Data</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            We use the collected data for various purposes:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li>To provide and maintain our service.</li>
+            <li>To notify you about changes to our platform.</li>
+            <li>To provide customer support and respond to inquiries.</li>
+            <li>To gather analysis or valuable information so that we can improve our service.</li>
+            <li>To monitor the usage of our service and detect technical issues.</li>
+            <li>To fulfill legal and regulatory requirements.</li>
+          </ul>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">4. Cookies and Tracking</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            We use cookies and similar tracking technologies to track the activity on our service and hold certain information. Cookies are files with a small amount of data which may include an anonymous unique identifier.
+          </p>
+          <p class="text-muted-foreground leading-relaxed">
+            You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">5. Third-Party Services</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            We may employ third-party companies and individuals to facilitate our service, provide the service on our behalf, or perform service-related services. These include:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li><strong>Google Analytics:</strong> To monitor and analyze the use of our service.</li>
+            <li><strong>Supabase:</strong> For database and infrastructure management.</li>
+            <li><strong>Vercel:</strong> For hosting and deployment.</li>
+          </ul>
+          <p class="text-muted-foreground leading-relaxed mt-4">
+            These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">6. Advertising Readiness</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            We may use third-party advertising companies to serve ads when you visit our website. These companies may use information about your visits to this and other websites in order to provide advertisements about goods and services of interest to you.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">7. Security of Data</h2>
+          <p class="text-muted-foreground leading-relaxed">
+            The security of your data is important to us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your Personal Data, we cannot guarantee its absolute security.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">8. Contact Us</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            If you have any questions about this Privacy Policy, please contact us:
+          </p>
+          <ul class="list-none space-y-2 text-muted-foreground">
+            <li>By email: <span class="text-brand-cyan">privacy@techjobmarket.com</span></li>
+            <li>By visiting our contact page: <a href="/contact" class="text-brand-cyan hover:underline">techjobmarket.com/contact</a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

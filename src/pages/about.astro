@@ -2,72 +2,148 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
+
+const dataSources = [
+  { name: "Indeed", type: "Job Volume & Salaries" },
+  { name: "Greenhouse", type: "Direct ATS Postings" },
+  { name: "Lever", type: "Hiring Velocity" },
+  { name: "Ashby", type: "Startup Hiring Trends" },
+  { name: "RemoteOK", type: "Remote-First Intelligence" },
+  { name: "Layoffs.fyi", type: "Market Correction Data" },
+];
 ---
 
 <Layout 
-  title="About TechJobMarket | US Tech Career Intelligence Platform"
-  description="Learn more about TechJobMarket, the platform dedicated to providing real-time intelligence on the current US tech job market, hiring trends, and salary data."
+  title="About TechJobMarket | US Tech Market Intelligence & Analytics"
+  description="TechJobMarket provides real-time, data-driven intelligence on the US tech job market, including live salary benchmarks, hiring trends, and layoffs tracking."
 >
   <Navbar />
   
-  <main class="py-24">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-16 text-center">
-        <h1 class="text-5xl font-bold text-white mb-6">Democratizing Market Intelligence</h1>
-        <p class="text-xl text-muted-foreground leading-relaxed">TechJobMarket is the definitive intelligence platform for the US tech ecosystem.</p>
+  <main class="py-24 bg-black">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <!-- Hero Section -->
+      <div class="mb-20 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+          Quantifying the <span class="text-brand-cyan">Tech Economy</span>
+        </h1>
+        <p class="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+          TechJobMarket is a data-first intelligence platform providing transparency into the current US tech ecosystem through real-time analytics and AI-driven insights.
+        </p>
       </div>
 
-      <div class="prose prose-invert max-w-none">
-        <section class="mb-16">
-          <h2 class="text-2xl font-bold text-white mb-4 font-mono uppercase tracking-tight">Our Mission</h2>
-          <p class="text-muted-foreground text-lg leading-relaxed mb-6">
-            The US tech job market has traditionally been opaque, with information asymmetry favoring large corporations over individual talent. We started TechJobMarket to bridge this gap. By providing real-time, data-driven insights, we empower professionals to make informed career decisions and help companies benchmark themselves against the best in the industry.
-          </p>
-        </section>
-
-        <section class="mb-16 p-8 rounded-2xl border border-white/10 bg-card">
-          <h2 class="text-2xl font-bold text-white mb-4 font-mono uppercase tracking-tight">Methodology</h2>
-          <p class="text-muted-foreground leading-relaxed mb-6">
-            Our data isn't just "scraped." We use a proprietary multi-signal approach to ensure accuracy:
-          </p>
-          <ul class="space-y-4 text-muted-foreground">
-            <li class="flex gap-4">
-              <span class="text-brand-cyan font-bold font-mono">01</span>
-              <span><strong>Verified Salary Feed:</strong> Aggregated ranges from verified US job listings and public salary transparency laws.</span>
-            </li>
-            <li class="flex gap-4">
-              <span><strong>Hiring Velocity:</strong> Real-time tracking of job openings across corporate career portals and US job boards.</span>
-            </li>
-            <li class="flex gap-4">
-              <span><strong>NLP Sentiment Analysis:</strong> Analysis of public employee discourse and financial filings to predict market movements.</span>
-            </li>
-          </ul>
-        </section>
-
-        <section class="mb-16 grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
-            <h2 class="text-xl font-bold text-white mb-4">Integrity First</h2>
-            <p class="text-muted-foreground text-sm leading-relaxed">
-              We never sell individual data. Our business model is based on aggregated intelligence subscriptions for HR teams and enterprise planning.
-            </p>
-          </div>
-          <div>
-            <h2 class="text-xl font-bold text-white mb-4">Independent & Unbiased</h2>
-            <p class="text-muted-foreground text-sm leading-relaxed">
-              TechJobMarket is not a recruitment agency. We don't take commissions for placements, ensuring our market reports remain objective.
-            </p>
+      <div class="space-y-24">
+        <!-- Mission Section -->
+        <section>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 class="text-2xl font-bold text-white mb-6 font-mono uppercase tracking-tight border-l-4 border-brand-cyan pl-4">Our Mission</h2>
+              <p class="text-muted-foreground text-lg leading-relaxed mb-6">
+                The tech job market moves faster than traditional reporting can track. Information asymmetry often leaves talent and companies in the dark. We built TechJobMarket to democratize access to high-fidelity market data.
+              </p>
+              <p class="text-muted-foreground text-lg leading-relaxed">
+                By aggregating signals from across the web, we provide a unified view of the US tech workforce, helping professionals navigate their careers and companies benchmark their growth with confidence.
+              </p>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm">
+              <div class="grid grid-cols-2 gap-4 text-center">
+                <div class="p-4 bg-black/40 rounded-xl border border-white/5">
+                  <div class="text-3xl font-bold text-white mb-1">Live</div>
+                  <div class="text-xs text-muted-foreground font-mono uppercase">Analytics</div>
+                </div>
+                <div class="p-4 bg-black/40 rounded-xl border border-white/5">
+                  <div class="text-3xl font-bold text-brand-cyan mb-1">AI</div>
+                  <div class="text-xs text-muted-foreground font-mono uppercase">Insights</div>
+                </div>
+                <div class="p-4 bg-black/40 rounded-xl border border-white/5">
+                  <div class="text-3xl font-bold text-white mb-1">Multi</div>
+                  <div class="text-xs text-muted-foreground font-mono uppercase">Source</div>
+                </div>
+                <div class="p-4 bg-black/40 rounded-xl border border-white/5">
+                  <div class="text-3xl font-bold text-white mb-1">US</div>
+                  <div class="text-xs text-muted-foreground font-mono uppercase">Focused</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <div class="border-t border-white/10 pt-16 text-center">
-          <p class="text-sm font-mono text-muted-foreground uppercase mb-4 tracking-widest">Built for the future of the US tech workforce</p>
-          <div class="flex justify-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <span class="text-white font-bold">𝕏</span>
+        <!-- Intelligence Pipeline -->
+        <section class="p-8 md:p-12 rounded-3xl border border-white/10 bg-card/50 relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-8 opacity-10">
+            <svg class="h-48 w-48 text-brand-cyan" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          
+          <h2 class="text-3xl font-bold text-white mb-8">The Intelligence Pipeline</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            <div class="space-y-4">
+              <div class="h-10 w-10 rounded-lg bg-brand-cyan/20 flex items-center justify-center text-brand-cyan font-bold">1</div>
+              <h3 class="text-xl font-bold text-white">Multi-Signal Ingestion</h3>
+              <p class="text-muted-foreground text-sm leading-relaxed">
+                We track thousands of data points daily from premium sources like Greenhouse, Lever, Ashby, and Indeed to capture hiring velocity at the source.
+              </p>
             </div>
-            <div class="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <span class="text-white font-bold">in</span>
+            <div class="space-y-4">
+              <div class="h-10 w-10 rounded-lg bg-brand-cyan/20 flex items-center justify-center text-brand-cyan font-bold">2</div>
+              <h3 class="text-xl font-bold text-white">AI Normalization</h3>
+              <p class="text-muted-foreground text-sm leading-relaxed">
+                Using advanced NLP and LLMs (Gemini Pro), we normalize job titles, extract skill requirements, and synthesize complex market signals into readable trends.
+              </p>
             </div>
+            <div class="space-y-4">
+              <div class="h-10 w-10 rounded-lg bg-brand-cyan/20 flex items-center justify-center text-brand-cyan font-bold">3</div>
+              <h3 class="text-xl font-bold text-white">Real-Time Synthesis</h3>
+              <p class="text-muted-foreground text-sm leading-relaxed">
+                Our dashboard updates continuously, reflecting shifts in salary benchmarks, layoffs, and emerging technology demands as they happen.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Sources -->
+        <section>
+          <h2 class="text-2xl font-bold text-white mb-8 text-center uppercase tracking-widest font-mono">Our Data Ecosystem</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {dataSources.map(source => (
+              <div class="p-4 rounded-xl border border-white/5 bg-white/[0.02] text-center group hover:border-brand-cyan/30 transition-all">
+                <div class="text-white font-bold mb-1 group-hover:text-brand-cyan transition-colors">{source.name}</div>
+                <div class="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">{source.type}</div>
+              </div>
+            ))}
+          </div>
+          <p class="text-center text-muted-foreground text-xs mt-8 italic">
+            *TechJobMarket is not affiliated with these entities; we process publicly available data and ATS feeds for market research.
+          </p>
+        </section>
+
+        <!-- Values -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-white/10 pt-24">
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-4">Analytical Integrity</h2>
+            <p class="text-muted-foreground leading-relaxed">
+              We provide objective market intelligence. Unlike recruitment agencies, we do not take placement fees or commissions. Our primary product is the data itself, ensuring our reports remain unbiased and focused on factual market movements.
+            </p>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-4">Production-Ready Intelligence</h2>
+            <p class="text-muted-foreground leading-relaxed">
+              Every data point is cross-referenced. We track salary transparency disclosures and verify layoffs through multiple public signals to ensure the most accurate market picture available to the public.
+            </p>
+          </div>
+        </section>
+
+        <!-- Contact/CTA -->
+        <div class="text-center py-12">
+          <p class="text-sm font-mono text-muted-foreground uppercase mb-6 tracking-widest italic">Empowering the next generation of tech talent</p>
+          <div class="flex justify-center gap-6">
+            <a href="/contact" class="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-brand-cyan transition-all active:scale-95">
+              Contact Us
+            </a>
+            <a href="/trends" class="px-8 py-3 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all">
+              Explore Trends
+            </a>
           </div>
         </div>
       </div>

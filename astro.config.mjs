@@ -1,10 +1,15 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
+import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: vercel(),
+  adapter: cloudflare({
+    platformProxy: {
+      enabled: true,
+    },
+    mode: 'directory'
+  }),
   site: 'https://techjobmarket.com', // REQUIRED: Your final deployed domain for sitemap generation
 });

@@ -79,7 +79,8 @@ skills.sort((a, b) => b.count - a.count);
       
       {skills.length > 0 ? (
         <div class="grid grid-cols-1 gap-8">
-          <div class="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+          <!-- Desktop Table View -->
+          <div class="hidden md:block bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
             <div class="grid grid-cols-12 gap-4 p-6 border-b border-white/10 text-xs font-mono text-muted-foreground uppercase tracking-wider bg-white/[0.02]">
               <div class="col-span-1 text-center">Rank</div>
               <div class="col-span-5 md:col-span-4">Technology</div>
@@ -121,6 +122,37 @@ skills.sort((a, b) => b.count - a.count);
                 </div>
               ))}
             </div>
+          </div>
+
+          <!-- Mobile Condensed List -->
+          <div class="divide-y divide-white/5 md:hidden border-t border-white/10">
+            {skills.map((skill, index) => (
+              <div class="py-4 px-2 active:bg-white/[0.05] transition-colors flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <span class="text-[10px] font-mono text-muted-foreground shrink-0 w-4">{(index + 1).toString().padStart(2, '0')}</span>
+                  <div class="min-w-0">
+                    <h3 class="text-sm font-bold text-white tracking-tight truncate">{skill.name}</h3>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class={`text-[8px] font-mono uppercase tracking-widest font-bold px-1 py-0.5 rounded-[3px] border ${
+                        skill.demand === 'Critical' ? 'bg-brand-magenta/20 text-brand-magenta border-brand-magenta/30' : 
+                        skill.demand === 'High' ? 'bg-brand-amber/20 text-brand-amber border-brand-amber/30' : 
+                        'bg-brand-cyan/20 text-brand-cyan border-brand-cyan/30'
+                      }`}>
+                        {skill.demand}
+                      </span>
+                      <span class={`text-[9px] font-mono font-bold ${skill.growth.startsWith('+') ? 'text-emerald-400' : skill.growth.startsWith('-') ? 'text-brand-magenta' : 'text-white/50'}`}>
+                        {skill.growth !== 'N/A' ? skill.growth : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="text-right shrink-0">
+                  <span class="block text-[9px] text-muted-foreground uppercase font-mono mb-0.5 tracking-tighter">Mentions</span>
+                  <span class="text-sm font-mono font-bold text-white">{skill.count}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div class="mt-12 grid md:grid-cols-2 gap-8">

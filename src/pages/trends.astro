@@ -125,9 +125,9 @@ const topGrowthTrajetories = marketOutlook
           </div>
         </div>
 
-        <div class="relative h-64 flex items-end gap-2 md:gap-4">
+        <div class="relative h-64 flex items-end gap-2 md:gap-4 overflow-x-auto custom-scrollbar">
           {realMonthlyTrends.length >= 2 ? (
-            <>
+            <div class="min-w-full flex items-end gap-2 md:gap-4 h-full">
               <!-- Background Grid -->
               <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
                 {[1, 2, 3, 4].map(_ => <div class="w-full h-px bg-white/5"></div>)}
@@ -137,7 +137,7 @@ const topGrowthTrajetories = marketOutlook
                 const maxJobs = Math.max(...realMonthlyTrends.map((d: any) => d.value));
                 const height = (item.value / maxJobs) * 100;
                 return (
-                  <div class="flex-1 flex flex-col items-center gap-4 group h-full justify-end">
+                  <div class="flex-1 min-w-[60px] flex flex-col items-center gap-4 group h-full justify-end relative">
                     <div class="relative w-full h-full flex items-end">
                       <div 
                         class="w-full bg-gradient-to-t from-brand-cyan/20 to-brand-cyan rounded-t-sm transition-all duration-700 group-hover:to-white group-hover:shadow-[0_0_20px_rgba(80,227,194,0.3)]"
@@ -147,11 +147,11 @@ const topGrowthTrajetories = marketOutlook
                         Jobs: {item.value}
                       </div>
                     </div>
-                    <span class="text-[10px] font-mono text-muted-foreground rotate-45 md:rotate-0 whitespace-nowrap">{item.month}</span>
+                    <span class="text-[10px] font-mono text-muted-foreground rotate-45 md:rotate-0 whitespace-nowrap mb-2">{item.month}</span>
                   </div>
                 )
               })}
-            </>
+            </div>
           ) : (
             <div class="w-full h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl bg-white/[0.02]">
               <p class="text-white font-mono text-sm mb-2">Insufficient historical data</p>

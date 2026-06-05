@@ -1,0 +1,182 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const title = "Contact Us | TechJobMarket";
+const description = "Get in touch with the TechJobMarket team. We're here to help with your tech career intelligence questions and feedback.";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://techjobmarket.com').toString();
+---
+
+<Layout title={title} description={description} canonicalURL={canonicalURL}>
+  <Navbar />
+  
+  <main class="relative min-h-[calc(100vh-64px)] overflow-hidden bg-black py-24 sm:py-32">
+    <!-- Background Accents -->
+    <div class="absolute inset-0 mesh-gradient opacity-40 pointer-events-none"></div>
+    <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-blue/10 blur-[120px] rounded-full pointer-events-none"></div>
+    <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-brand-cyan/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center mb-16">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-cyan"></span>
+          </span>
+          <span class="text-[10px] font-bold tracking-widest uppercase text-brand-cyan">Support Center</span>
+        </div>
+        <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-6">
+          Get in <span class="text-brand-cyan">Touch</span>
+        </h1>
+        <p class="text-lg text-muted-foreground leading-relaxed text-balance">
+          Have questions about our real-time market data or want to collaborate? Our team of market analysts is ready to help.
+        </p>
+      </div>
+
+      <div class="mx-auto max-w-xl">
+        <div class="glass rounded-2xl p-8 sm:p-10 shadow-2xl relative">
+          <!-- Formspree / Web3Forms Implementation -->
+          <form id="contact-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-6">
+            <!-- IMPORTANT: Replace the value below with your actual Web3Forms Access Key -->
+            <input type="hidden" name="access_key" value="eca207ac-2269-4e2a-893e-d1ffc3120a00">
+            <input type="hidden" name="subject" value="New Inquiry from TechJobMarket">
+            <input type="hidden" name="from_name" value="TJM Contact Form">
+            
+            <div class="grid grid-cols-1 gap-y-6">
+              <div>
+                <label for="name" class="block text-sm font-medium text-white mb-2">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  required
+                  placeholder="John Doe"
+                  class="block w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-white mb-2">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  required
+                  placeholder="john@example.com"
+                  class="block w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent transition-all"
+                />
+              </div>
+              
+              <div>
+                <label for="message" class="block text-sm font-medium text-white mb-2">Your Message</label>
+                <textarea
+                  name="message"
+                  id="message"
+                  rows="4"
+                  required
+                  placeholder="How can we help you today?"
+                  class="block w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:border-transparent transition-all"
+                ></textarea>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                id="submit-button"
+                class="group w-full rounded-lg bg-white px-6 py-4 text-sm font-bold text-black hover:bg-brand-cyan transition-all active:scale-[0.98] shadow-lg shadow-white/5 flex items-center justify-center gap-2"
+              >
+                <span>Send Message</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              </button>
+            </div>
+            
+            <div id="form-result" class="hidden text-center mt-4 p-4 rounded-lg font-medium text-sm border"></div>
+          </form>
+        </div>
+        
+        <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div class="glass p-6 rounded-xl border-white/5">
+            <h3 class="text-xs font-bold text-white uppercase tracking-widest mb-3 font-mono text-brand-cyan">Analyst Support</h3>
+            <p class="text-sm text-muted-foreground">Direct access to our market intelligence team for detailed data inquiries.</p>
+          </div>
+          <div class="glass p-6 rounded-xl border-white/5">
+            <h3 class="text-xs font-bold text-white uppercase tracking-widest mb-3 font-mono text-brand-blue">Strategic Media</h3>
+            <p class="text-sm text-muted-foreground">Press inquiries and partnership requests for market trend reports.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script is:inline>
+  const form = document.getElementById('contact-form');
+  const result = document.getElementById('form-result');
+  const submitButton = document.getElementById('submit-button');
+
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Basic validation check
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      const object = Object.fromEntries(formData);
+      const json = JSON.stringify(object);
+
+      // UI Feedback State
+      result.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/20', 'text-red-400', 'bg-brand-cyan/10', 'border-brand-cyan/20', 'text-brand-cyan');
+      result.textContent = "Processing your inquiry...";
+      result.classList.add('block', 'bg-white/5', 'border-white/10', 'text-white');
+      
+      submitButton.disabled = true;
+      submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+      fetch('https://api.web3forms.com/submit', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+              },
+              body: json
+          })
+          .then(async (response) => {
+              let json = await response.json();
+              result.classList.remove('bg-white/5', 'border-white/10', 'text-white');
+              
+              if (response.status == 200) {
+                  result.classList.add('bg-brand-cyan/10', 'border-brand-cyan/20', 'text-brand-cyan');
+                  result.textContent = "Inquiry received. Our analysts will reach out shortly.";
+                  form.reset();
+              } else {
+                  console.error(response);
+                  result.classList.add('bg-red-500/10', 'border-red-500/20', 'text-red-400');
+                  result.textContent = json.message || "Submission failed. Please try again.";
+              }
+          })
+          .catch(error => {
+              console.error(error);
+              result.classList.remove('bg-white/5', 'border-white/10', 'text-white');
+              result.classList.add('bg-red-500/10', 'border-red-500/20', 'text-red-400');
+              result.textContent = "Network error. Please verify your connection.";
+          })
+          .finally(() => {
+              submitButton.disabled = false;
+              submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+              
+              // Hide message after 8 seconds
+              setTimeout(() => {
+                  result.classList.add('hidden');
+              }, 8000);
+          });
+    });
+  }
+</script>

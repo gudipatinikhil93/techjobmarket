@@ -17,11 +17,50 @@ TechJobMarket is a real-time intelligence platform providing deep analysis of th
 *   **Scrapers:** Playwright, Apify
 *   **Data Science:** Custom normalization & analytics pipeline
 
+## Project Structure
+
+*   `src/` - Application source code (Astro, components, styles)
+*   `public/` - Static assets
+*   `scripts/` - Data pipeline, scraping, and maintenance scripts
+*   `docs/` - Project documentation and internal audits
+*   `.github/` - GitHub Actions for automated data updates
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+*   [DESIGN.md](./DESIGN.md) - Visual identity and design system
+*   [SETUP.md](./SETUP.md) - Detailed local development setup
+*   [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Current feature roadmap and status
+*   `docs/internal/` - Internal architecture audits and development logs
+
 ## Getting Started
 
-1.  Clone the repo
-2.  Install dependencies: `npm install`
-3.  Set up Supabase environment variables in `.env`
-4.  Run development server: `npm run dev`
-5.  Seed US market data: `npx tsx scripts/seed-us-data.ts`
-6.  Trigger US scraping pipeline: `npm run pipeline:update`
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/your-repo/techjobmarket.git
+    cd techjobmarket
+    ```
+
+2.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Configuration:**
+    Create a `.env` file based on `.env.example` and fill in your Supabase and API credentials.
+
+4.  **Launch Development Server:**
+    ```bash
+    npm run dev
+    ```
+
+5.  **Initialize Data (Optional):**
+    ```bash
+    npx tsx scripts/seed-us-data.ts
+    npm run pipeline:update
+    ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

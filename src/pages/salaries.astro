@@ -75,7 +75,8 @@ const salaryData = dbSalaries.length > 0
         </div>
       </div>
       
-      <div class="overflow-x-auto rounded-xl border border-white/10 bg-card">
+      <!-- Desktop Table -->
+      <div class="hidden md:block overflow-x-auto rounded-xl border border-white/10 bg-card">
         <table class="w-full border-collapse" id="salaryTable">
           <thead>
             <tr class="border-b border-white/10 text-left bg-white/[0.02]">
@@ -110,6 +111,36 @@ const salaryData = dbSalaries.length > 0
         </table>
       </div>
 
+      <!-- Mobile Condensed List -->
+      <div id="salaryCards" class="divide-y divide-white/5 md:hidden border-t border-white/10">
+        {salaryData.length > 0 ? salaryData.map(item => (
+          <div class="py-4 px-2 hover:bg-white/[0.02] transition-colors salary-row-mobile flex items-center justify-between gap-4" data-role={item.role.toLowerCase()}>
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm font-bold text-white mb-1 truncate">{item.role}</h3>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] text-muted-foreground uppercase font-mono">Min:</span>
+                  <span class="text-xs font-mono text-white/70">${item.avgMin}k</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] text-muted-foreground uppercase font-mono">Max:</span>
+                  <span class="text-xs font-mono text-white/70">${item.avgMax}k</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-right shrink-0">
+              <span class="block text-[9px] text-brand-cyan uppercase font-mono mb-0.5 tracking-tighter">Est. Median</span>
+              <span class="text-sm font-mono font-bold text-brand-cyan">${item.avgMedian}k</span>
+            </div>
+          </div>
+        )) : (
+          <div class="py-12 text-center text-muted-foreground italic">
+            No salary data available yet.
+          </div>
+        )}
+      </div>
+
       {salaryData.length < 5 && salaryData.length > 0 && (
         <p class="mt-4 text-xs text-brand-magenta font-mono">
           ⚠️ Low confidence indicator: Limited data points for certain roles.
@@ -119,16 +150,19 @@ const salaryData = dbSalaries.length > 0
       <script>
         const searchInput = document.getElementById('roleSearch');
         const rows = document.querySelectorAll('.salary-row');
+        const mobileRows = document.querySelectorAll('.salary-row-mobile');
 
         searchInput?.addEventListener('input', (e) => {
           const term = (e.target as HTMLInputElement).value.toLowerCase();
+          
           rows.forEach(row => {
             const role = row.getAttribute('data-role') || '';
-            if (role.includes(term)) {
-              (row as HTMLElement).style.display = '';
-            } else {
-              (row as HTMLElement).style.display = 'none';
-            }
+            (row as HTMLElement).style.display = role.includes(term) ? '' : 'none';
+          });
+
+          mobileRows.forEach(row => {
+            const role = row.getAttribute('data-role') || '';
+            (row as HTMLElement).style.display = role.includes(term) ? '' : 'none';
           });
         });
       </script>

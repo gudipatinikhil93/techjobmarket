@@ -18,7 +18,7 @@ import { GeminiService } from './geminiService';
 export async function generateWeeklyInsights() {
   console.log('[AI-Service] Starting Market Intelligence Generation...');
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = import.meta.env?.GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
   
   if (!apiKey) {
     console.error('[AI-Service] GEMINI_API_KEY is not configured. Skipping.');

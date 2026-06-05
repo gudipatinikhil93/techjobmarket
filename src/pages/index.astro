@@ -122,7 +122,7 @@ const jsonLdSchema = {
 				</p>
 
 				<!-- Pulse Indicators Grid -->
-				<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
 					<div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors">
 						<span class="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Hiring Velocity</span>
 						<div class="flex items-baseline gap-2">
@@ -155,7 +155,7 @@ const jsonLdSchema = {
 						</div>
 					</div>
 
-					<div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors hidden lg:block">
+					<div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-colors sm:col-span-2 lg:col-span-1">
 						<span class="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Top Hiring Hub</span>
 						<div class="flex items-baseline gap-2">
 							<span class="text-xl font-bold text-white">{topCity ? topCity.city : 'Initializing'}</span>
@@ -200,9 +200,9 @@ const jsonLdSchema = {
 							<p class="text-muted-foreground text-sm">Overall market velocity across captured US tech hubs.</p>
 						</div>
 						
-						<div class="h-[300px] w-full rounded-2xl border border-white/10 bg-white/[0.01] p-6 relative flex items-end">
+						<div class="h-[300px] w-full rounded-2xl border border-white/10 bg-white/[0.01] p-6 relative flex items-end overflow-x-auto custom-scrollbar">
 							{hasSufficientTrendData ? (
-								<div class="w-full h-full flex items-end justify-between gap-2">
+								<div class="min-w-full h-full flex items-end justify-between gap-2 md:gap-4">
 									{hiringTrends.map((point: any, index: number) => {
 										// Calculate dynamic height based on values. Fallback generic logic for safety.
 										const maxVal = Math.max(...hiringTrends.map((p: any) => p.value));
@@ -211,7 +211,7 @@ const jsonLdSchema = {
 										const normalizedHeight = ((point.value - minVal) / range) * 60 + 20; // 20% to 80%
 										
 										return (
-											<div class="flex-1 flex flex-col items-center gap-2 group relative">
+											<div class="flex-1 min-w-[40px] flex flex-col items-center gap-2 group relative">
 												<div class="w-full rounded-t bg-gradient-to-t from-brand-blue/20 to-brand-cyan/50 hover:to-brand-cyan transition-all" style={`height: ${normalizedHeight}%`}>
 													<div class="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-white text-black text-xs font-bold py-1 px-2 rounded transition-opacity whitespace-nowrap pointer-events-none">
 														{point.value} jobs
@@ -343,14 +343,13 @@ const jsonLdSchema = {
 				</div>
 
 				<div class="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
-					<div class="grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-xs font-mono text-muted-foreground uppercase tracking-wider bg-white/[0.02]">
-						<div class="col-span-5 md:col-span-4">Role / Domain</div>
-						<div class="col-span-7 md:col-span-8">Compensation Range (USD)</div>
+					<div class="hidden md:grid grid-cols-12 gap-4 p-4 border-b border-white/10 text-xs font-mono text-muted-foreground uppercase tracking-wider bg-white/[0.02]">
+						<div class="col-span-4">Role / Domain</div>
+						<div class="col-span-8">Compensation Range (USD)</div>
 					</div>
 					
 					<div class="divide-y divide-white/5">
 						{salaryBenchmarks && salaryBenchmarks.length > 0 ? salaryBenchmarks.map((benchmark: any) => {
-							// Determine bar position. Let's assume absolute min is $50k and max is $350k for US Tech
 							const ABSOLUTE_MIN = 50000;
 							const ABSOLUTE_MAX = 350000;
 							const range = ABSOLUTE_MAX - ABSOLUTE_MIN;
@@ -359,19 +358,21 @@ const jsonLdSchema = {
 							const widthPercent = Math.min(100 - minPercent, ((benchmark.avg_max - benchmark.avg_min) / range) * 100);
 							
 							return (
-								<div class="grid grid-cols-12 gap-4 p-4 items-center hover:bg-white/[0.02] transition-colors">
-									<div class="col-span-5 md:col-span-4">
-										<span class="text-sm font-bold text-white block">{benchmark.role}</span>
-									</div>
-									<div class="col-span-7 md:col-span-8 flex items-center gap-4">
-										<span class="text-xs font-mono text-muted-foreground w-16 text-right shrink-0">{formatSalary(benchmark.avg_min)}</span>
-										<div class="flex-1 h-3 rounded-full bg-black border border-white/5 relative overflow-hidden hidden sm:block">
-											<div 
-												class="absolute h-full rounded-full bg-gradient-to-r from-brand-blue/50 to-brand-cyan/80 border border-white/10"
-												style={`left: ${minPercent}%; width: ${widthPercent}%;`}
-											></div>
+								<div class="p-4 hover:bg-white/[0.02] transition-colors">
+									<div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+										<div class="md:col-span-4">
+											<span class="text-sm font-bold text-white block">{benchmark.role}</span>
 										</div>
-										<span class="text-xs font-mono text-white w-16 shrink-0">{formatSalary(benchmark.avg_max)}</span>
+										<div class="md:col-span-8 flex items-center gap-3 sm:gap-4">
+											<span class="text-[10px] sm:text-xs font-mono text-muted-foreground w-12 sm:w-16 text-right shrink-0">{formatSalary(benchmark.avg_min)}</span>
+											<div class="flex-1 h-2 sm:h-3 rounded-full bg-black border border-white/5 relative overflow-hidden">
+												<div 
+													class="absolute h-full rounded-full bg-gradient-to-r from-brand-blue/50 to-brand-cyan/80 border border-white/10"
+													style={`left: ${minPercent}%; width: ${widthPercent}%;`}
+												></div>
+											</div>
+											<span class="text-[10px] sm:text-xs font-mono text-white w-12 sm:w-16 shrink-0">{formatSalary(benchmark.avg_max)}</span>
+										</div>
 									</div>
 								</div>
 							)

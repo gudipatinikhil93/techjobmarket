@@ -10,6 +10,8 @@ export const GET: APIRoute = async ({ site }) => {
   const staticPages = [
     `${site.origin}/`,
     `${site.origin}/about`,
+    `${site.origin}/privacy-policy`,
+    `${site.origin}/terms-and-conditions`,
     `${site.origin}/cities`,
     `${site.origin}/layoffs`,
     `${site.origin}/roles`,
@@ -17,6 +19,7 @@ export const GET: APIRoute = async ({ site }) => {
     `${site.origin}/skills`,
     `${site.origin}/trends`,
     `${site.origin}/search`,
+    `${site.origin}/contact`,
   ];
 
   const marketOutlook = await getMarketOutlook();

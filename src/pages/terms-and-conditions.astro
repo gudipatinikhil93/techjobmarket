@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const lastUpdated = "June 5, 2026";
+---
+
+<Layout 
+  title="Terms & Conditions | TechJobMarket"
+  description="Terms and Conditions for using the TechJobMarket platform. Understand our service limitations, data usage, and user responsibilities."
+>
+  <Navbar />
+  
+  <main class="py-24 bg-black">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16">
+        <h1 class="text-4xl font-bold text-white mb-4">Terms & Conditions</h1>
+        <p class="text-muted-foreground font-mono uppercase tracking-widest text-sm">Last Updated: {lastUpdated}</p>
+      </div>
+
+      <div class="prose prose-invert max-w-none">
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">1. Agreement to Terms</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            By accessing or using TechJobMarket (techjobmarket.com), you agree to be bound by these Terms and Conditions and our Privacy Policy. If you disagree with any part of the terms, you may not access the service.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">2. Informational Purpose Only</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            TechJobMarket is an intelligence platform providing market data, analytics, and insights. 
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground mb-6">
+            <li><strong>No Hiring Guarantees:</strong> We are not a recruitment agency. We do not guarantee job placements, interviews, or hiring outcomes.</li>
+            <li><strong>Data Accuracy:</strong> While we strive for accuracy, our data is aggregated from third-party sources (Indeed, Greenhouse, Lever, etc.) and may contain inaccuracies or delays.</li>
+            <li><strong>Not Financial Advice:</strong> Market trends and salary data are for informational purposes and should not be considered financial or career advice.</li>
+          </ul>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">3. Acceptable Use</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            You agree not to:
+          </p>
+          <ul class="list-disc pl-6 space-y-2 text-muted-foreground">
+            <li>Use the service for any illegal purpose or in violation of any local, state, national, or international law.</li>
+            <li>Attempt to reverse engineer, scrape (except as permitted by robots.txt), or disrupt the integrity of the platform.</li>
+            <li>Use our data to build competing products without express written consent.</li>
+            <li>Misrepresent your identity or affiliation with TechJobMarket.</li>
+          </ul>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">4. Intellectual Property</h2>
+          <p class="text-muted-foreground leading-relaxed">
+            The service and its original content (excluding data sourced from third parties), features, and functionality are and will remain the exclusive property of TechJobMarket and its licensors. Our trademarks and trade dress may not be used in connection with any product or service without our prior written consent.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">5. Third-Party Links & Sources</h2>
+          <p class="text-muted-foreground leading-relaxed">
+            Our service contains links to third-party websites or services that are not owned or controlled by TechJobMarket. We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services. You acknowledge and agree that TechJobMarket shall not be responsible or liable, directly or indirectly, for any damage or loss caused or alleged to be caused by or in connection with the use of or reliance on any such content, goods, or services available on or through any such web sites or services.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">6. Limitation of Liability</h2>
+          <p class="text-muted-foreground leading-relaxed">
+            In no event shall TechJobMarket, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) your access to or use of or inability to access or use the service; (ii) any conduct or content of any third party on the service; (iii) any content obtained from the service; and (iv) unauthorized access, use or alteration of your transmissions or content.
+          </p>
+        </section>
+
+        <section class="mb-12">
+          <h2 class="text-2xl font-bold text-white mb-6">7. Changes to Terms</h2>
+          <p class="text-muted-foreground leading-relaxed">
+            We reserve the right, at our sole discretion, to modify or replace these Terms at any time. We will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
+          </p>
+        </section>
+
+        <section class="mb-12 border-t border-white/10 pt-12">
+          <h2 class="text-2xl font-bold text-white mb-6">8. Contact Us</h2>
+          <p class="text-muted-foreground leading-relaxed mb-4">
+            If you have any questions about these Terms, please contact us:
+          </p>
+          <ul class="list-none space-y-2 text-muted-foreground">
+            <li>By email: <span class="text-brand-cyan">legal@techjobmarket.com</span></li>
+            <li>By visiting our contact page: <a href="/contact" class="text-brand-cyan hover:underline">techjobmarket.com/contact</a></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>

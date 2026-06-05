@@ -93,8 +93,8 @@ const getStatusColor = (status: string) => {
         </div>
       </div>
 
-      <!-- Data Table -->
-      <div class="rounded-xl border border-white/10 bg-white/[0.01] overflow-hidden overflow-x-auto">
+      <!-- Data Table (Desktop) & Cards (Mobile) -->
+      <div class="hidden md:block rounded-xl border border-white/10 bg-white/[0.01] overflow-hidden">
         <table class="w-full text-left text-sm whitespace-nowrap" id="rolesTable">
           <thead class="bg-white/[0.03] border-b border-white/10 text-xs font-mono uppercase tracking-wider text-muted-foreground">
             <tr>
@@ -131,12 +131,54 @@ const getStatusColor = (status: string) => {
             ))}
           </tbody>
         </table>
-        {displayRoles.length === 0 && (
-           <div class="p-12 text-center text-muted-foreground">
-             No role data found in the current snapshot.
-           </div>
-        )}
       </div>
+
+      <!-- Mobile Condensed List -->
+      <div id="rolesCards" class="divide-y divide-white/5 md:hidden border-t border-white/10">
+        {displayRoles.map((role) => (
+          <div 
+            class="py-4 px-2 active:bg-white/[0.05] transition-colors cursor-pointer flex items-center justify-between gap-4"
+            onclick={`window.location.href='/role/${encodeURIComponent(role.role)}'`}
+            data-role={role.role.toLowerCase()} 
+            data-status={role.status} 
+            data-jobcount={role.jobCount} 
+            data-salary={role.avgSalaryMin} 
+            data-growth={role.growthPercentage}
+          >
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-sm font-bold text-white truncate">{role.role}</h3>
+                <span class={`inline-flex items-center px-1.5 py-0.5 rounded-[4px] text-[9px] font-bold uppercase border ${getStatusColor(role.status)} shrink-0`}>
+                  {role.status}
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1">
+                  <span class="text-[10px] text-muted-foreground font-mono">Growth:</span>
+                  <span class={`text-[10px] font-mono font-bold ${role.growthPercentage > 0 ? 'text-brand-cyan' : role.growthPercentage < 0 ? 'text-brand-magenta' : 'text-white/50'}`}>
+                    {role.growthPercentage > 0 ? '+' : ''}{role.growthPercentage}%
+                  </span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="text-[10px] text-muted-foreground font-mono">Openings:</span>
+                  <span class="text-[10px] font-mono text-white/70">{role.jobCount}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-right shrink-0">
+              <span class="block text-[10px] text-muted-foreground uppercase font-mono mb-0.5 tracking-tighter">Est. Base</span>
+              <span class="text-xs font-mono font-bold text-white">{formatSalary(role.avgSalaryMin, role.avgSalaryMax)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {displayRoles.length === 0 && (
+         <div class="p-12 text-center text-muted-foreground">
+           No role data found in the current snapshot.
+         </div>
+      )}
 
     </div>
   </main>
@@ -149,7 +191,11 @@ const getStatusColor = (status: string) => {
     const searchInput = document.getElementById('roleSearch') as HTMLInputElement;
     const statusFilter = document.getElementById('statusFilter') as HTMLSelectElement;
     const tableBody = document.getElementById('rolesBody');
-    const rows = Array.from(tableBody?.querySelectorAll('tr') || []);
+    const cardsContainer = document.getElementById('rolesCards');
+    
+    const tableRows = Array.from(tableBody?.querySelectorAll('tr') || []);
+    const mobileCards = Array.from(cardsContainer?.querySelectorAll('[data-role]') || []);
+    
     const headers = document.querySelectorAll('th[data-sort]');
 
     let currentSort = 'openings';
@@ -159,19 +205,15 @@ const getStatusColor = (status: string) => {
       const searchTerm = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
 
-      // Filter
-      let visibleRows = rows.filter(row => {
-        const role = row.getAttribute('data-role') || '';
-        const status = row.getAttribute('data-status') || '';
-        
+      const filterFn = (el: Element) => {
+        const role = el.getAttribute('data-role') || '';
+        const status = el.getAttribute('data-status') || '';
         const matchesSearch = role.includes(searchTerm);
         const matchesStatus = statusValue === 'all' || status === statusValue;
-        
         return matchesSearch && matchesStatus;
-      });
+      };
 
-      // Sort
-      visibleRows.sort((a, b) => {
+      const sortFn = (a: Element, b: Element) => {
         let valA: any = a.getAttribute(`data-${currentSort}`);
         let valB: any = b.getAttribute(`data-${currentSort}`);
 
@@ -184,12 +226,22 @@ const getStatusColor = (status: string) => {
            valB = String(valB);
            return currentDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
         }
-      });
+      };
 
-      // Render
+      // Handle Table
+      let visibleRows = tableRows.filter(filterFn);
+      visibleRows.sort(sortFn);
       if (tableBody) {
         tableBody.innerHTML = '';
         visibleRows.forEach(row => tableBody.appendChild(row));
+      }
+
+      // Handle Cards
+      let visibleCards = mobileCards.filter(filterFn);
+      visibleCards.sort(sortFn);
+      if (cardsContainer) {
+        cardsContainer.innerHTML = '';
+        visibleCards.forEach(card => cardsContainer.appendChild(card));
       }
     }
 

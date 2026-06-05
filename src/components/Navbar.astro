@@ -47,6 +47,81 @@ const navLinks = [
       <button class="rounded-pill bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-white/90 transition-all active:scale-95">
         Market Pulse
       </button>
+
+      <!-- Mobile Menu Button -->
+      <button 
+        id="mobile-menu-button"
+        type="button" 
+        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-white hover:bg-white/5 focus:outline-none transition-colors"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <span class="sr-only">Open main menu</span>
+        <!-- Icon when menu is closed -->
+        <svg id="menu-icon-closed" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <!-- Icon when menu is open -->
+        <svg id="menu-icon-open" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-black/95 backdrop-blur-2xl">
+    <div class="space-y-1 px-4 pb-6 pt-2">
+      {navLinks.map(link => (
+        <a 
+          href={link.href} 
+          class="block rounded-lg px-3 py-3 text-base font-semibold text-white hover:bg-white/5 transition-colors"
+        >
+          {link.label}
+        </a>
+      ))}
+      <div class="my-4 border-t border-white/10 pt-4">
+        <a href="/about" class="block rounded-lg px-3 py-3 text-base font-semibold text-white hover:bg-white/5 transition-colors">About</a>
+        <a href="/contact" class="block rounded-lg px-3 py-3 text-base font-semibold text-white hover:bg-white/5 transition-colors">Contact</a>
+      </div>
+      <form action="/search" method="GET" class="relative mt-4 px-3">
+        <input 
+          type="text" 
+          name="q" 
+          placeholder="Search roles..." 
+          class="w-full h-11 bg-white/5 border border-white/10 rounded-lg px-4 text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:border-brand-cyan/50 transition-all"
+        />
+      </form>
     </div>
   </div>
 </nav>
+
+<script>
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const menuIconClosed = document.getElementById('menu-icon-closed');
+  const menuIconOpen = document.getElementById('menu-icon-open');
+
+  mobileMenuButton?.addEventListener('click', () => {
+    const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+    
+    mobileMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+    mobileMenu?.classList.toggle('hidden');
+    menuIconClosed?.classList.toggle('hidden');
+    menuIconOpen?.classList.toggle('hidden');
+    
+    // Prevent scrolling when menu is open
+    document.body.style.overflow = isExpanded ? '' : 'hidden';
+  });
+
+  // Close menu on resize if switching to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      mobileMenu?.classList.add('hidden');
+      mobileMenuButton?.setAttribute('aria-expanded', 'false');
+      menuIconClosed?.classList.remove('hidden');
+      menuIconOpen?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
