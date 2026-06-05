@@ -4,6 +4,7 @@
 The application is in a "Feature Complete Beta" state. The visual identity and core data structures are finalized. Data is flowing from Supabase to the UI on the most critical pages.
 
 ## Latest Implemented Features
+- **GitHub Actions Automation**: Fully automated weekly market intelligence pipeline (`weekly-pipeline.yml`). Runs scraping, normalization, and AI intelligence generation every Monday.
 - **Snapshot Analytics:** Implemented a system to track job counts over time, enabling "Growth %" metrics on the frontend.
 - **Dynamic Role Routing:** Created `src/pages/role/[role].astro` which generates dedicated landing pages for any normalized job title.
 - **Market Pulse Metrics:** Added real-time aggregation for "Active Jobs", "Companies Hiring", and "Hiring Velocity".
