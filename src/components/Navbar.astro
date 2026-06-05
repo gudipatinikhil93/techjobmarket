@@ -52,7 +52,7 @@ const navLinks = [
       <button 
         id="mobile-menu-button"
         type="button" 
-        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-white hover:bg-white/5 focus:outline-none transition-colors"
+        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-white hover:bg-white/5 focus:outline-none transition-colors z-50"
         aria-controls="mobile-menu"
         aria-expanded="false"
       >
@@ -69,8 +69,11 @@ const navLinks = [
     </div>
   </div>
 
+  <!-- Mobile Menu Backdrop -->
+  <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
   <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-black/95 backdrop-blur-2xl">
+  <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-black/95 backdrop-blur-2xl max-h-[calc(100vh-64px)] overflow-y-auto overscroll-contain relative z-50">
     <div class="space-y-1 px-4 pb-6 pt-2">
       {navLinks.map(link => (
         <a 
@@ -97,31 +100,94 @@ const navLinks = [
 </nav>
 
 <script>
-  const mobileMenuButton = document.getElementById('mobile-menu-button');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const menuIconClosed = document.getElementById('menu-icon-closed');
-  const menuIconOpen = document.getElementById('menu-icon-open');
+  function initMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const backdrop = document.getElementById('mobile-menu-backdrop');
+    const menuIconClosed = document.getElementById('menu-icon-closed');
+    const menuIconOpen = document.getElementById('menu-icon-open');
+    const mobileLinks = mobileMenu?.querySelectorAll('a');
 
-  mobileMenuButton?.addEventListener('click', () => {
-    const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-    
-    mobileMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
-    mobileMenu?.classList.toggle('hidden');
-    menuIconClosed?.classList.toggle('hidden');
-    menuIconOpen?.classList.toggle('hidden');
-    
-    // Prevent scrolling when menu is open
-    document.body.style.overflow = isExpanded ? '' : 'hidden';
-  });
+    if (!mobileMenuButton || !mobileMenu || !backdrop) return;
 
-  // Close menu on resize if switching to desktop
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
+    function closeMenu() {
       mobileMenu?.classList.add('hidden');
+      backdrop?.classList.add('hidden');
       mobileMenuButton?.setAttribute('aria-expanded', 'false');
       menuIconClosed?.classList.remove('hidden');
       menuIconOpen?.classList.add('hidden');
       document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
     }
+
+    function openMenu() {
+      mobileMenu?.classList.remove('hidden');
+      backdrop?.classList.remove('hidden');
+      mobileMenuButton?.setAttribute('aria-expanded', 'true');
+      menuIconClosed?.classList.add('hidden');
+      menuIconOpen?.classList.remove('hidden');
+      
+      // Prevent body scroll
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+      }
+    }
+
+    function toggleMenu() {
+      const isExpanded = mobileMenuButton?.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }
+
+    // Toggle click
+    mobileMenuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Backdrop click
+    backdrop.addEventListener('click', closeMenu);
+
+    // Link clicks - close menu immediately
+    mobileLinks?.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    // Escape key
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMenu();
+    };
+    document.addEventListener('keydown', handleKeydown);
+
+    // Resize cleanup
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        closeMenu();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    // BFcache restoration
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        closeMenu();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+  }
+
+  // Initialize
+  initMobileMenu();
+
+  // Re-run on Astro View Transitions if enabled
+  document.addEventListener('astro:page-load', initMobileMenu);
+  document.addEventListener('astro:after-swap', () => {
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
   });
 </script>

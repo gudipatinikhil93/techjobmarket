@@ -11,7 +11,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://techjobm
 <Layout title={title} description={description} canonicalURL={canonicalURL}>
   <Navbar />
   
-  <main class="relative min-h-[calc(100vh-64px)] overflow-hidden bg-black py-24 sm:py-32">
+  <main class="relative min-h-[calc(100vh-64px)] overflow-x-hidden bg-black py-24 sm:py-32">
     <!-- Background Accents -->
     <div class="absolute inset-0 mesh-gradient opacity-40 pointer-events-none"></div>
     <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-brand-blue/10 blur-[120px] rounded-full pointer-events-none"></div>
