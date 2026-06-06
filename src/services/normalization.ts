@@ -50,7 +50,20 @@ const TITLE_MAP: Record<string, string> = {
   'ENGINEERING MANAGER': 'Engineering Manager',
   'DIRECTOR OF ENGINEERING': 'Engineering Manager',
   'CTO': 'Executive',
-  'VP OF ENGINEERING': 'Executive'
+  'VP OF ENGINEERING': 'Executive',
+  // India Specific
+  'GRADUATE ENGINEER TRAINEE': 'SDE Intern',
+  'GET': 'SDE Intern',
+  'MTS': 'Software Engineer',
+  'MEMBER OF TECHNICAL STAFF': 'Software Engineer',
+  'PRODUCT ENGINEER': 'Software Engineer',
+  'APPLICATION DEVELOPER': 'Software Engineer',
+  'SDE 1': 'Software Engineer',
+  'SDE 2': 'Senior Software Engineer',
+  'SDE 3': 'Staff Software Engineer',
+  'SDE I': 'Software Engineer',
+  'SDE II': 'Senior Software Engineer',
+  'SDE III': 'Staff Software Engineer',
 };
 
 export function normalizeTitle(title: string): string {
@@ -111,18 +124,38 @@ export function normalizeCity(city: string, region: string = 'us'): string {
   };
 
   const INDIA_HUBS: Record<string, string> = {
-    'BANGALORE': 'Bangalore',
-    'BENGALURU': 'Bangalore',
+    'BANGALORE': 'Bengaluru',
+    'BENGALURU': 'Bengaluru',
     'HYDERABAD': 'Hyderabad',
+    'SECUNDERABAD': 'Hyderabad',
     'PUNE': 'Pune',
     'DELHI': 'Delhi NCR',
+    'GURGAON': 'Delhi NCR',
+    'GURUGRAM': 'Delhi NCR',
+    'NOIDA': 'Delhi NCR',
     'NCR': 'Delhi NCR',
     'MUMBAI': 'Mumbai',
+    'BOMBAY': 'Mumbai',
+    'THANE': 'Mumbai',
+    'NAVI MUMBAI': 'Mumbai',
     'CHENNAI': 'Chennai',
-    'GURGAON': 'Gurgaon',
-    'GURUGRAM': 'Gurgaon',
-    'NOIDA': 'Noida',
+    'MADRAS': 'Chennai',
     'AHMEDABAD': 'Ahmedabad',
+    'KOLKATA': 'Kolkata',
+    'CALCUTTA': 'Kolkata',
+    'TRIVANDRUM': 'Trivandrum',
+    'THIRUVANANTHAPURAM': 'Trivandrum',
+    'KOCHI': 'Kochi',
+    'COCHIN': 'Kochi',
+    'JAIPUR': 'Jaipur',
+    'INDORE': 'Indore',
+    'CHANDIGARH': 'Chandigarh',
+    'COIMBATORE': 'Coimbatore',
+    'BHUBANESWAR': 'Bhubaneswar',
+    'VIZAG': 'Visakhapatnam',
+    'VISAKHAPATNAM': 'Visakhapatnam',
+    'LUCKNOW': 'Lucknow',
+    'NAGPUR': 'Nagpur',
   };
 
   const GENERIC_HUBS: Record<string, string> = {
@@ -293,7 +326,7 @@ export function extractSkills(text: string): string[] {
   return Array.from(foundSkills);
 }
 
-export function cleanSalary(salary: number | string | undefined): number | null {
+export function cleanSalary(salary: number | string | undefined, region: string = 'us'): number | null {
   if (salary === undefined || salary === null || salary === '') return null;
   
   if (typeof salary === 'number') {
@@ -301,12 +334,75 @@ export function cleanSalary(salary: number | string | undefined): number | null 
     return salary;
   }
 
-  // Parse string salary (e.g. "$150k", "$150,000")
-  const cleanStr = salary.replace(/[$,kK]/g, (match) => {
+  const cleanStr = salary.toLowerCase();
+
+  // India Specific: LPA (Lakhs Per Annum)
+  if (region === 'india' && (cleanStr.includes('lpa') || cleanStr.includes('lakh'))) {
+    const matches = cleanStr.match(/(\d+(?:\.\d+)?)/g);
+    if (matches && matches.length > 0) {
+      // If it's a range like "15-20 LPA", we return the average
+      const values = matches.map(m => parseFloat(m) * 100000);
+      const avg = values.reduce((a, b) => a + b, 0) / values.length;
+      return avg;
+    }
+  }
+
+  // India Specific: Monthly (e.g. "50k/month", "50,000 per month")
+  if (region === 'india' && (cleanStr.includes('/month') || cleanStr.includes('per month') || cleanStr.includes('monthly'))) {
+    const matches = cleanStr.match(/(\d+(?:,\d+)*(?:\.\d+)?)/g);
+    if (matches && matches.length > 0) {
+      const val = parseFloat(matches[0].replace(/,/g, ''));
+      // Handle "50k" vs "50000"
+      const normalizedVal = cleanStr.includes('k') && val < 1000 ? val * 1000 : val;
+      return normalizedVal * 12; // Convert to annual
+    }
+  }
+
+  // Standard Parsing (e.g. "$150k", "$150,000")
+  const standardClean = salary.replace(/[$,kK]/g, (match) => {
     if (match.toLowerCase() === 'k') return '000';
     return '';
   }).replace(/,/g, '');
 
-  const num = parseFloat(cleanStr);
+  // Handle ranges in standard parsing (e.g. "150k-200k")
+  if (standardClean.includes('-')) {
+    const parts = standardClean.split('-').map(p => parseFloat(p.trim()));
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      return (parts[0] + parts[1]) / 2;
+    }
+  }
+
+  const num = parseFloat(standardClean);
   return isNaN(num) || num === 0 ? null : num;
+}
+
+/**
+ * Categorizes companies into Startup, Product, Service, or GCC.
+ */
+export function categorizeCompany(company: string, region: string = 'india'): string {
+  const c = company.toUpperCase();
+
+  const SERVICE_COMPANIES = [
+    'TCS', 'TATA CONSULTANCY', 'INFOSYS', 'WIPRO', 'HCL', 'COGNIZANT', 'ACCENTURE', 
+    'TECH MAHINDRA', 'LTIMINDTREE', 'MINDTREE', 'L&T', 'CAPGEMINI', 'DXC', 'IBM'
+  ];
+
+  const GCC_COMPANIES = [
+    'GOOGLE', 'MICROSOFT', 'AMAZON', 'META', 'APPLE', 'NETFLIX', 'UBER', 'AIRBNB',
+    'GOLDMAN SACHS', 'JPMORGAN', 'MORGAN STANLEY', 'WELLS FARGO', 'WALMART', 'TARGET',
+    'TESCO', 'SHELL', 'BP', 'VISA', 'MASTERCARD', 'AMERICAN EXPRESS', 'INTEL', 'NVIDIA',
+    'QUALCOMM', 'SAMSUNG', 'ADOBE', 'SALESFORCE', 'ORACLE', 'SAP', 'CISCO'
+  ];
+
+  const PRODUCT_COMPANIES = [
+    'ZOMATO', 'SWIGGY', 'OLA', 'PAYTM', 'PHONEPE', 'FLIPKART', 'MEESHO', 'NYKAA',
+    'ZEPTO', 'BLINKIT', 'RAZORPAY', 'CRED', 'FRESHWORKS', 'ZOHO', 'POSTMAN', 'BROWSERSTACK'
+  ];
+
+  if (SERVICE_COMPANIES.some(s => c.includes(s))) return 'Service';
+  if (GCC_COMPANIES.some(g => c.includes(g))) return 'GCC';
+  if (PRODUCT_COMPANIES.some(p => c.includes(p))) return 'Product';
+  
+  // Default to Startup for others if in India and not a known big entity
+  return region === 'india' ? 'Startup' : 'Product';
 }

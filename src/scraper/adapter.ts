@@ -1,11 +1,13 @@
 export interface RawJob {
   title: string;
   company: string;
+  company_category?: string;
   city: string;
   description?: string;
   salary_text?: string;
   salary_min?: number;
   salary_max?: number;
+  currency?: string;
   skills: string[];
   source: string;
   url: string;

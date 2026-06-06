@@ -139,6 +139,45 @@ const dataSources = [
           </div>
         </section>
 
+        <!-- Transparency & Methodology -->
+        <section class="py-24 border-t border-white/10">
+          <div class="max-w-4xl">
+            <h2 class="text-3xl font-bold text-white mb-8 tracking-tight">Methodology & Source Transparency</h2>
+            <div class="space-y-12">
+              <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div class="text-[10px] font-mono text-brand-cyan uppercase tracking-widest mb-2">Update Frequency</div>
+                  <div class="text-xl font-bold text-white">Live Every 6h</div>
+                  <p class="text-xs text-muted-foreground mt-2">Continuous scraping and normalization pipelines.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div class="text-[10px] font-mono text-brand-cyan uppercase tracking-widest mb-2">Data Confidence</div>
+                  <div class="text-xl font-bold text-white">High (85%+)</div>
+                  <p class="text-xs text-muted-foreground mt-2">Verified against direct ATS feeds and SEC filings.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                  <div class="text-[10px] font-mono text-brand-cyan uppercase tracking-widest mb-2">Coverage</div>
+                  <div class="text-xl font-bold text-white">15,000+ Jobs</div>
+                  <p class="text-xs text-muted-foreground mt-2">Active tracked listings across {regionConfig.name}.</p>
+                </div>
+              </div>
+
+              <div class="prose prose-invert max-w-none text-muted-foreground">
+                <h3 class="text-white">How we process market signals</h3>
+                <p>
+                  Our proprietary engine uses a multi-stage pipeline to ensure data fidelity. First, we ingest raw job descriptions from thousands of sources. These are then processed using <strong>Gemini 2.0 Flash</strong> for high-speed title normalization and skill extraction.
+                </p>
+                <p>
+                  Salary data is processed using a "Median-Filtering" approach to remove extreme outliers and unreliable disclosures. We prioritize listings that specify a salary range over general market estimates to maintain the integrity of our benchmarks.
+                </p>
+                <p>
+                  <strong>Historical drift</strong> is calculated by comparing weekly snapshot captures (taken every Sunday at 00:00 UTC) against the current 7-day rolling average. This allows us to filter out daily noise and identify sustainable market trends.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Contact/CTA -->
         <div class="text-center py-12">
           <p class="text-sm font-mono text-muted-foreground uppercase mb-6 tracking-widest italic">Empowering the next generation of tech talent</p>

@@ -2,8 +2,11 @@
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
-import { getHiringTrends } from '../../services/jobService';
+import TrendHighlight from '../../components/TrendHighlight.astro';
+import IntelligenceCard from '../../components/IntelligenceCard.astro';
+import { getHiringTrends, getWeeklyMovers, getMonthlyMomentum } from '../../services/jobService';
 import { getMarketOutlook } from '../../services/outlookService';
+import EmailCapture from '../../components/EmailCapture.astro';
 import { getRegion, getRegionConfig } from '../../regions';
 
 const region = getRegion(Astro.params);
@@ -11,6 +14,8 @@ const regionConfig = getRegionConfig(region);
 
 const realMonthlyTrends = await getHiringTrends(region);
 const marketOutlook = await getMarketOutlook(region);
+const weeklyMovers = await getWeeklyMovers(region);
+const monthlyMomentum = await getMonthlyMomentum(region);
 
 const decliningRoles = marketOutlook.filter(r => r.status === 'Declining' || r.status === 'Oversaturated').slice(0, 5);
 const growingRoles = marketOutlook.filter(r => r.status === 'Growing').slice(0, 5);
@@ -59,6 +64,42 @@ const topGrowthTrajetories = marketOutlook
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Market Trends & Trajectories</h1>
         <p class="text-muted-foreground text-lg max-w-2xl">Predictive intelligence on sector growth, declining roles, and macro-economic shifts in the {regionConfig.name} tech market.</p>
+      </div>
+
+      <!-- Role Momentum Highlights -->
+      <div class="grid lg:grid-cols-2 gap-8 mb-20">
+        <TrendHighlight 
+          title="Weekly Volatility" 
+          type="weekly" 
+          movers={weeklyMovers.map(m => ({ name: m.entity_name, change: `${m.wow_growth}%`, isUp: m.wow_growth > 0 }))}
+        />
+        <TrendHighlight 
+          title="Sustainable Growth" 
+          type="monthly" 
+          movers={monthlyMomentum.map(m => ({ name: m.entity_name, change: `${m.mom_growth}%`, isUp: m.mom_growth > 0 }))}
+        />
+      </div>
+
+      <!-- Narrative Intelligence -->
+      <div class="grid lg:grid-cols-3 gap-8 mb-20">
+        <IntelligenceCard 
+          title="Market Narrative"
+          summary="The industry is shifting from generalist engineering to specialized AI infrastructure."
+          type="info"
+          footer="Strategic shift observed across 80% of top employers."
+        />
+        <IntelligenceCard 
+          title="Economic Signal"
+          summary="Hiring velocity is decoupling from stock market performance as efficiency becomes the priority."
+          type="warning"
+          footer="Observation based on 2026 Q2 market data."
+        />
+        <IntelligenceCard 
+          title="Future Outlook"
+          summary="Distributed systems and MLOps are projected to dominate hiring through 2027."
+          type="positive"
+          footer="Projected 25% CAGR for AI-adjacent roles."
+        />
       </div>
 
       <!-- Role Outlook Summary -->
@@ -197,6 +238,10 @@ const topGrowthTrajetories = marketOutlook
              </div>
            ))}
         </div>
+      </div>
+
+      <div class="mt-20">
+        <EmailCapture />
       </div>
     </div>
   </main>

@@ -4,6 +4,9 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import MarketInsightCard from '../../components/MarketInsightCard.astro';
 import MiniChart from '../../components/MiniChart.astro';
+import TrendHighlight from '../../components/TrendHighlight.astro';
+import ComparativeAnalytics from '../../components/ComparativeAnalytics.astro';
+import IntelligenceCard from '../../components/IntelligenceCard.astro';
 import { getMarketOutlook } from '../../services/outlookService';
 import { 
   getMarketPulse, 
@@ -11,7 +14,8 @@ import {
   getAIHiringMomentum, 
   getTrendingRoles, 
   getDecliningRoles,
-  getSalaryBenchmarks
+  getSalaryBenchmarks,
+  getWeeklyMovers
 } from '../../services/jobService';
 import { getRegion, getRegionConfig } from '../../regions';
 
@@ -27,7 +31,8 @@ const [
   aiMomentum, 
   trendingRoles, 
   decliningRoles,
-  salaryBenchmarks
+  salaryBenchmarks,
+  weeklyMovers
 ] = await Promise.all([
   getMarketOutlook(region),
   getMarketPulse(region),
@@ -35,7 +40,8 @@ const [
   getAIHiringMomentum(region),
   getTrendingRoles(region),
   getDecliningRoles(region),
-  getSalaryBenchmarks(region)
+  getSalaryBenchmarks(region),
+  getWeeklyMovers(region, 'role')
 ]);
 
 // Filter out extreme noise
@@ -43,6 +49,17 @@ const displayRoles = allRoles.filter(r => r.jobCount > 0);
 
 // Sort for curated sections
 const topHiring = [...displayRoles].sort((a, b) => b.jobCount - a.jobCount).slice(0, 4);
+
+// roleComparison logic for ComparativeAnalytics
+const roleComparison = topHiring.slice(0, 2).map(role => ({
+  name: role.role,
+  metrics: [
+    { label: "Hiring Volume", value: `${role.jobCount} roles`, score: Math.min(100, (role.jobCount / 50) * 100) },
+    { label: "Growth", value: `${role.growthPercentage}%`, score: Math.min(100, (role.growthPercentage + 20) * 2) },
+    { label: "Salary Cap", value: `~${(role.avgSalaryMax / (region === 'india' ? 100000 : 1000)).toFixed(0)}${region === 'india' ? 'L' : 'k'}`, score: Math.min(100, (role.avgSalaryMax / (region === 'us' ? 250000 : 4500000)) * 100) }
+  ]
+}));
+
 const fastestGrowing = trendingRoles.slice(0, 4);
 const highestPaying = salaryBenchmarks.slice(0, 4);
 const riskAreas = decliningRoles.slice(0, 4);
@@ -99,6 +116,44 @@ const getStatusColor = (status: string) => {
               Real-time analysis of the {regionConfig.name} tech workforce. Tracking demand shifts, compensation trajectories, and role-specific hiring signals across the entire market.
             </p>
           </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8 mb-16">
+          <div class="lg:col-span-1">
+            <TrendHighlight 
+              title="Role Velocity" 
+              type="weekly" 
+              movers={weeklyMovers.map(m => ({ name: m.entity_name, change: `${m.wow_growth}%`, isUp: m.wow_growth > 0 }))}
+            />
+          </div>
+          <div class="lg:col-span-2">
+            <ComparativeAnalytics 
+              title="Role Head-to-Head" 
+              category="Workforce Intelligence"
+              entities={roleComparison}
+            />
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8 mb-16">
+          <IntelligenceCard 
+            title="Sourcing Signal"
+            summary="Recruiters are moving from broad keyword searches to specific project-based skill verification."
+            type="info"
+            footer="Observation based on recruiter feedback loops."
+          />
+          <IntelligenceCard 
+            title="Growth Pivot"
+            summary="Cloud Infrastructure roles are pivoting towards GPU-optimized orchestration."
+            type="positive"
+            footer="Directly linked to GenAI infrastructure demand."
+          />
+          <IntelligenceCard 
+            title="Saturation Alert"
+            summary="Entry-level Frontend roles are seeing extreme applicant density (500:1)."
+            type="warning"
+            footer="Suggests high barrier to entry for generalists."
+          />
         </div>
 
         <!-- Market Pulse Grid -->

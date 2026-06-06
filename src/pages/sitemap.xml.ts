@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getMarketOutlook } from '../services/outlookService';
 import { regions } from '../regions';
+import { supabase } from '../lib/supabase';
 
 export const GET: APIRoute = async ({ site }) => {
   if (!site) {
@@ -31,7 +32,24 @@ export const GET: APIRoute = async ({ site }) => {
       .filter(r => r.role)
       .map(r => `${site.origin}/${regionId}/role/${encodeURIComponent(r.role)}`);
 
-    allPages.push(...staticPages, ...rolePages);
+    // Add City Pages
+    const { data: cities } = await supabase.from('top_cities').select('city').eq('region', regionId);
+    const cityPages = (cities || []).map(c => `${site.origin}/${regionId}/city/${encodeURIComponent(c.city)}`);
+
+    // Add Skill Pages
+    const { data: skills } = await supabase.from('top_skills').select('skill').eq('region', regionId);
+    const skillPages = (skills || []).map(s => `${site.origin}/${regionId}/skill/${encodeURIComponent(s.skill)}`);
+
+    // Add Trend Archives (Last 6 months)
+    const trendArchives = [];
+    for (let i = 0; i < 6; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const period = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      trendArchives.push(`${site.origin}/${regionId}/trends/${period}`);
+    }
+
+    allPages.push(...staticPages, ...rolePages, ...cityPages, ...skillPages, ...trendArchives);
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

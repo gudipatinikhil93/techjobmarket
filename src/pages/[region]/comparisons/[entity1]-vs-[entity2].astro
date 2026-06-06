@@ -1,0 +1,117 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getComparisonIntelligence } from '../../../services/outlookService';
+import { getRegion, getRegionConfig } from '../../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+const { entity1, entity2 } = Astro.params;
+const comparison = await getComparisonIntelligence(entity1 || '', entity2 || '', region);
+
+if (!comparison) {
+  return Astro.redirect(`/${region}`);
+}
+
+const { type, entity1: e1, entity2: e2 } = comparison;
+
+const formatSalary = (num: number) => {
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(num / 100000).toFixed(1)}L`;
+  }
+  return `$${(num / 1000).toFixed(0)}k`;
+};
+
+const getDisplayName = (e: any) => e.role || e.city || e.skill;
+const name1 = getDisplayName(e1);
+const name2 = getDisplayName(e2);
+---
+
+<Layout 
+  title={`${name1} vs ${name2} | ${regionConfig.name} Tech Market Comparison 2026`}
+  description={`Compare ${name1} and ${name2} in ${regionConfig.name}. Head-to-head analysis of salaries, job demand, and hiring velocity for 2026.`}
+  region={region}
+>
+  <Navbar region={region} />
+  
+  <main class="py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-12 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+          {name1} <span class="text-white/20 italic">vs</span> {name2}
+        </h1>
+        <p class="text-muted-foreground text-lg">Head-to-head market intelligence for {regionConfig.name}.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 mb-16">
+        <!-- Entity 1 -->
+        <div class="p-10 rounded-3xl border border-white/10 bg-white/[0.02]">
+          <h2 class="text-2xl font-bold text-white mb-8">{name1}</h2>
+          <div class="space-y-8">
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Active Demand</span>
+              <span class="text-2xl font-bold text-white">{e1.jobCount} roles</span>
+            </div>
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Market Velocity</span>
+              <span class={`text-2xl font-bold ${e1.growthPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {e1.growthPercentage}%
+              </span>
+            </div>
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Avg Compensation</span>
+              <span class="text-2xl font-bold text-white">
+                {formatSalary(e1.avgSalary || (e1.avgSalaryMin + e1.avgSalaryMax) / 2)}
+              </span>
+            </div>
+            <div>
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest block mb-4">Status</span>
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white">{e1.status}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entity 2 -->
+        <div class="p-10 rounded-3xl border border-white/10 bg-white/[0.02]">
+          <h2 class="text-2xl font-bold text-white mb-8">{name2}</h2>
+          <div class="space-y-8">
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Active Demand</span>
+              <span class="text-2xl font-bold text-white">{e2.jobCount} roles</span>
+            </div>
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Market Velocity</span>
+              <span class={`text-2xl font-bold ${e2.growthPercentage >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {e2.growthPercentage}%
+              </span>
+            </div>
+            <div class="flex justify-between items-end border-b border-white/5 pb-4">
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest">Avg Compensation</span>
+              <span class="text-2xl font-bold text-white">
+                {formatSalary(e2.avgSalary || (e2.avgSalaryMin + e2.avgSalaryMax) / 2)}
+              </span>
+            </div>
+            <div>
+              <span class="text-muted-foreground uppercase text-[10px] font-mono tracking-widest block mb-4">Status</span>
+              <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-white">{e2.status}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-12 rounded-3xl glass-panel text-center">
+        <h3 class="text-2xl font-bold text-white mb-6">Market Verdict</h3>
+        <p class="text-muted-foreground text-lg max-w-3xl mx-auto leading-relaxed">
+          {e1.jobCount > e2.jobCount ? name1 : name2} currently holds the higher market volume in ${regionConfig.name}, 
+          while {Math.abs(e1.growthPercentage) > Math.abs(e2.growthPercentage) ? name1 : name2} is showing more significant 
+          volatility in hiring patterns. Professionals choosing between these two should consider that 
+          {e1.avgSalary > e2.avgSalary ? name1 : name2} offers a higher compensation baseline as of 2026.
+        </p>
+      </div>
+    </div>
+  </main>
+  
+  <Footer region={region} />
+</Layout>

@@ -2,14 +2,20 @@
 import Layout from '../../layouts/Layout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
-import { getTopSkills, getSkillGrowth } from '../../services/jobService';
+import TrendHighlight from '../../components/TrendHighlight.astro';
+import ComparativeAnalytics from '../../components/ComparativeAnalytics.astro';
+import { getTopSkills, getSkillGrowth, getBreakoutSkills, getMarketPulse } from '../../services/jobService';
 import { getRegion, getRegionConfig } from '../../regions';
 
 const region = getRegion(Astro.params);
 const regionConfig = getRegionConfig(region);
 
-const dbSkills = await getTopSkills(region);
-const skillGrowthData = await getSkillGrowth(region);
+const [dbSkills, skillGrowthData, breakoutSkills, marketPulse] = await Promise.all([
+  getTopSkills(region),
+  getSkillGrowth(region),
+  getBreakoutSkills(region),
+  getMarketPulse(region)
+]);
 
 // Combine top skills with their growth data if available
 const skills = dbSkills.length > 0
@@ -22,6 +28,7 @@ const skills = dbSkills.length > 0
         name: s.skill,
         count: s.job_count,
         growth: growthInfo ? (growthInfo.growth_percentage > 0 ? `+${growthInfo.growth_percentage}%` : `${growthInfo.growth_percentage}%`) : "N/A",
+        growth_numeric: growthInfo ? growthInfo.growth_percentage : 0,
         demand: demandLevel,
       };
     })
@@ -29,6 +36,16 @@ const skills = dbSkills.length > 0
 
 // Sort by count
 skills.sort((a, b) => b.count - a.count);
+
+// skillComparison logic for ComparativeAnalytics
+const skillComparison = skills.slice(0, 2).map(skill => ({
+  name: skill.name,
+  metrics: [
+    { label: "Active Demand", value: `${skill.count} roles`, score: Math.min(100, (skill.count / 40) * 100) },
+    { label: "Growth Velocity", value: skill.growth, score: Math.min(100, (skill.growth_numeric + 20) * 2) },
+    { label: "Market Pen.", value: `${((skill.count / marketPulse.totalJobs) * 100).toFixed(1)}%`, score: (skill.count / marketPulse.totalJobs) * 100 }
+  ]
+}));
 ---
 
 <Layout region={region} 
@@ -79,6 +96,23 @@ skills.sort((a, b) => b.count - a.count);
         <p class="text-muted-foreground text-lg max-w-3xl leading-relaxed">
           Forget subjective trend lists and generic business terms. This dashboard tracks real technology stacks—languages, frameworks, cloud platforms, and infrastructure tooling—extracted directly from the requirements of active {regionConfig.name} tech job descriptions.
         </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8 mb-16">
+        <div class="lg:col-span-1">
+          <TrendHighlight 
+            title="Breakout Tech" 
+            type="breakout" 
+            movers={breakoutSkills.map(m => ({ name: m.entity_name, change: `${m.wow_growth}%`, isUp: m.wow_growth > 0, type: 'Weekly Growth' }))}
+          />
+        </div>
+        <div class="lg:col-span-2">
+          <ComparativeAnalytics 
+            title="Technology Head-to-Head" 
+            category="Stack Comparison"
+            entities={skillComparison}
+          />
+        </div>
       </div>
       
       {skills.length > 0 ? (
@@ -190,3 +224,4 @@ skills.sort((a, b) => b.count - a.count);
   
   <Footer region={region} />
 </Layout region={region}>
+gion={region}>

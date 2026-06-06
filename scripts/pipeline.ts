@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import { IndeedPlaywrightScraper } from '../src/scraper/indeedPlaywright';
+import { IndiaIndeedScraper } from '../src/scraper/indiaIndeed';
+import { IndiaWellfoundScraper } from '../src/scraper/indiaWellfound';
+import { IndiaInstahyreScraper } from '../src/scraper/indiaInstahyre';
+import { IndiaRemoteOKScraper } from '../src/scraper/indiaRemoteOK';
 import { GreenhouseAdapter } from '../src/scraper/greenhouse';
 import { LeverAdapter } from '../src/scraper/lever';
 import { AshbyAdapter } from '../src/scraper/ashby';
@@ -10,19 +14,32 @@ import { processAndStoreLayoffs } from '../src/services/layoffService';
 import { generateWeeklyInsights } from '../src/services/aiService';
 
 async function main() {
-  const region = process.argv[2] || 'us';
+  const region = (process.argv[2] || 'us').toLowerCase();
   console.log(`--- STARTING ENHANCED CAREER INTELLIGENCE PIPELINE [REGION: ${region.toUpperCase()}] ---`);
   console.log(`Time: ${new Date().toISOString()}`);
 
   try {
-    // For now, most scrapers are US-centric, we might need regional adapters in the future
-    const scrapers = [
-      new GreenhouseAdapter().scrape(),
-      new LeverAdapter().scrape(),
-      new AshbyAdapter().scrape(),
-      new RemoteOKAdapter().scrape(),
-      new IndeedPlaywrightScraper().scrape(20) 
-    ];
+    let scrapers: Promise<any[]>[] = [];
+
+    if (region === 'india') {
+      console.log(`[Pipeline] Initializing India-specific ingestion...`);
+      scrapers = [
+        new IndiaIndeedScraper().scrape(30),
+        new IndiaWellfoundScraper().scrape(20),
+        new IndiaInstahyreScraper().scrape(20),
+        new IndiaRemoteOKScraper().scrape(20),
+        // Add more India sources here as needed
+      ];
+    } else {
+      console.log(`[Pipeline] Initializing US-centric ingestion...`);
+      scrapers = [
+        new GreenhouseAdapter().scrape(),
+        new LeverAdapter().scrape(),
+        new AshbyAdapter().scrape(),
+        new RemoteOKAdapter().scrape(),
+        new IndeedPlaywrightScraper().scrape(20) 
+      ];
+    }
 
     console.log(`[Pipeline] Triggering ${scrapers.length} job scraping sources concurrently for ${region}...`);
 

@@ -40,7 +40,7 @@ export async function processAndStoreLayoffs(layoffs: RawLayoff[], region: strin
     const { error } = await supabase
       .from('layoffs')
       .insert(dbBatch);
-      
+    
     if (error) {
       console.error(`[LayoffService] Error storing batch for ${region}:`, error);
     } else {

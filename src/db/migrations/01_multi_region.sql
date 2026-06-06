@@ -1,30 +1,68 @@
--- Add region column to jobs
-ALTER TABLE jobs ADD COLUMN region TEXT DEFAULT 'us';
-CREATE INDEX idx_jobs_region ON jobs(region);
+-- 01_multi_region.sql: Idempotent migration for multi-region support
 
--- Add region column to salary_benchmarks
-ALTER TABLE salary_benchmarks ADD COLUMN region TEXT DEFAULT 'us';
+-- 1. Jobs Table
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS region TEXT DEFAULT 'us';
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_jobs_region') THEN
+        CREATE INDEX idx_jobs_region ON jobs(region);
+    END IF;
+END $$;
+
+-- 2. Salary Benchmarks (Handling transition from VIEW to TABLE)
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.views WHERE table_name = 'salary_benchmarks') THEN
+        DROP VIEW IF EXISTS salary_benchmarks CASCADE;
+    END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS salary_benchmarks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    role TEXT NOT NULL,
+    avg_min NUMERIC NOT NULL,
+    avg_max NUMERIC NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    region TEXT DEFAULT 'us'
+);
+
+-- Ensure UNIQUE constraint on role and region
 ALTER TABLE salary_benchmarks DROP CONSTRAINT IF EXISTS salary_benchmarks_role_key;
+ALTER TABLE salary_benchmarks DROP CONSTRAINT IF EXISTS salary_benchmarks_role_region_key;
 ALTER TABLE salary_benchmarks ADD CONSTRAINT salary_benchmarks_role_region_key UNIQUE (role, region);
 
--- Add region column to role_snapshots
-ALTER TABLE role_snapshots ADD COLUMN region TEXT DEFAULT 'us';
-CREATE INDEX idx_role_snapshots_region ON role_snapshots(region);
+-- Seed initial US data if empty
+INSERT INTO salary_benchmarks (role, avg_min, avg_max, region)
+SELECT role, avg_min, avg_max, 'us'
+FROM (VALUES 
+    ('Software Engineer', 110000, 165000),
+    ('Backend Developer', 120000, 180000),
+    ('Frontend Developer', 115000, 170000),
+    ('Full Stack Developer', 120000, 185000),
+    ('AI Engineer', 150000, 250000),
+    ('Data Scientist', 130000, 190000),
+    ('Product Manager', 125000, 180000),
+    ('Cloud Security', 140000, 210000),
+    ('DevOps Engineer', 135000, 200000),
+    ('Site Reliability Engineer', 140000, 210000)
+) AS v(role, avg_min, avg_max)
+WHERE NOT EXISTS (SELECT 1 FROM salary_benchmarks WHERE region = 'us');
 
--- Add region column to city_snapshots
-ALTER TABLE city_snapshots ADD COLUMN region TEXT DEFAULT 'us';
-CREATE INDEX idx_city_snapshots_region ON city_snapshots(region);
+-- 3. Snapshots & Insights
+ALTER TABLE role_snapshots ADD COLUMN IF NOT EXISTS region TEXT DEFAULT 'us';
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_role_snapshots_region') THEN CREATE INDEX idx_role_snapshots_region ON role_snapshots(region); END IF; END $$;
 
--- Add region column to ai_insights
-ALTER TABLE ai_insights ADD COLUMN region TEXT DEFAULT 'us';
-CREATE INDEX idx_ai_insights_region ON ai_insights(region);
+ALTER TABLE city_snapshots ADD COLUMN IF NOT EXISTS region TEXT DEFAULT 'us';
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_city_snapshots_region') THEN CREATE INDEX idx_city_snapshots_region ON city_snapshots(region); END IF; END $$;
 
--- Add region column to layoffs
-ALTER TABLE layoffs ADD COLUMN region TEXT DEFAULT 'us';
-CREATE INDEX idx_layoffs_region ON layoffs(region);
+ALTER TABLE ai_insights ADD COLUMN IF NOT EXISTS region TEXT DEFAULT 'us';
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_ai_insights_region') THEN CREATE INDEX idx_ai_insights_region ON ai_insights(region); END IF; END $$;
 
--- Update trending_roles view to be region-aware
-DROP VIEW IF EXISTS trending_roles;
+ALTER TABLE layoffs ADD COLUMN IF NOT EXISTS region TEXT DEFAULT 'us';
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_layoffs_region') THEN CREATE INDEX idx_layoffs_region ON layoffs(region); END IF; END $$;
+
+-- 4. Views (Always use CREATE OR REPLACE)
+DROP VIEW IF EXISTS trending_roles CASCADE;
 CREATE OR REPLACE VIEW trending_roles AS
 WITH current_period AS (
     SELECT 
@@ -58,8 +96,7 @@ SELECT
 FROM current_period c
 FULL OUTER JOIN previous_period p ON c.role = p.role AND c.region = p.region;
 
--- Update top_cities view
-DROP VIEW IF EXISTS top_cities;
+DROP VIEW IF EXISTS top_cities CASCADE;
 CREATE OR REPLACE VIEW top_cities AS
 SELECT 
     city,
@@ -69,8 +106,7 @@ SELECT
 FROM jobs
 GROUP BY city, region;
 
--- Update top_skills view
-DROP VIEW IF EXISTS top_skills;
+DROP VIEW IF EXISTS top_skills CASCADE;
 CREATE OR REPLACE VIEW top_skills AS
 SELECT 
     skill,
@@ -81,8 +117,7 @@ FROM (
 ) t
 GROUP BY skill, region;
 
--- Update role_intelligence view
-DROP VIEW IF EXISTS role_intelligence;
+DROP VIEW IF EXISTS role_intelligence CASCADE;
 CREATE OR REPLACE VIEW role_intelligence AS
 WITH role_stats AS (
     SELECT 
@@ -107,7 +142,7 @@ SELECT
 FROM role_stats rs
 LEFT JOIN salary_benchmarks sb ON rs.role = sb.role AND rs.region = sb.region;
 
--- Update snapshot functions
+-- 5. Functions
 CREATE OR REPLACE FUNCTION capture_role_snapshots(p_region TEXT DEFAULT 'us') 
 RETURNS void AS $$
 BEGIN
@@ -139,7 +174,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Update skill growth function
 DROP FUNCTION IF EXISTS get_skill_growth();
 CREATE OR REPLACE FUNCTION get_skill_growth(p_region TEXT DEFAULT 'us')
 RETURNS TABLE (skill TEXT, growth_percentage NUMERIC) AS $$

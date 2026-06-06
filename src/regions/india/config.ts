@@ -33,5 +33,5 @@ export const indiaConfig: RegionConfig = {
     topCities: 'Top India Tech Hubs',
     salaryBenchmarks: 'India Salary Benchmarks'
   },
-  public: false // Beta Mode
+  public: true // Beta Mode
 };
