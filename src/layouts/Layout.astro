@@ -128,11 +128,19 @@ const currentOrigin = Astro.url.origin;
 				});
 			}, observerOptions);
 
-			// Count-up Animation Logic
+			// Count-up Animation Logic (Hoisted for performance)
+			const currencyFormatter = new Intl.NumberFormat('en-US', {
+				style: 'currency',
+				currency: 'USD',
+				maximumFractionDigits: 0
+			});
+
+			const numberFormatter = new Intl.NumberFormat('en-US');
+
 			function animateCountUp(el: HTMLElement) {
 				const target = parseInt(el.dataset.countTarget || "0");
+				const format = el.dataset.countFormat;
 				const duration = 1500;
-				const start = 0;
 				const startTime = performance.now();
 
 				function update(currentTime: number) {
@@ -141,19 +149,14 @@ const currentOrigin = Astro.url.origin;
 					
 					// Ease out expo
 					const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-					
 					const currentCount = Math.floor(easeProgress * target);
 					
-					if (el.dataset.countFormat === 'currency') {
-						el.textContent = new Intl.NumberFormat('en-US', {
-							style: 'currency',
-							currency: 'USD',
-							maximumFractionDigits: 0
-						}).format(currentCount).replace('$', '$');
-					} else if (el.dataset.countFormat === 'percent') {
+					if (format === 'currency') {
+						el.textContent = currencyFormatter.format(currentCount);
+					} else if (format === 'percent') {
 						el.textContent = `${currentCount}%`;
 					} else {
-						el.textContent = currentCount.toLocaleString();
+						el.textContent = numberFormatter.format(currentCount);
 					}
 
 					if (progress < 1) {

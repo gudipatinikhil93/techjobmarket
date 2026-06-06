@@ -1,8 +1,9 @@
-@import "tailwindcss";
-@import "@fontsource/geist/400.css";
-@import "@fontsource/geist/500.css";
-@import "@fontsource/geist/600.css";
-@import "@fontsource/geist-mono/400.css";
+@import "tailwindcss" source("../");
+@import "@fontsource/geist/latin-400.css";
+@import "@fontsource/geist/latin-500.css";
+@import "@fontsource/geist/latin-600.css";
+@import "@fontsource/geist/latin-700.css";
+@import "@fontsource/geist-mono/latin-400.css";
 
 @theme {
   --font-sans: "Geist", "Inter", "system-ui", "sans-serif";
@@ -14,23 +15,22 @@
   --color-card: #0a0a0a;
   --color-card-foreground: #ffffff;
   
-  --color-muted: #888888;
-  --color-muted-foreground: #a1a1a1;
+  --color-muted: #94a3b8; /* Improved contrast from #888 */
+  --color-muted-foreground: #cbd5e1; /* Improved contrast from #a1a1a1 */
   
-  --color-border: #333333;
-  --color-border-strong: #4d4d4d;
+  --color-border: #262626;
+  --color-border-strong: #404040;
   
   --color-brand-cyan: #50e3c2;
   --color-brand-blue: #007cf0;
   --color-brand-magenta: #eb367f;
   --color-brand-amber: #f9cb28;
 
-  /* Refined Atmospheric Colors - Stronger US Market Identity */
-  --color-atmosphere-blue: rgba(0, 100, 240, 0.12);
-  --color-atmosphere-red: rgba(220, 38, 38, 0.06);
-  --color-atmosphere-glow: rgba(0, 124, 240, 0.15);
-  --color-atmosphere-cyan: rgba(80, 227, 194, 0.1);
-  --color-atmosphere-muted: rgba(148, 163, 184, 0.03);
+  /* Refined Atmospheric Colors */
+  --color-atmosphere-blue: rgba(0, 100, 240, 0.1);
+  --color-atmosphere-red: rgba(220, 38, 38, 0.05);
+  --color-atmosphere-glow: rgba(0, 124, 240, 0.12);
+  --color-atmosphere-cyan: rgba(80, 227, 194, 0.08);
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -39,35 +39,23 @@
   --radius-xl: 16px;
   --radius-pill: 100px;
 
-  --animate-subtle-pulse: subtle-pulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  --animate-fade-in-up: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-shimmer: shimmer 2.5s linear infinite;
-  --animate-float: float 6s ease-in-out infinite;
+  --animate-subtle-pulse: subtle-pulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-fade-in-up: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   @keyframes subtle-pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.85; transform: scale(0.995); }
+    50% { opacity: 0.9; transform: scale(0.998); }
   }
 
   @keyframes fade-in-up {
     from {
       opacity: 0;
-      transform: translate3d(0, 10px, 0);
+      transform: translate3d(0, 8px, 0);
     }
     to {
       opacity: 1;
       transform: translate3d(0, 0, 0);
     }
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    50% { transform: translate3d(0, -8px, 0); }
   }
 }
 
@@ -79,46 +67,34 @@
     @apply bg-background text-foreground antialiased selection:bg-brand-cyan/30;
     font-feature-settings: "ss01", "ss02", "cv01", "cv11";
     overflow-x: hidden;
-    /* Use GPU for the entire body scrolling if possible */
     -webkit-overflow-scrolling: touch;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/[0.02] backdrop-blur-lg border border-white/[0.06] shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)];
+    @apply bg-white/[0.03] backdrop-blur-md border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)];
     transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
   }
 
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.03)];
+    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)];
     transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
   }
 
   .glass-card {
-    @apply bg-white/[0.01] backdrop-blur-md border border-white/[0.04] hover:bg-white/[0.03] hover:border-white/[0.12] transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out;
+    @apply bg-white/[0.02] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.15] transition-[background-color,border-color,transform] duration-300 ease-out;
     transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
   }
   
   .cinematic-glow {
-    @apply relative after:absolute after:inset-0 after:rounded-[inherit] after:bg-gradient-to-br after:from-white/[0.01] after:to-transparent after:pointer-events-none;
-  }
-
-  .mesh-gradient {
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(0, 124, 240, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(80, 227, 194, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(235, 54, 127, 0.06) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, rgba(249, 203, 40, 0.04) 0px, transparent 50%);
+    @apply relative after:absolute after:inset-0 after:rounded-[inherit] after:bg-gradient-to-br after:from-white/[0.02] after:to-transparent after:pointer-events-none;
   }
 
   .reveal-on-scroll {
     opacity: 0;
-    transform: translate3d(0, 15px, 0);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translate3d(0, 10px, 0);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
   }
 
@@ -127,17 +103,10 @@
     transform: translate3d(0, 0, 0);
   }
 
-  .shimmer-bg {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent);
-    background-size: 200% 100%;
-    animation: var(--animate-shimmer);
-  }
-
   /* Performance Utilities */
   .gpu-accelerated {
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
-    perspective: 1000px;
   }
 
   .translate-3d-lift {
@@ -146,10 +115,6 @@
 
   .translate-3d-lift:hover {
     transform: translate3d(0, -4px, 0);
-  }
-
-  .hover\:translate-3d-right:hover {
-    transform: translate3d(4px, 0, 0);
   }
 }
 
@@ -164,3 +129,4 @@
     transition-delay: 0s !important;
   }
 }
+
