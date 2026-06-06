@@ -1,5 +1,6 @@
 ---
 import { getRegionConfig } from '../regions';
+import RegionSwitcher from './RegionSwitcher.astro';
 
 interface Props {
   hideSearch?: boolean;
@@ -38,6 +39,10 @@ const navLinks = [
     </div>
     
     <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center mr-2">
+        <RegionSwitcher currentRegion={region} />
+      </div>
+
       {!hideSearch && (
         <form action={`/${region}/search`} method="GET" class="hidden lg:block relative">
           <input 
@@ -57,12 +62,6 @@ const navLinks = [
       <a href={`/${region}/contact`} class="hidden sm:block text-sm font-medium text-muted-foreground hover:text-white transition-colors">
         Contact
       </a>
-      <div class="flex items-center gap-3">
-        <span class="text-[10px] font-mono font-bold uppercase text-white/30 tracking-widest px-2 py-1 rounded border border-white/5 bg-white/5">{region}</span>
-        <button class="rounded-pill bg-white px-4 py-1.5 text-sm font-semibold text-black hover:bg-white/90 transition-[background-color,transform] active:scale-95">
-          Pulse
-        </button>
-      </div>
 
       <!-- Mobile Menu Button -->
       <button 
@@ -91,6 +90,10 @@ const navLinks = [
   <!-- Mobile Menu (Optimized Blur) -->
   <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-black/90 backdrop-blur-md max-h-[calc(100vh-64px)] overflow-y-auto overscroll-contain relative z-50">
     <div class="space-y-1 px-4 pb-6 pt-2">
+      <div class="px-3 py-4 border-b border-white/5 mb-2">
+        <span class="text-[10px] font-mono text-white/30 uppercase tracking-widest block mb-3">Select Region</span>
+        <RegionSwitcher currentRegion={region} className="w-full justify-center" />
+      </div>
       {navLinks.map(link => (
         <a 
           href={link.href} 

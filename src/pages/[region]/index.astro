@@ -11,13 +11,16 @@ import {
   getAIHiringMomentum,
   getJuniorHiringDifficulty,
   getTopSkills
-} from '../services/jobService';
+} from '../../services/jobService';
 import { getMarketOutlook } from '../../services/outlookService';
 import { getLatestInsights } from '../../services/aiService';
 import { getRecentLayoffs } from '../../services/layoffService';
 import FAQSection from '../../components/FAQSection.astro';
 import MarketInsightCard from '../../components/MarketInsightCard.astro';
 import MiniChart from '../../components/MiniChart.astro';
+import ComparativeAnalytics from '../../components/ComparativeAnalytics.astro';
+import EmailCapture from '../../components/EmailCapture.astro';
+import RegionSwitcher from '../../components/RegionSwitcher.astro';
 import { getRegion, getRegionConfig } from '../../regions';
 
 const region = getRegion(Astro.params);
@@ -35,6 +38,24 @@ const aiMomentum = await getAIHiringMomentum(region);
 const juniorDifficulty = await getJuniorHiringDifficulty(region);
 const recentLayoffs = await getRecentLayoffs(50, region); // Fetch more to calculate pressure
 const topSkills = await getTopSkills(region);
+
+// Format numbers
+const formatSalary = (num: number) => {
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(num / 100000).toFixed(1)}L`;
+  }
+  return `$${(num / 1000).toFixed(0)}k`;
+};
+
+// cityComparison logic for ComparativeAnalytics
+const cityComparison = topCities.slice(0, 2).map(city => ({
+  name: city.city,
+  metrics: [
+    { label: "Hiring Volume", value: `${city.job_count} roles`, score: Math.min(100, (city.job_count / 20) * 100) },
+    { label: "Avg Salary", value: formatSalary(city.avg_salary), score: Math.min(100, (city.avg_salary / (region === 'us' ? 200000 : 3500000)) * 100) },
+    { label: "Market Share", value: `${((city.job_count / marketPulse.totalJobs) * 100).toFixed(1)}%`, score: (city.job_count / marketPulse.totalJobs) * 100 }
+  ]
+}));
 
 // Calculate Layoff Pressure (Simple count in last 30 days)
 const thirtyDaysAgo = new Date();
@@ -58,14 +79,6 @@ if (hiringVelocity > 7.5) {
   statusColor = "text-brand-magenta";
   statusBg = "bg-brand-magenta/10";
 }
-
-// Format numbers
-const formatSalary = (num: number) => {
-  if (regionConfig.currency.format === 'INR') {
-    return `₹${(num / 100000).toFixed(1)}L`;
-  }
-  return `$${(num / 1000).toFixed(0)}k`;
-};
 
 const FAQ_CONTENT = [
   {
@@ -110,7 +123,7 @@ const jsonLdSchema = {
 	heroActive={true}
 	region={region}
 >
-	<Navbar region={region} />
+	<Navbar hideSearch={true} region={region} />
 	
 	<main class="min-h-screen text-white selection:bg-brand-cyan/30 bg-transparent">
 		
@@ -125,7 +138,7 @@ const jsonLdSchema = {
 				
 				<div class="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-20 animate-fade-in-up">
 					<div class="max-w-4xl">
-						<div class="flex items-center gap-4 mb-8">
+						<div class="flex flex-wrap items-center gap-4 mb-8">
 							<div class={`px-3.5 py-1.5 rounded-full ${statusBg} border border-white/10 flex items-center gap-2.5 shadow-lg backdrop-blur-md`}>
 								<span class="relative flex h-2 w-2">
 									<span class={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusColor.replace('text-', 'bg-')}`}></span>
@@ -141,9 +154,27 @@ const jsonLdSchema = {
 							<span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/40 italic">{regionConfig.name} Tech Labor Market</span>
 						</h1>
 						
-						<p class="text-xl md:text-2xl text-muted-foreground/80 leading-relaxed max-w-3xl font-medium">
+						<p class="text-xl md:text-2xl text-muted-foreground/80 leading-relaxed max-w-3xl font-medium mb-10">
 							Live market briefing aggregating real-time hiring velocity, layoff pressure, and compensation benchmarks across major {regionConfig.name} tech hubs.
 						</p>
+
+						<form action={`/${region}/search`} method="GET" class="relative max-w-2xl">
+							<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+								<svg class="h-6 w-6 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+							</div>
+							<input 
+								type="text" 
+								name="q" 
+								placeholder={`Search ${regionConfig.name} tech roles, skills, or companies...`}
+								class="block w-full pl-12 pr-4 py-4 md:py-5 bg-white/5 border border-white/10 rounded-2xl text-lg text-white placeholder:text-white/40 focus:outline-none focus:border-brand-cyan/50 focus:ring-1 focus:ring-brand-cyan/50 transition-all backdrop-blur-md shadow-2xl"
+								required
+							/>
+							<div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+								<button type="submit" class="bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 border border-brand-cyan/20 px-4 py-2 rounded-xl text-sm font-bold uppercase tracking-widest transition-colors">
+									Search
+								</button>
+							</div>
+						</form>
 					</div>
 
 					<div class="flex flex-col gap-4 p-8 rounded-3xl glass-panel min-w-[280px] hover:bg-black/40 transition-[transform,background-color] duration-300 ease-out group relative overflow-hidden hover:translate-3d-lift">
@@ -313,37 +344,47 @@ const jsonLdSchema = {
 
 						<!-- Geographic Momentum -->
 						<div class="p-10 rounded-3xl glass-panel relative overflow-hidden">
-							<!-- Subtle Ambient Glow -->
-							<div class="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 blur-[100px] -z-10"></div>
-							
-							<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
-								<div>
-									<h2 class="text-2xl font-bold mb-3">Geographic Hiring Velocity</h2>
-									<p class="text-sm text-muted-foreground">Concentration of active volume across top-tier {regionConfig.name} tech hubs.</p>
-								</div>
-								<a href={`/${region}/cities`} class="text-[10px] font-mono uppercase tracking-widest text-brand-cyan hover:text-white transition-colors border-b border-brand-cyan/20 pb-1">View Detailed Hub Analysis →</a>
-							</div>
+						<!-- Subtle Ambient Glow -->
+						<div class="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 blur-[100px] -z-10"></div>
 
-							<div class="space-y-8">
-								{topCities.map(city => {
-									const maxJobs = Math.max(...topCities.map(c => c.job_count));
-									const width = (city.job_count / maxJobs) * 100;
-									return (
-										<div class="group">
-											<div class="flex justify-between items-end mb-4">
-												<span class="text-sm font-bold group-hover:text-brand-cyan transition-colors">{city.city}</span>
-												<span class="text-xs font-mono text-muted-foreground group-hover:text-white transition-colors">{city.job_count} active roles</span>
-											</div>
-											<div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-												<div class="h-full bg-brand-cyan/80 transition-all duration-1000 group-hover:bg-brand-cyan group-hover:shadow-[0_0_15px_rgba(80,227,194,0.4)]" style={`width: ${width}%`}></div>
-											</div>
-										</div>
-									)
-								})}
+						<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+							<div>
+								<h2 class="text-2xl font-bold mb-3">Geographic Hiring Velocity</h2>
+								<p class="text-sm text-muted-foreground">Concentration of active volume across top-tier {regionConfig.name} tech hubs.</p>
 							</div>
+							<a href={`/${region}/cities`} class="text-[10px] font-mono uppercase tracking-widest text-brand-cyan hover:text-white transition-colors border-b border-brand-cyan/20 pb-1">View Detailed Hub Analysis →</a>
 						</div>
-					</div>
 
+						<div class="space-y-8">
+							{topCities.map(city => {
+								const maxJobs = Math.max(...topCities.map(c => c.job_count));
+								const width = (city.job_count / maxJobs) * 100;
+								return (
+									<div class="group">
+										<div class="flex justify-between items-end mb-4">
+											<span class="text-sm font-bold group-hover:text-brand-cyan transition-colors">{city.city}</span>
+											<span class="text-xs font-mono text-muted-foreground group-hover:text-white transition-colors">{city.job_count} active roles</span>
+										</div>
+										<div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+											<div class="h-full bg-brand-cyan/80 transition-all duration-1000 group-hover:bg-brand-cyan group-hover:shadow-[0_0_15px_rgba(80,227,194,0.4)]" style={`width: ${width}%`}></div>
+										</div>
+									</div>
+								)
+							})}
+						</div>
+						</div>
+
+						<!-- Comparative Spotlight -->
+						{cityComparison.length === 2 && (
+						<div class="mt-16">
+							<ComparativeAnalytics 
+								title="Hub vs Hub Performance" 
+								category="Market Intelligence"
+								entities={cityComparison}
+							/>
+						</div>
+						)}
+						</div>
 					<!-- Right: Meta Data & Market Pulse -->
 					<div class="lg:col-span-4 space-y-8">
 						
@@ -480,6 +521,13 @@ const jsonLdSchema = {
 						<FAQSection faqs={FAQ_CONTENT} regionName={regionConfig.name} />
 					</div>
 				</div>
+			</div>
+		</section>
+
+		<!-- 6. RETENTION LAYER -->
+		<section class="py-32 bg-transparent reveal-on-scroll">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<EmailCapture />
 			</div>
 		</section>
 

@@ -1,0 +1,45 @@
+---
+interface Props {
+  currentRegion: string;
+  className?: string;
+}
+
+const { currentRegion, className = "" } = Astro.props;
+const pathname = Astro.url.pathname;
+
+// Logic to swap region in URL while preserving sub-paths
+const getTargetUrl = (targetRegion: string) => {
+  const parts = pathname.split('/').filter(Boolean);
+  
+  // If the first part is a valid region, replace it
+  if (parts.length > 0 && (parts[0] === 'us' || parts[0] === 'india')) {
+    parts[0] = targetRegion;
+    return '/' + parts.join('/');
+  }
+  
+  // Fallback to region root
+  return `/${targetRegion}`;
+};
+
+const regions = [
+  { id: 'us', label: 'US' },
+  { id: 'india', label: 'India' }
+];
+---
+
+<div class={`flex items-center bg-white/5 border border-white/10 rounded-xl p-1.5 ${className}`}>
+  {regions.map(r => (
+    <a
+      href={getTargetUrl(r.id)}
+      class:list={[
+        "px-4 py-2 text-sm font-bold uppercase tracking-widest transition-all rounded-lg flex items-center justify-center min-w-[70px]",
+        currentRegion === r.id 
+          ? "bg-white/15 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]" 
+          : "text-white/40 hover:text-white/70 hover:bg-white/[0.03]"
+      ]}
+      aria-current={currentRegion === r.id ? 'page' : undefined}
+    >
+      {r.label}
+    </a>
+  ))}
+</div>
