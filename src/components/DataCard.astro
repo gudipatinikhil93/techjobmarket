@@ -13,20 +13,23 @@ interface Props {
 const { title, value, trend, description } = Astro.props;
 ---
 
-<div class="group relative overflow-hidden rounded-xl border border-white/10 bg-card p-6 transition-all duration-300 hover:border-white/25 hover:bg-white/[0.04] hover:-translate-y-1 shadow-sm hover:shadow-brand-cyan/5 reveal-on-scroll">
-  <div class="flex flex-col gap-1">
-    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground font-mono group-hover:text-white/70 transition-colors">{title}</p>
+<div class="group relative overflow-hidden rounded-xl glass-card p-6 reveal-on-scroll">
+  <!-- Optimized Shadow Hover -->
+  <div class="absolute inset-0 rounded-[inherit] shadow-[0_0_30px_rgba(80,227,194,0.05)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none"></div>
+
+  <div class="relative z-10 flex flex-col gap-1">
+    <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground font-mono group-hover:text-white/70 transition-colors duration-300">{title}</p>
     <div class="flex items-baseline gap-2">
-      <h3 class="text-2xl font-bold tracking-tight text-white group-hover:text-brand-cyan transition-colors">{value}</h3>
+      <h3 class="text-2xl font-bold tracking-tight text-white group-hover:text-brand-cyan transition-colors duration-300">{value}</h3>
       {trend && (
         <span class={`text-xs font-bold flex items-center gap-1 ${trend.isUp ? 'text-brand-cyan' : 'text-brand-magenta'}`}>
           <span class="animate-subtle-pulse">{trend.isUp ? '↑' : '↓'}</span> {trend.value}
         </span>
       )}
     </div>
-    {description && <p class="mt-2 text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/80 transition-colors">{description}</p>}
+    {description && <p class="mt-2 text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/80 transition-colors duration-300">{description}</p>}
   </div>
   
-  <!-- Subtle decoration -->
-  <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/[0.02] blur-2xl group-hover:bg-brand-cyan/10 transition-colors"></div>
+  <!-- Subtle decoration (Optimized Blur) -->
+  <div class="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-white/[0.01] blur-xl group-hover:bg-brand-cyan/10 transition-[background-color,transform] duration-500 ease-out group-hover:scale-110"></div>
 </div>

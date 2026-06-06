@@ -1,6 +1,8 @@
 ---
 import "../styles/global.css";
 
+import AtmosphereLayer from "../components/AtmosphereLayer.astro";
+
 interface Props {
 	title?: string;
 	description?: string;
@@ -8,6 +10,7 @@ interface Props {
 	canonicalURL?: string;
 	type?: string;
 	noindex?: boolean;
+	heroActive?: boolean;
 }
 
 const { 
@@ -16,7 +19,8 @@ const {
 	image = "/og-image.png",
 	canonicalURL = Astro.url.href,
 	type = "website",
-	noindex = false
+	noindex = false,
+	heroActive = false
 } = Astro.props;
 
 const siteName = "TechJobMarket";
@@ -103,29 +107,8 @@ const currentOrigin = Astro.url.origin;
 			gtag('config', 'G-2V7Y2B2ZGX');
 		</script>
 	</head>
-	<body class="min-h-screen selection:bg-brand-cyan selection:text-black relative">
-		<!-- Atmospheric Background -->
-		<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
-			<!-- Terminal Grid Layer -->
-			<div class="absolute inset-0 terminal-grid opacity-[0.25]"></div>
-			<div class="absolute inset-0 scanline"></div>
-
-			<!-- Atmospheric Glows (Layered for Depth) -->
-			<!-- Primary Blue Glow (Top Left) -->
-			<div class="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-atmosphere-blue rounded-full blur-[160px] opacity-90 mix-blend-screen animate-float"></div>
-			
-			<!-- Muted Red Edge Glow (Bottom Right) -->
-			<div class="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-atmosphere-red rounded-full blur-[140px] opacity-70 mix-blend-soft-light"></div>
-			
-			<!-- Secondary Cyan Accent (Top Right) -->
-			<div class="absolute top-[10%] right-[-15%] w-[40%] h-[40%] bg-atmosphere-cyan rounded-full blur-[140px] opacity-50 mix-blend-overlay"></div>
-			
-			<!-- Deep Center Glow (Dimensionality) -->
-			<div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-atmosphere-glow rounded-full blur-[180px] opacity-40 mix-blend-screen"></div>
-
-			<!-- Bottom Muted Base (Stability) -->
-			<div class="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-atmosphere-muted to-transparent opacity-30"></div>
-		</div>
+	<body class={`min-h-screen selection:bg-brand-cyan selection:text-black relative ${heroActive ? 'hero-active' : ''}`}>
+		<AtmosphereLayer />
 
 		<slot />
 
@@ -183,22 +166,26 @@ const currentOrigin = Astro.url.origin;
 
 			// Initialize
 			function init() {
-				// Reveal sections
-				document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+				// Reveal sections (Optimized)
+				const revealElements = document.querySelectorAll('.reveal-on-scroll');
+				revealElements.forEach(el => {
 					observer.observe(el);
 				});
 
-				// Trigger count-up on visible
+				// Trigger count-up on visible (Optimized)
 				const countObserver = new IntersectionObserver((entries) => {
 					entries.forEach(entry => {
 						if (entry.isIntersecting) {
-							animateCountUp(entry.target as HTMLElement);
+							requestAnimationFrame(() => {
+								animateCountUp(entry.target as HTMLElement);
+							});
 							countObserver.unobserve(entry.target);
 						}
 					});
-				}, { threshold: 0.5 });
+				}, { threshold: 0.2 });
 
-				document.querySelectorAll('[data-count-target]').forEach(el => {
+				const countElements = document.querySelectorAll('[data-count-target]');
+				countElements.forEach(el => {
 					countObserver.observe(el);
 				});
 			}

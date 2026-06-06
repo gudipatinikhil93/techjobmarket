@@ -1,0 +1,37 @@
+---
+/**
+ * AtmosphereLayer.astro
+ * 
+ * Modular component that provides the cinematic US market atmosphere.
+ * This component is self-contained and manages its own background layers.
+ */
+import "../styles/atmosphere.css";
+---
+
+<div class="atmosphere-system" aria-hidden="true">
+  <!-- 1. Background Texture -->
+  <div class="atm-grain"></div>
+
+  <!-- 2. Terminal Grid -->
+  <div class="atm-grid"></div>
+
+  <!-- 2.5 Scanline -->
+  <div class="atm-scanline"></div>
+
+  <!-- 3. Kinetic Light Sources -->
+  <div class="atm-glow-container">
+    <div class="atm-glow-blue"></div>
+    <div class="atm-glow-red"></div>
+    <div class="atm-glow-cyan"></div>
+  </div>
+
+  <!-- 4. Environmental Depth -->
+  <div class="atm-diffusion"></div>
+
+  <!-- 5. Edge Definition -->
+  <div class="atm-edge-light"></div>
+</div>
+
+<style>
+  /* Local overrides if needed */
+</style>
