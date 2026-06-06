@@ -1,0 +1,44 @@
+---
+interface Props {
+  title: string;
+  value: string;
+  subValue?: string;
+  trend?: {
+    value: string;
+    isUp: boolean;
+    neutral?: boolean;
+  };
+  type?: 'default' | 'positive' | 'negative' | 'warning' | 'info';
+}
+
+const { title, value, subValue, trend, type = 'default' } = Astro.props;
+
+const typeColors = {
+  default: 'text-white',
+  positive: 'text-brand-cyan',
+  negative: 'text-brand-magenta',
+  warning: 'text-brand-amber',
+  info: 'text-brand-blue'
+};
+
+const trendColor = trend?.neutral ? 'text-muted' : (trend?.isUp ? 'text-brand-cyan' : 'text-brand-magenta');
+const trendIcon = trend?.neutral ? '→' : (trend?.isUp ? '↑' : '↓');
+---
+
+<div class="flex flex-col p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all group">
+  <div class="flex justify-between items-start mb-2">
+    <span class="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{title}</span>
+    {trend && (
+      <span class={`text-[10px] font-mono font-bold ${trendColor}`}>
+        {trendIcon} {trend.value}
+      </span>
+    )}
+  </div>
+  
+  <div class="flex items-baseline gap-2">
+    <span class={`text-2xl font-bold tracking-tight ${typeColors[type]}`}>{value}</span>
+    {subValue && <span class="text-xs text-muted-foreground font-medium">{subValue}</span>}
+  </div>
+  
+  <slot />
+</div>
