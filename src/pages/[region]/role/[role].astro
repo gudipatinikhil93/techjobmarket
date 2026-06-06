@@ -1,15 +1,19 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Navbar from '../../components/Navbar.astro';
-import Footer from '../../components/Footer.astro';
-import { getRoleIntelligence } from '../../services/outlookService';
+import Layout from '../../../layouts/Layout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getRoleIntelligence } from '../../../services/outlookService';
+import { getRegion, getRegionConfig } from '../../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
 
 const { role } = Astro.params;
 const decodedRole = decodeURIComponent(role || '');
-const intelligence = await getRoleIntelligence(decodedRole);
+const intelligence = await getRoleIntelligence(decodedRole, region);
 
 if (!intelligence) {
-  return Astro.redirect('/roles');
+  return Astro.redirect(`/${region}/roles`);
 }
 
 const statusColors = {
@@ -21,10 +25,12 @@ const statusColors = {
 ---
 
 <Layout 
-  title={`${intelligence.role} Market Outlook & Salary in US 2026 | TechJobMarket`}
-  description={`What is the current job market like for ${intelligence.role}? Discover 2026 salary trends, top hiring cities, and key skills for ${intelligence.role} positions in the US.`}
+  title={`${intelligence.role} Market Outlook & Salary in ${regionConfig.name} 2026 | TechJobMarket`}
+  description={`What is the current job market like for ${intelligence.role}? Discover 2026 salary trends, top hiring cities, and key skills for ${intelligence.role} positions in ${regionConfig.name}.`}
+  region={region}
 >
-  <script type="application/ld+json" set:html={JSON.stringify({
+  <script type="application/ld+json" define:vars={{ region, regionConfig, intelligence, role }}>
+  {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -32,32 +38,33 @@ const statusColors = {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://techjobmarket.com"
+        "item": `https://techjobmarket.com/${region}`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Roles",
-        "item": "https://techjobmarket.com/roles"
+        "item": `https://techjobmarket.com/${region}/roles`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": intelligence.role,
-        "item": `https://techjobmarket.com/role/${role}`
+        "item": `https://techjobmarket.com/${region}/role/${role}`
       }
     ]
-  })} />
+  }
+  </script>
 
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <nav class="mb-8" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2 text-sm text-muted-foreground">
-          <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
+          <li><a href={`/${region}`} class="hover:text-white transition-colors">Home</a></li>
           <li><span>/</span></li>
-          <li><a href="/roles" class="hover:text-white transition-colors">Roles</a></li>
+          <li><a href={`/${region}/roles`} class="hover:text-white transition-colors">Roles</a></li>
           <li><span>/</span></li>
           <li class="text-white font-medium">{intelligence.role}</li>
         </ol>
@@ -68,13 +75,13 @@ const statusColors = {
         <div class="lg:col-span-2 space-y-12">
           <div>
             <div class="flex items-center gap-4 mb-4">
-              <h1 class="text-4xl font-bold text-white tracking-tight">{intelligence.role} Job Market US</h1>
+              <h1 class="text-4xl font-bold text-white tracking-tight">{intelligence.role} Job Market</h1>
               <span class={`px-3 py-1 rounded-full text-xs font-bold uppercase ${statusColors[intelligence.status]}`}>
                 {intelligence.status}
               </span>
             </div>
             <p class="text-xl text-muted-foreground leading-relaxed">
-              Analysis of the <strong>current job market for {intelligence.role}</strong> in the US. {intelligence.insight}
+              Analysis of the <strong>current job market for {intelligence.role}</strong> in {regionConfig.name}. {intelligence.insight}
             </p>
           </div>
 
@@ -92,7 +99,7 @@ const statusColors = {
             <div class="rounded-xl border border-white/10 bg-card p-6">
               <span class="text-xs font-mono text-muted-foreground uppercase tracking-widest">Avg Base 2026</span>
               <p class="text-3xl font-bold text-white mt-2">
-                ${Math.round(intelligence.avgSalaryMin / 1000)}k - ${Math.round(intelligence.avgSalaryMax / 1000)}k
+                {regionConfig.currency.symbol}{regionConfig.currency.format === 'INR' ? (intelligence.avgSalaryMin / 100000).toFixed(1) : Math.round(intelligence.avgSalaryMin / 1000)}{regionConfig.currency.format === 'INR' ? 'L' : 'k'} - {regionConfig.currency.symbol}{regionConfig.currency.format === 'INR' ? (intelligence.avgSalaryMax / 100000).toFixed(1) : Math.round(intelligence.avgSalaryMax / 1000)}{regionConfig.currency.format === 'INR' ? 'L' : 'k'}
               </p>
             </div>
           </div>
@@ -102,8 +109,8 @@ const statusColors = {
             <div class="prose prose-invert max-w-none">
               <p>
                 Based on current market data, the role of <strong>{intelligence.role}</strong> is currently seeing a 
-                {intelligence.status.toLowerCase()} trend in the US tech ecosystem. The average base salary range in the US for this position currently spans from 
-                ${intelligence.avgSalaryMin.toLocaleString('en-US')} to ${intelligence.avgSalaryMax.toLocaleString('en-US')} per annum, reflecting the <strong>current job market trends</strong> for 2026.
+                {intelligence.status.toLowerCase()} trend in {regionConfig.name} tech ecosystem. The average base salary range in {regionConfig.name} for this position currently spans from 
+                {regionConfig.currency.symbol}{intelligence.avgSalaryMin.toLocaleString(regionConfig.locale)} to {regionConfig.currency.symbol}{intelligence.avgSalaryMax.toLocaleString(regionConfig.locale)} per annum, reflecting the <strong>current job market trends</strong> for 2026.
               </p>
               <p>
                 The highest demand for <strong>{intelligence.role}</strong> is currently concentrated in major hubs like <strong>{intelligence.topCities.join(', ')}</strong>. 
@@ -144,7 +151,7 @@ const statusColors = {
           <div class="p-6 rounded-xl bg-brand-magenta/10 border border-brand-magenta/20">
              <h4 class="font-bold text-white mb-2">Data Transparency</h4>
              <p class="text-xs text-muted-foreground">
-               This intelligence is generated based on {intelligence.jobCount} real-time job listings from Indeed US, Wellfound, and direct career pages. Analytics are updated weekly.
+               This intelligence is generated based on {intelligence.jobCount} real-time job listings from Indeed, Wellfound, and direct career pages. Analytics are updated weekly.
              </p>
           </div>
         </div>
@@ -152,5 +159,5 @@ const statusColors = {
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

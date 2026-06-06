@@ -1,10 +1,14 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { getAllCities } from '../services/jobService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getAllCities } from '../../services/jobService';
+import { getRegion, getRegionConfig } from '../../regions';
 
-const dbCities = await getAllCities();
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+const dbCities = await getAllCities(region);
 
 const cities = dbCities.length > 0 
   ? dbCities.map(c => {
@@ -14,24 +18,32 @@ const cities = dbCities.length > 0
         index: Math.min(10, (c.job_count / 10) + 5).toFixed(1), // scaled for data volume
         industries: ["Tech", "IT Services", "Engineering"], // we'd ideally pull from jobs.skills
         status: isPeak ? "Peak" : "Growing",
-        description: `Active US Tech Hub with ${c.job_count} current open listings.`,
+        description: `Active ${regionConfig.name} Tech Hub with ${c.job_count} current open listings.`,
         salary: c.avg_salary
       };
     })
   : [];
+
+const formatSalary = (num: number) => {
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(num / 100000).toFixed(1)}L`;
+  }
+  return `$${(num / 1000).toFixed(0)}k`;
+};
 ---
 
 <Layout 
-  title="Best Cities for Tech Jobs in US | Top Hiring Hubs"
-  description="Discover the top hiring cities in the US current tech job market. Compare tech hubs based on live hiring demand."
+  title={`Best Cities for Tech Jobs in ${regionConfig.name} | Top Hiring Hubs`}
+  description={`Discover the top hiring cities in the ${regionConfig.name} current tech job market. Compare tech hubs based on live hiring demand.`}
+  region={region}
 >
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24 bg-black min-h-screen">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Hiring Hubs</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">Geographic distribution of tech demand across the United States based on active, live job listings.</p>
+        <p class="text-muted-foreground text-lg max-w-2xl">Geographic distribution of tech demand across {regionConfig.name} based on active, live job listings.</p>
       </div>
       
       <!-- Desktop Grid / Mobile Condensed List -->
@@ -51,7 +63,7 @@ const cities = dbCities.length > 0
                 {city.salary > 0 && (
                   <div class="flex items-center gap-1">
                     <span class="text-[9px] uppercase tracking-wider text-muted-foreground font-bold font-mono">Comp:</span>
-                    <span class="text-[10px] md:text-sm font-mono text-white">${(city.salary / 1000).toFixed(0)}k</span>
+                    <span class="text-[10px] md:text-sm font-mono text-white">{formatSalary(city.salary)}</span>
                   </div>
                 )}
                 <div class="hidden md:block">
@@ -83,12 +95,12 @@ const cities = dbCities.length > 0
         <div class="relative z-10 md:flex items-center justify-between gap-12">
           <div class="mb-8 md:mb-0">
             <h2 class="text-2xl font-bold text-white mb-4">Remote vs On-Site Dynamics</h2>
-            <p class="text-muted-foreground max-w-xl">While major hubs like San Francisco and New York still command the highest raw volume, the "Remote" designation remains the largest single category for senior technical roles across the US.</p>
+            <p class="text-muted-foreground max-w-xl">While major hubs still command the highest raw volume, the "Remote" designation remains the largest single category for senior technical roles across {regionConfig.name}.</p>
           </div>
         </div>
       </div>
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

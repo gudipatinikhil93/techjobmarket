@@ -1,21 +1,21 @@
 import { supabase } from '../lib/supabase';
 import type { RawLayoff } from '../scraper/layoffsFyi';
 
-export async function processAndStoreLayoffs(layoffs: RawLayoff[]) {
+export async function processAndStoreLayoffs(layoffs: RawLayoff[], region: string = 'us') {
   if (!layoffs.length) return 0;
 
-  console.log(`[LayoffService] Storing ${layoffs.length} layoffs to database...`);
+  console.log(`[LayoffService] Storing ${layoffs.length} layoffs for region ${region} to database...`);
   
-  // Clear existing layoffs data (full refresh)
+  // Clear existing layoffs data for this region (full refresh)
   const { error: deleteError } = await supabase
     .from('layoffs')
     .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+    .eq('region', region);
     
   if (deleteError) {
-    console.error(`[LayoffService] Error clearing old layoffs:`, deleteError);
+    console.error(`[LayoffService] Error clearing old layoffs for ${region}:`, deleteError);
   } else {
-    console.log(`[LayoffService] Cleared old layoffs data.`);
+    console.log(`[LayoffService] Cleared old layoffs data for ${region}.`);
   }
 
   // To avoid extremely large payloads, batch the inserts
@@ -33,7 +33,8 @@ export async function processAndStoreLayoffs(layoffs: RawLayoff[]) {
       date: layoff.date.split('T')[0], // ensure DATE format
       sector: layoff.sector,
       reason: layoff.reason,
-      source_url: layoff.source_url
+      source_url: layoff.source_url,
+      region: region
     }));
 
     const { error } = await supabase
@@ -41,35 +42,37 @@ export async function processAndStoreLayoffs(layoffs: RawLayoff[]) {
       .insert(dbBatch);
       
     if (error) {
-      console.error(`[LayoffService] Error storing batch:`, error);
+      console.error(`[LayoffService] Error storing batch for ${region}:`, error);
     } else {
       storedCount += batch.length;
     }
   }
 
-  console.log(`[LayoffService] Successfully stored ${storedCount} layoffs.`);
+  console.log(`[LayoffService] Successfully stored ${storedCount} layoffs for ${region}.`);
   return storedCount;
 }
 
-export async function getRecentLayoffs(limit = 10) {
+export async function getRecentLayoffs(limit = 10, region: string = 'us') {
   const { data, error } = await supabase
     .from('layoffs')
     .select('*')
+    .eq('region', region)
     .order('date', { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('[LayoffService] Error fetching recent layoffs:', error);
+    console.error(`[LayoffService] Error fetching recent layoffs for ${region}:`, error);
     return [];
   }
   return data;
 }
 
-export async function getTopAffectedSectors(limit = 5) {
+export async function getTopAffectedSectors(limit = 5, region: string = 'us') {
   // Since we don't have an RPC, we can fetch all or do a rough aggregation
   const { data, error } = await supabase
     .from('layoffs')
     .select('sector, layoffs_count')
+    .eq('region', region)
     .not('sector', 'is', null);
 
   if (error || !data) {
@@ -88,3 +91,4 @@ export async function getTopAffectedSectors(limit = 5) {
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
 }
+

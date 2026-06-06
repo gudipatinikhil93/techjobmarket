@@ -1,16 +1,18 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getRegion } from '../../regions';
 
+const region = getRegion(Astro.params);
 const lastUpdated = "June 5, 2026";
 ---
 
-<Layout 
+<Layout region={region} 
   title="Privacy Policy | TechJobMarket"
   description="Privacy Policy for TechJobMarket. Learn how we handle data, analytics, and user privacy on our platform."
 >
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24 bg-black">
     <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -115,12 +117,12 @@ const lastUpdated = "June 5, 2026";
           </p>
           <ul class="list-none space-y-2 text-muted-foreground">
             <li>By email: <span class="text-brand-cyan">privacy@techjobmarket.com</span></li>
-            <li>By visiting our contact page: <a href="/contact" class="text-brand-cyan hover:underline">techjobmarket.com/contact</a></li>
+            <li>By visiting our contact page: <a href={`/${region}/contact`} class="text-brand-cyan hover:underline">techjobmarket.com/contact</a></li>
           </ul>
         </section>
       </div>
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

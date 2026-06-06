@@ -1,63 +1,62 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { getSalaryBenchmarks } from '../services/jobService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getSalaryBenchmarks } from '../../services/jobService';
+import { getRegion, getRegionConfig } from '../../regions';
 
-const dbSalaries = await getSalaryBenchmarks();
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+const dbSalaries = await getSalaryBenchmarks(region);
+
+const isINR = regionConfig.currency.format === 'INR';
 
 const salaryData = dbSalaries.length > 0
   ? dbSalaries.map(s => ({
       role: s.role,
-      avgMin: (s.avg_min / 1000).toFixed(0),
-      avgMax: (s.avg_max / 1000).toFixed(0),
-      avgMedian: (((s.avg_min + s.avg_max) / 2) / 1000).toFixed(0)
+      avgMin: isINR ? (s.avg_min / 100000).toFixed(1) : (s.avg_min / 1000).toFixed(0),
+      avgMax: isINR ? (s.avg_max / 100000).toFixed(1) : (s.avg_max / 1000).toFixed(0),
+      avgMedian: isINR 
+        ? (((s.avg_min + s.avg_max) / 2) / 100000).toFixed(1)
+        : (((s.avg_min + s.avg_max) / 2) / 1000).toFixed(0),
+      unit: isINR ? 'L' : 'k'
     }))
   : [];
 ---
 
 <Layout 
-  title="Software Engineer Salary Trends US 2026 | Tech Compensation Benchmarks"
-  description="Explore current software engineer salary trends in the US tech job market for 2026. Get data-driven insights on compensation, average salaries, and pay scales for various tech roles."
+  title={`${regionConfig.name} Tech Salary Trends 2026 | Tech Compensation Benchmarks`}
+  description={`Explore current tech salary trends in the ${regionConfig.name} tech job market for 2026. Get data-driven insights on compensation and pay scales.`}
+  region={region}
 >
-  <script type="application/ld+json">
+  <script type="application/ld+json" define:vars={{ region, regionConfig }}>
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "Software Engineer Salaries in US 2026 | Tech Pay Scales",
-    "description": "How much do software engineers make in the current US tech job market? Explore average salaries, compensation ranges, and trends for 2026.",
-    "url": "https://techjobmarket.com/salaries",
+    "name": `Tech Salaries in ${regionConfig.name} 2026 | Tech Pay Scales`,
+    "description": `How much do tech professionals make in the current ${regionConfig.name} tech job market? Explore average salaries, compensation ranges, and trends for 2026.`,
+    "url": `https://techjobmarket.com/${region}/salaries`,
     "mainEntity": {
       "@type": "Dataset",
-      "name": "US Tech Salary Benchmarks Dataset",
-      "description": "A dataset of average annual base salary ranges (USD) by tech role across major US tech hubs, providing realistic compensation expectations and excluding outlier equity packages.",
+      "name": `${regionConfig.name} Tech Salary Benchmarks Dataset`,
+      "description": `A dataset of average annual base salary ranges (${regionConfig.currency.code}) by tech role across major ${regionConfig.name} tech hubs.`,
       "creator": {
         "@type": "Organization",
         "name": "TechJobMarket"
       },
-      "url": "https://techjobmarket.com/salaries",
-      "keywords": ["software engineer salaries", "tech pay scales", "compensation trends", "US tech salaries", "developer salaries", "AI engineer salary"],
-      "variableMeasured": [
-        { "@type": "StatisticalVariable", "name": "job role" },
-        { "@type": "StatisticalVariable", "name": "average minimum salary", "description": "Average minimum base salary in USD for the role" },
-        { "@type": "StatisticalVariable", "name": "average maximum salary", "description": "Average maximum base salary in USD for the role" },
-        { "@type": "StatisticalVariable", "name": "estimated median salary", "description": "Estimated median base salary in USD for the role" }
-      ],
-      "distribution": {
-        "@type": "DataDownload",
-        "encodingFormat": "text/csv",
-        "contentUrl": "https://techjobmarket.com/api/salaries-data.csv" // Placeholder, if CSV download is available
-      }
+      "url": `https://techjobmarket.com/${region}/salaries`,
+      "keywords": ["tech salaries", "pay scales", "compensation trends", `${regionConfig.name} tech salaries`]
     }
   }
   </script>
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
-        <h1 class="text-4xl font-bold text-white mb-4">Salary Benchmarks</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">Average annual base salary ranges (USD) by role across major US tech hubs.</p>
+        <h1 class="text-4xl font-bold text-white mb-4">{regionConfig.labels.salaryBenchmarks}</h1>
+        <p class="text-muted-foreground text-lg max-w-2xl">Average annual base salary ranges ({regionConfig.currency.label}) by role across major {regionConfig.name} tech hubs.</p>
       </div>
 
       <!-- Search Section -->
@@ -92,22 +91,23 @@ const salaryData = dbSalaries.length > 0
                 <td class="py-6 px-6">
                   <span class="text-lg font-bold text-white group-hover:text-brand-cyan transition-colors">{item.role}</span>
                 </td>
-                <td class="py-6 px-6 text-white/70">${item.avgMin}k</td>
-                <td class="py-6 px-6 text-white/70">${item.avgMax}k</td>
+                <td class="py-6 px-6 text-white/70">{regionConfig.currency.symbol}{item.avgMin}{item.unit}</td>
+                <td class="py-6 px-6 text-white/70">{regionConfig.currency.symbol}{item.avgMax}{item.unit}</td>
                 <td class="py-6 px-6">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-cyan/10 text-brand-cyan">
-                    ${item.avgMedian}k
+                    {regionConfig.currency.symbol}{item.avgMedian}{item.unit}
                   </span>
                 </td>
               </tr>
             )) : (
               <tr>
                 <td colspan="4" class="py-12 text-center text-muted-foreground italic">
-                  No salary data available yet. Pipeline is scraping current US tech job salaries.
+                  No salary data available yet. Pipeline is scraping current {regionConfig.name} tech job salaries.
                 </td>
               </tr>
             )}
           </tbody>
+
         </table>
       </div>
 
@@ -120,18 +120,18 @@ const salaryData = dbSalaries.length > 0
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-1">
                   <span class="text-[9px] text-muted-foreground uppercase font-mono">Min:</span>
-                  <span class="text-xs font-mono text-white/70">${item.avgMin}k</span>
+                  <span class="text-xs font-mono text-white/70">{regionConfig.currency.symbol}{item.avgMin}{item.unit}</span>
                 </div>
                 <div class="flex items-center gap-1">
                   <span class="text-[9px] text-muted-foreground uppercase font-mono">Max:</span>
-                  <span class="text-xs font-mono text-white/70">${item.avgMax}k</span>
+                  <span class="text-xs font-mono text-white/70">{regionConfig.currency.symbol}{item.avgMax}{item.unit}</span>
                 </div>
               </div>
             </div>
             
             <div class="text-right shrink-0">
               <span class="block text-[9px] text-brand-cyan uppercase font-mono mb-0.5 tracking-tighter">Est. Median</span>
-              <span class="text-sm font-mono font-bold text-brand-cyan">${item.avgMedian}k</span>
+              <span class="text-sm font-mono font-bold text-brand-cyan">{regionConfig.currency.symbol}{item.avgMedian}{item.unit}</span>
             </div>
           </div>
         )) : (
@@ -171,18 +171,18 @@ const salaryData = dbSalaries.length > 0
         <div class="p-8 rounded-2xl border border-white/10 bg-card">
           <h3 class="text-xl font-bold text-white mb-4">Stock Options & RSUs</h3>
           <p class="text-muted-foreground text-sm leading-relaxed">
-            In 2026, many US tech companies are re-evaluating compensation. While FAANG and public companies continue to offer generous RSUs with 4-year vesting, early-stage startups are increasingly relying on higher base salaries or quarterly performance-linked bonuses to remain competitive.
+            In 2026, many {regionConfig.name} tech companies are re-evaluating compensation. While major public companies continue to offer generous RSUs with 4-year vesting, early-stage startups are increasingly relying on higher base salaries or quarterly performance-linked bonuses to remain competitive.
           </p>
         </div>
         <div class="p-8 rounded-2xl border border-white/10 bg-card">
           <h3 class="text-xl font-bold text-white mb-4">The "GenAI Premium"</h3>
           <p class="text-muted-foreground text-sm leading-relaxed">
-            Engineers with proven experience in custom model training or RAG-at-scale are commanding a 25-40% premium over traditional full-stack roles. We've seen "Talent Wars" in San Francisco resulting in base salaries exceeding $200k for senior AI architects.
+            Engineers with proven experience in custom model training or RAG-at-scale are commanding a significant premium over traditional full-stack roles. We've seen "Talent Wars" in major hubs resulting in substantial base salary increases for senior AI architects.
           </p>
         </div>
       </div>
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

@@ -1,10 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import MarketInsightCard from '../components/MarketInsightCard.astro';
-import MiniChart from '../components/MiniChart.astro';
-import { getMarketOutlook } from '../services/outlookService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import MarketInsightCard from '../../components/MarketInsightCard.astro';
+import MiniChart from '../../components/MiniChart.astro';
+import { getMarketOutlook } from '../../services/outlookService';
 import { 
   getMarketPulse, 
   getRemoteTrend, 
@@ -12,7 +12,12 @@ import {
   getTrendingRoles, 
   getDecliningRoles,
   getSalaryBenchmarks
-} from '../services/jobService';
+} from '../../services/jobService';
+import { getRegion, getRegionConfig } from '../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
 
 // Fetch all data in parallel for performance
 const [
@@ -24,13 +29,13 @@ const [
   decliningRoles,
   salaryBenchmarks
 ] = await Promise.all([
-  getMarketOutlook(),
-  getMarketPulse(),
-  getRemoteTrend(),
-  getAIHiringMomentum(),
-  getTrendingRoles(),
-  getDecliningRoles(),
-  getSalaryBenchmarks()
+  getMarketOutlook(region),
+  getMarketPulse(region),
+  getRemoteTrend(region),
+  getAIHiringMomentum(region),
+  getTrendingRoles(region),
+  getDecliningRoles(region),
+  getSalaryBenchmarks(region)
 ]);
 
 // Filter out extreme noise
@@ -44,6 +49,9 @@ const riskAreas = decliningRoles.slice(0, 4);
 
 const formatSalary = (min: number, max: number) => {
   if (!min || !max) return 'Market Rate';
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(min/100000).toFixed(1)}L - ₹${(max/100000).toFixed(1)}L`;
+  }
   return `$${(min/1000).toFixed(0)}k - $${(max/1000).toFixed(0)}k`;
 };
 
@@ -58,10 +66,11 @@ const getStatusColor = (status: string) => {
 ---
 
 <Layout 
-  title="US Tech Job Market Roles & Hiring Intelligence 2026 | TechJobMarket"
-  description="US tech hiring intelligence dashboard. Real-time data on role demand, AI hiring momentum, remote trends, and salary benchmarks for 2026."
+  title={`${regionConfig.name} Tech Job Market Roles & Hiring Intelligence 2026 | TechJobMarket`}
+  description={`${regionConfig.name} tech hiring intelligence dashboard. Real-time data on role demand, AI hiring momentum, remote trends, and salary benchmarks for 2026.`}
+  region={region}
 >
-  <Navbar hideSearch={true} />
+  <Navbar hideSearch={true} region={region} />
   
   <main class="py-12 md:py-20 bg-black min-h-screen cinematic-glow relative overflow-x-hidden">
     <!-- Atmospheric Layer -->
@@ -87,7 +96,7 @@ const getStatusColor = (status: string) => {
               Role Hiring <span class="text-brand-cyan">Intelligence</span>
             </h1>
             <p class="text-muted-foreground text-lg leading-relaxed">
-              Real-time analysis of the US tech workforce. Tracking demand shifts, compensation trajectories, and role-specific hiring signals across the entire market.
+              Real-time analysis of the {regionConfig.name} tech workforce. Tracking demand shifts, compensation trajectories, and role-specific hiring signals across the entire market.
             </p>
           </div>
         </div>
@@ -141,7 +150,7 @@ const getStatusColor = (status: string) => {
             </h3>
             <div class="space-y-4 flex-1">
               {topHiring.map(role => (
-                <a href={`/role/${encodeURIComponent(role.role)}`} class="group block">
+                <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="group block">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-sm font-bold text-white group-hover:text-brand-cyan transition-colors">{role.role}</span>
                     <span class="text-xs font-mono text-muted-foreground">{role.jobCount}</span>
@@ -162,7 +171,7 @@ const getStatusColor = (status: string) => {
             </h3>
             <div class="space-y-4 flex-1">
               {fastestGrowing.map(role => (
-                <a href={`/role/${encodeURIComponent(role.role)}`} class="group block">
+                <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="group block">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-sm font-bold text-white group-hover:text-brand-cyan transition-colors">{role.role}</span>
                     <span class="text-xs font-mono text-brand-cyan">+{role.growth_percentage}%</span>
@@ -181,7 +190,7 @@ const getStatusColor = (status: string) => {
             </h3>
             <div class="space-y-4 flex-1">
               {highestPaying.map(role => (
-                <a href={`/role/${encodeURIComponent(role.role)}`} class="group block">
+                <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="group block">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-sm font-bold text-white group-hover:text-brand-cyan transition-colors">{role.role}</span>
                     <span class="text-xs font-mono text-white/70">${(role.avg_max/1000).toFixed(0)}k</span>
@@ -204,7 +213,7 @@ const getStatusColor = (status: string) => {
             </h3>
             <div class="space-y-4 flex-1">
               {riskAreas.map(role => (
-                <a href={`/role/${encodeURIComponent(role.role)}`} class="group block">
+                <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="group block">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-sm font-bold text-white group-hover:text-brand-magenta transition-colors">{role.role}</span>
                     <span class="text-xs font-mono text-brand-magenta">{role.growth_percentage}%</span>
@@ -260,7 +269,7 @@ const getStatusColor = (status: string) => {
             </thead>
             <tbody class="divide-y divide-white/5 text-white/80" id="rolesBody">
               {displayRoles.map((role) => (
-                <tr class="hover:bg-white/[0.02] transition-colors group cursor-pointer" onclick={`window.location.href='/role/${encodeURIComponent(role.role)}'`} data-role={role.role.toLowerCase()} data-status={role.status} data-jobcount={role.jobCount} data-salary={role.avgSalaryMin} data-growth={role.growthPercentage}>
+                <tr class="hover:bg-white/[0.02] transition-colors group cursor-pointer" onclick={`window.location.href='/${region}/role/${encodeURIComponent(role.role)}'`} data-role={role.role.toLowerCase()} data-status={role.status} data-jobcount={role.jobCount} data-salary={role.avgSalaryMin} data-growth={role.growthPercentage}>
                   <td class="px-6 py-4 font-bold text-white group-hover:text-brand-cyan transition-colors">{role.role}</td>
                   <td class="px-6 py-4">
                     <span class={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getStatusColor(role.status)}`}>
@@ -286,7 +295,7 @@ const getStatusColor = (status: string) => {
           {displayRoles.map((role) => (
             <div 
               class="py-4 px-2 active:bg-white/[0.05] transition-colors cursor-pointer flex items-center justify-between gap-4"
-              onclick={`window.location.href='/role/${encodeURIComponent(role.role)}'`}
+              onclick={`window.location.href='/${region}/role/${encodeURIComponent(role.role)}'`}
               data-role={role.role.toLowerCase()} 
               data-status={role.status} 
               data-jobcount={role.jobCount} 
@@ -339,7 +348,7 @@ const getStatusColor = (status: string) => {
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>
 
 <script>

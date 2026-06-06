@@ -1,12 +1,16 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { getHiringTrends } from '../services/jobService';
-import { getMarketOutlook } from '../services/outlookService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getHiringTrends } from '../../services/jobService';
+import { getMarketOutlook } from '../../services/outlookService';
+import { getRegion, getRegionConfig } from '../../regions';
 
-const realMonthlyTrends = await getHiringTrends();
-const marketOutlook = await getMarketOutlook();
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+const realMonthlyTrends = await getHiringTrends(region);
+const marketOutlook = await getMarketOutlook(region);
 
 const decliningRoles = marketOutlook.filter(r => r.status === 'Declining' || r.status === 'Oversaturated').slice(0, 5);
 const growingRoles = marketOutlook.filter(r => r.status === 'Growing').slice(0, 5);
@@ -24,47 +28,37 @@ const topGrowthTrajetories = marketOutlook
 ---
 
 <Layout 
-  title="US Tech Job Market Trends & Forecast 2026 | Hiring Analysis"
-  description="Stay ahead with the latest US tech job market trends and hiring forecasts for 2026. Analyze growth, decline, AI hiring momentum, and economic shifts impacting the tech industry."
+  title={`${regionConfig.name} Tech Job Market Trends & Forecast 2026 | Hiring Analysis`}
+  description={`Stay ahead with the latest ${regionConfig.name} tech job market trends and hiring forecasts for 2026. Analyze growth, decline, AI hiring momentum, and economic shifts.`}
+  region={region}
 >
-  <script type="application/ld+json">
+  <script type="application/ld+json" define:vars={{ region, regionConfig }}>
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "Current US Tech Job Market Trends | Hiring Forecast & Analysis",
-    "description": "Stay ahead with the latest job market trends in the US. Analyze hiring velocity, sector growth, and high-demand roles in real-time.",
-    "url": "https://techjobmarket.com/trends",
+    "name": `Current ${regionConfig.name} Tech Job Market Trends | Hiring Forecast & Analysis`,
+    "description": `Stay ahead with the latest job market trends in ${regionConfig.name}. Analyze hiring velocity, sector growth, and high-demand roles in real-time.`,
+    "url": `https://techjobmarket.com/${region}/trends`,
     "mainEntity": {
       "@type": "Dataset",
-      "name": "US Tech Job Market Trends Dataset",
-      "description": "A dataset of predictive intelligence on sector growth, declining roles, hiring velocity, and macro-economic shifts in the US tech market, providing a comprehensive outlook for career and business strategy.",
+      "name": `${regionConfig.name} Tech Job Market Trends Dataset`,
+      "description": `A dataset of predictive intelligence on sector growth, declining roles, hiring velocity, and macro-economic shifts in the ${regionConfig.name} tech market.`,
       "creator": {
         "@type": "Organization",
         "name": "TechJobMarket"
       },
-      "url": "https://techjobmarket.com/trends",
-      "keywords": ["job market trends", "hiring forecast", "tech sector growth", "AI hiring trends", "US tech market analysis", "economic shifts tech"],
-      "variableMeasured": [
-        { "@type": "StatisticalVariable", "name": "role outlook", "description": "Status and growth percentage for various tech roles" },
-        { "@type": "StatisticalVariable", "name": "hiring velocity index", "description": "Aggregated demand from snapshot history indicating market activity" },
-        { "@type": "StatisticalVariable", "name": "sector growth", "description": "Growth and decline across different tech sectors" },
-        { "@type": "StatisticalVariable", "name": "role growth trajectories", "description": "Top roles experiencing significant growth in demand" }
-      ],
-      "distribution": {
-        "@type": "DataDownload",
-        "encodingFormat": "text/csv",
-        "contentUrl": "https://techjobmarket.com/api/trends-data.csv" // Placeholder, if CSV download is available
-      }
+      "url": `https://techjobmarket.com/${region}/trends`,
+      "keywords": ["job market trends", "hiring forecast", "tech sector growth", "AI hiring trends", `${regionConfig.name} tech market analysis`]
     }
   }
   </script>
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24 bg-black min-h-screen">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16">
         <h1 class="text-4xl font-bold text-white mb-4">Market Trends & Trajectories</h1>
-        <p class="text-muted-foreground text-lg max-w-2xl">Predictive intelligence on sector growth, declining roles, and macro-economic shifts in the US tech market.</p>
+        <p class="text-muted-foreground text-lg max-w-2xl">Predictive intelligence on sector growth, declining roles, and macro-economic shifts in the {regionConfig.name} tech market.</p>
       </div>
 
       <!-- Role Outlook Summary -->
@@ -76,7 +70,7 @@ const topGrowthTrajetories = marketOutlook
           </h3>
           <div class="space-y-4">
             {growingRoles.length > 0 ? growingRoles.map(role => (
-              <a href={`/role/${encodeURIComponent(role.role)}`} class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-green-500/30 transition-all group">
+              <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-green-500/30 transition-all group">
                 <div>
                   <h4 class="font-bold text-white group-hover:text-green-400 transition-colors">{role.role}</h4>
                   <p class="text-xs text-muted-foreground">{role.jobCount} active openings</p>
@@ -98,7 +92,7 @@ const topGrowthTrajetories = marketOutlook
           </h3>
           <div class="space-y-4">
             {decliningRoles.length > 0 ? decliningRoles.map(role => (
-              <a href={`/role/${encodeURIComponent(role.role)}`} class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-orange-500/30 transition-all group">
+              <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-orange-500/30 transition-all group">
                 <div>
                   <h4 class="font-bold text-white group-hover:text-orange-400 transition-colors">{role.role}</h4>
                   <p class="text-xs text-muted-foreground">{role.status}</p>
@@ -207,5 +201,5 @@ const topGrowthTrajetories = marketOutlook
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

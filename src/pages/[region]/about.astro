@@ -1,7 +1,11 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getRegion, getRegionConfig } from '../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
 
 const dataSources = [
   { name: "Indeed", type: "Job Volume & Salaries" },
@@ -14,10 +18,11 @@ const dataSources = [
 ---
 
 <Layout 
-  title="About TechJobMarket | US Tech Market Intelligence & Analytics"
-  description="TechJobMarket provides real-time, data-driven intelligence on the US tech job market, including live salary benchmarks, hiring trends, and layoffs tracking."
+  title={`About TechJobMarket | ${regionConfig.name} Tech Market Intelligence & Analytics`}
+  description={`TechJobMarket provides real-time, data-driven intelligence on the ${regionConfig.name} tech job market, including live salary benchmarks, hiring trends, and layoffs tracking.`}
+  region={region}
 >
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24 bg-black">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -27,7 +32,7 @@ const dataSources = [
           Quantifying the <span class="text-brand-cyan">Tech Economy</span>
         </h1>
         <p class="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-          TechJobMarket is a data-first intelligence platform providing transparency into the current US tech ecosystem through real-time analytics and AI-driven insights.
+          TechJobMarket is a data-first intelligence platform providing transparency into the current {regionConfig.name} tech ecosystem through real-time analytics and AI-driven insights.
         </p>
       </div>
 
@@ -41,7 +46,7 @@ const dataSources = [
                 The tech job market moves faster than traditional reporting can track. Information asymmetry often leaves talent and companies in the dark. We built TechJobMarket to democratize access to high-fidelity market data.
               </p>
               <p class="text-muted-foreground text-lg leading-relaxed">
-                By aggregating signals from across the web, we provide a unified view of the US tech workforce, helping professionals navigate their careers and companies benchmark their growth with confidence.
+                By aggregating signals from across the web, we provide a unified view of the {regionConfig.name} tech workforce, helping professionals navigate their careers and companies benchmark their growth with confidence.
               </p>
             </div>
             <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm">
@@ -59,7 +64,7 @@ const dataSources = [
                   <div class="text-xs text-muted-foreground font-mono uppercase">Source</div>
                 </div>
                 <div class="p-4 bg-black/40 rounded-xl border border-white/5">
-                  <div class="text-3xl font-bold text-white mb-1">US</div>
+                  <div class="text-3xl font-bold text-white mb-1">{regionConfig.id.toUpperCase()}</div>
                   <div class="text-xs text-muted-foreground font-mono uppercase">Focused</div>
                 </div>
               </div>
@@ -138,10 +143,10 @@ const dataSources = [
         <div class="text-center py-12">
           <p class="text-sm font-mono text-muted-foreground uppercase mb-6 tracking-widest italic">Empowering the next generation of tech talent</p>
           <div class="flex justify-center gap-6">
-            <a href="/contact" class="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-brand-cyan transition-all active:scale-95">
+            <a href={`/${region}/contact`} class="px-8 py-3 rounded-full bg-white text-black font-bold hover:bg-brand-cyan transition-all active:scale-95">
               Contact Us
             </a>
-            <a href="/trends" class="px-8 py-3 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all">
+            <a href={`/${region}/trends`} class="px-8 py-3 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all">
               Explore Trends
             </a>
           </div>
@@ -150,5 +155,5 @@ const dataSources = [
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

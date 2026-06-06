@@ -73,12 +73,13 @@ export function normalizeTitle(title: string): string {
 }
 
 /**
- * Normalizes city names to common US tech hubs
+ * Normalizes city names to common tech hubs based on region.
+ * Also helps detect if a city belongs to a different region to prevent contamination.
  */
-export function normalizeCity(city: string): string {
+export function normalizeCity(city: string, region: string = 'us'): string {
   if (!city) return 'Remote';
   
-  const hubMap: Record<string, string> = {
+  const US_HUBS: Record<string, string> = {
     'SAN FRANCISCO': 'San Francisco',
     'SF': 'San Francisco',
     'BAY AREA': 'San Francisco',
@@ -107,23 +108,56 @@ export function normalizeCity(city: string): string {
     'WASHINGTON': 'Washington DC',
     'DC': 'Washington DC',
     'SAN DIEGO': 'Los Angeles',
+  };
+
+  const INDIA_HUBS: Record<string, string> = {
+    'BANGALORE': 'Bangalore',
+    'BENGALURU': 'Bangalore',
+    'HYDERABAD': 'Hyderabad',
+    'PUNE': 'Pune',
+    'DELHI': 'Delhi NCR',
+    'NCR': 'Delhi NCR',
+    'MUMBAI': 'Mumbai',
+    'CHENNAI': 'Chennai',
+    'GURGAON': 'Gurgaon',
+    'GURUGRAM': 'Gurgaon',
+    'NOIDA': 'Noida',
+    'AHMEDABAD': 'Ahmedabad',
+  };
+
+  const GENERIC_HUBS: Record<string, string> = {
     'REMOTE': 'Remote',
     'ANYWHERE': 'Remote',
     'WORLDWIDE': 'Remote',
-    'UNITED STATES': 'Remote', // Often means remote US
-    'US': 'Remote'
+    'UNITED STATES': 'Remote',
+    'US': 'Remote',
+    'INDIA': 'Remote',
   };
 
   const upperCity = city.toUpperCase();
+  
+  // 1. Check for generic/remote first
+  for (const [key, value] of Object.entries(GENERIC_HUBS)) {
+    if (upperCity.includes(key)) return value;
+  }
+
+  // 2. Check current region hubs
+  const hubMap = region === 'india' ? INDIA_HUBS : US_HUBS;
   for (const [key, value] of Object.entries(hubMap)) {
     if (upperCity.includes(key)) return value;
   }
 
-  // If not a known hub, just return the raw city or a generic 'Remote' if it implies remote
-  if (upperCity.includes('REMOTE') || upperCity.includes('ANYWHERE')) return 'Remote';
+  // 3. Check for cross-region contamination
+  // If we are in India but find a US hub, return "CROSS_REGION_LEAK"
+  const otherHubMap = region === 'india' ? US_HUBS : INDIA_HUBS;
+  for (const [key] of Object.entries(otherHubMap)) {
+    if (upperCity.includes(key)) return 'CROSS_REGION_LEAK';
+  }
 
   return city.trim();
 }
+
+
 
 const TECHNOLOGY_DICTIONARY: Record<string, string> = {
   // Languages

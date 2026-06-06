@@ -2,6 +2,7 @@
 import "../styles/global.css";
 
 import AtmosphereLayer from "../components/AtmosphereLayer.astro";
+import { getRegionConfig } from "../regions";
 
 interface Props {
 	title?: string;
@@ -11,16 +12,25 @@ interface Props {
 	type?: string;
 	noindex?: boolean;
 	heroActive?: boolean;
+	region?: string;
 }
 
 const { 
-	title = "TechJobMarket | US Tech Career Intelligence", 
-	description = "Modern US-focused tech job market intelligence platform. Analyze trends, salaries, and hiring patterns in real-time.",
+	region = "us",
+	heroActive = false,
+	type = "website",
 	image = "/og-image.png",
 	canonicalURL = Astro.url.href,
-	type = "website",
-	noindex = false,
-	heroActive = false
+} = Astro.props;
+
+const regionConfig = getRegionConfig(region);
+
+// Automatically noindex beta/private regions
+const noindex = Astro.props.noindex || !regionConfig.public;
+
+const { 
+	title = regionConfig.seo.defaultTitle, 
+	description = regionConfig.seo.defaultDescription,
 } = Astro.props;
 
 const siteName = "TechJobMarket";
@@ -29,7 +39,7 @@ const currentOrigin = Astro.url.origin;
 ---
 
 <!doctype html>
-<html lang="en" class="dark">
+<html lang={regionConfig.locale} class="dark">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -100,29 +110,29 @@ const currentOrigin = Astro.url.origin;
 		</style>
 
 		<!-- Structured Data -->
-		<script type="application/ld+json" is:inline define:vars={{ currentOrigin }}>
+		<script type="application/ld+json" is:inline define:vars={{ currentOrigin, region }}>
 			{
 				"@context": "https://schema.org",
 				"@type": "WebSite",
 				"name": "TechJobMarket",
 				"alternateName": "TJM",
-				"url": currentOrigin,
+				"url": `${currentOrigin}/${region}`,
 				"potentialAction": {
 					"@type": "SearchAction",
-					"target": `${currentOrigin}/search?q={search_term_string}`,
+					"target": `${currentOrigin}/${region}/search?q={search_term_string}`,
 					"query-input": "required name=search_term_string"
 				}
 			}
 		</script>
-		<script type="application/ld+json" is:inline define:vars={{ currentOrigin }}>
+		<script type="application/ld+json" is:inline define:vars={{ currentOrigin, region, regionConfig }}>
 			{
 				"@context": "https://schema.org",
 				"@type": "Organization",
 				"name": "TechJobMarket",
-				"url": currentOrigin,
+				"url": `${currentOrigin}/${region}`,
 				"logo": `${currentOrigin}/favicon.svg`,
 				"image": `${currentOrigin}/og-image.png`,
-				"description": "TechJobMarket is a real-time US tech job market intelligence platform providing insights on hiring trends, salaries, and layoffs.",
+				"description": `TechJobMarket is a real-time ${regionConfig.name} tech job market intelligence platform providing insights on hiring trends, salaries, and layoffs.`,
 				"sameAs": [
 					"https://twitter.com/techjobmarket",
 					"https://linkedin.com/company/techjobmarket",
@@ -131,7 +141,7 @@ const currentOrigin = Astro.url.origin;
 			}
 		</script>
 		<!-- Google tag (gtag.js) - Aggressively Deferred for Performance -->
-		<script is:inline>
+		<script is:inline define:vars={{ region }}>
 			(function() {
 				const GA_ID = 'G-2V7Y2B2ZGX';
 				let loaded = false;
@@ -151,7 +161,8 @@ const currentOrigin = Astro.url.origin;
 					gtag('config', GA_ID, { 
 						'anonymize_ip': true,
 						'page_path': window.location.pathname,
-						'send_page_view': true
+						'send_page_view': true,
+						'region_context': region
 					});
 				}
 
@@ -184,28 +195,28 @@ const currentOrigin = Astro.url.origin;
 
 		<slot />
 
-		<script>
+		<script is:inline define:vars={{ regionConfig }}>
 			// Optimized Shared Observer for Scroll Reveal and Count-up
 			const sharedObserverOptions = {
 				threshold: 0.1,
 				rootMargin: "0px 0px -50px 0px"
 			};
 
-			const currencyFormatter = new Intl.NumberFormat('en-US', {
+			const currencyFormatter = new Intl.NumberFormat(regionConfig.locale, {
 				style: 'currency',
-				currency: 'USD',
+				currency: regionConfig.currency.code,
 				maximumFractionDigits: 0
 			});
 
-			const numberFormatter = new Intl.NumberFormat('en-US');
+			const numberFormatter = new Intl.NumberFormat(regionConfig.locale);
 
-			function animateCountUp(el: HTMLElement) {
+			function animateCountUp(el) {
 				const target = parseFloat(el.dataset.countTarget || "0");
 				const format = el.dataset.countFormat;
 				const duration = 1500;
 				const startTime = performance.now();
 
-				function update(currentTime: number) {
+				function update(currentTime) {
 					const elapsed = currentTime - startTime;
 					const progress = Math.min(elapsed / duration, 1);
 					
@@ -215,7 +226,13 @@ const currentOrigin = Astro.url.origin;
 					
 					let text = "";
 					if (format === 'currency') {
-						text = currencyFormatter.format(Math.floor(currentCount));
+						if (regionConfig.currency.format === 'INR') {
+							// For INR, often show in LPA
+							const lpa = currentCount / 100000;
+							text = `₹${lpa.toFixed(1)}L`;
+						} else {
+							text = currencyFormatter.format(Math.floor(currentCount));
+						}
 					} else if (format === 'percent') {
 						text = `${Math.floor(currentCount)}%`;
 					} else {
@@ -237,7 +254,7 @@ const currentOrigin = Astro.url.origin;
 			const observer = new IntersectionObserver((entries) => {
 				entries.forEach(entry => {
 					if (entry.isIntersecting) {
-						const target = entry.target as HTMLElement;
+						const target = entry.target;
 						
 						// Handle Scroll Reveal
 						if (target.classList.contains('reveal-on-scroll')) {
@@ -267,6 +284,7 @@ const currentOrigin = Astro.url.origin;
 		</script>
 	</body>
 </html>
+
 
 <style is:global>
 	html,

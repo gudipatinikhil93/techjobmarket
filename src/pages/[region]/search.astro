@@ -1,11 +1,15 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { searchRoles } from '../services/outlookService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { searchRoles } from '../../services/outlookService';
+import { getRegion, getRegionConfig } from '../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
 
 const q = Astro.url.searchParams.get('q') || '';
-const results = q ? await searchRoles(q) : [];
+const results = q ? await searchRoles(q, region) : [];
 
 const statusColors = {
   Growing: 'text-green-400',
@@ -13,10 +17,17 @@ const statusColors = {
   Declining: 'text-orange-400',
   Oversaturated: 'text-brand-magenta',
 };
+
+const formatSalary = (min: number, max: number) => {
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(min / 100000).toFixed(1)}L - ₹${(max / 100000).toFixed(1)}L`;
+  }
+  return `$${Math.round(min/1000)}k - $${Math.round(max/1000)}k`;
+};
 ---
 
-<Layout title={`Search Results for "${q}" | TechJobMarket`}>
-  <Navbar />
+<Layout title={`Search Results for "${q}" | TechJobMarket`} region={region}>
+  <Navbar region={region} />
   
   <main class="py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -25,7 +36,7 @@ const statusColors = {
       {results.length > 0 ? (
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {results.map(role => (
-            <a href={`/role/${encodeURIComponent(role.role)}`} class="rounded-xl border border-white/10 bg-card p-6 hover:border-brand-cyan/30 transition-all group">
+            <a href={`/${region}/role/${encodeURIComponent(role.role)}`} class="rounded-xl border border-white/10 bg-card p-6 hover:border-brand-cyan/30 transition-all group">
               <div class="flex justify-between items-start mb-4">
                 <span class={`text-xs font-bold uppercase ${statusColors[role.status]}`}>
                   {role.status}
@@ -34,7 +45,7 @@ const statusColors = {
               </div>
               <h3 class="text-xl font-bold text-white mb-4 group-hover:text-brand-cyan transition-colors">{role.role}</h3>
               <p class="text-sm text-muted-foreground mb-4">
-                Market Avg: ${Math.round(role.avgSalaryMin/1000)}k - ${Math.round(role.avgSalaryMax/1000)}k
+                Market Avg: {formatSalary(role.avgSalaryMin, role.avgSalaryMax)}
               </p>
               <span class="text-sm font-bold text-brand-cyan">View Intelligence →</span>
             </a>
@@ -43,11 +54,11 @@ const statusColors = {
       ) : (
         <div class="text-center py-20 rounded-2xl border border-dashed border-white/10">
           <p class="text-muted-foreground text-lg mb-4">No specific intelligence found for "{q}".</p>
-          <a href="/roles" class="text-brand-cyan font-bold hover:underline">Explore all roles →</a>
+          <a href={`/${region}/roles`} class="text-brand-cyan font-bold hover:underline">Explore all roles →</a>
         </div>
       )}
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

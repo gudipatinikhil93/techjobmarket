@@ -12,25 +12,29 @@ export interface RoleOutlook {
   insight: string;
 }
 
-export async function getRoleIntelligence(roleName: string): Promise<RoleOutlook | null> {
-  const allOutlooks = await getMarketOutlook();
+export async function getRoleIntelligence(roleName: string, region: string = 'us'): Promise<RoleOutlook | null> {
+  const allOutlooks = await getMarketOutlook(region);
   return allOutlooks.find(r => r.role.toLowerCase() === roleName.toLowerCase()) || null;
 }
 
-export async function searchRoles(query: string): Promise<RoleOutlook[]> {
-  const allOutlooks = await getMarketOutlook();
+export async function searchRoles(query: string, region: string = 'us'): Promise<RoleOutlook[]> {
+  const allOutlooks = await getMarketOutlook(region);
   return allOutlooks.filter(r => r.role.toLowerCase().includes(query.toLowerCase())).slice(0, 10);
 }
 
-export async function getMarketOutlook(): Promise<RoleOutlook[]> {
+export async function getMarketOutlook(region: string = 'us'): Promise<RoleOutlook[]> {
   const { data: trendingRoles, error: trendingError } = await supabase
     .from('trending_roles')
     .select('*')
+    .eq('region', region)
     .order('job_count', { ascending: false });
 
   if (trendingError || !trendingRoles) return [];
 
-  const { data: salaryData } = await supabase.from('salary_benchmarks').select('*');
+  const { data: salaryData } = await supabase
+    .from('salary_benchmarks')
+    .select('*')
+    .eq('region', region);
   const salaries = Object.fromEntries((salaryData || []).map(s => [s.role, s]));
 
   // In a real implementation we would fetch top cities and skills per role here, 
@@ -44,7 +48,7 @@ export async function getMarketOutlook(): Promise<RoleOutlook[]> {
     else if (growth < -20) status = 'Declining';
     else if (count > 50 && growth >= -10 && growth <= 10) status = 'Oversaturated';
     
-    const salary = salaries[role.role] || { avg_min: 110000, avg_max: 160000 };
+    const salary = salaries[role.role] || { avg_min: region === 'us' ? 110000 : 1500000, avg_max: region === 'us' ? 160000 : 2500000 };
 
     return {
       role: role.role,
@@ -53,9 +57,9 @@ export async function getMarketOutlook(): Promise<RoleOutlook[]> {
       growthPercentage: growth,
       avgSalaryMin: salary.avg_min,
       avgSalaryMax: salary.avg_max,
-      topCities: ['San Francisco', 'New York', 'Austin'], // Default fallback
+      topCities: region === 'us' ? ['San Francisco', 'New York', 'Austin'] : ['Bangalore', 'Hyderabad', 'Pune'], // Default fallbacks
       keySkills: ['Cloud Infrastructure', 'Automation', 'Python'], // Default fallback
-      insight: generateInsight({ role: role.role, status, growth_percentage: growth, top_cities: ['San Francisco', 'New York', 'Austin'] })
+      insight: generateInsight({ role: role.role, status, growth_percentage: growth, top_cities: region === 'us' ? ['San Francisco', 'New York', 'Austin'] : ['Bangalore', 'Hyderabad', 'Pune'] })
     };
   });
 }

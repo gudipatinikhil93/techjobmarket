@@ -1,36 +1,45 @@
 ---
+import { getRegionConfig } from '../regions';
+
+interface Props {
+  region?: string;
+}
+
+const { region = "us" } = Astro.props;
+const regionConfig = getRegionConfig(region);
+
 const footerSections = [
   {
     title: "Market",
     links: [
-      { href: "/roles", label: "Trending Roles" },
-      { href: "/skills", label: "Skill Demand" },
-      { href: "/salaries", label: "Salary Benchmarks" },
-      { href: "/cities", label: "Hiring Hubs" },
+      { href: `/${region}/roles`, label: "Trending Roles" },
+      { href: `/${region}/skills`, label: "Skill Demand" },
+      { href: `/${region}/salaries`, label: "Salary Benchmarks" },
+      { href: `/${region}/cities`, label: "Hiring Hubs" },
     ],
   },
   {
     title: "Insights",
     links: [
-      { href: "/trends", label: "Market Trends" },
+      { href: `/${region}/trends`, label: "Market Trends" },
     ],
   },
   {
     title: "Platform",
     links: [
-      { href: "/about", label: "About Us" },
-      { href: "/privacy-policy", label: "Privacy Policy" },
-      { href: "/terms-and-conditions", label: "Terms & Conditions" },
-      { href: "/contact", label: "Contact" },
+      { href: `/${region}/about`, label: "About Us" },
+      { href: `/${region}/privacy-policy`, label: "Privacy Policy" },
+      { href: `/${region}/terms-and-conditions`, label: "Terms & Conditions" },
+      { href: `/${region}/contact`, label: "Contact" },
     ],
   },
   {
     title: "Popular Roles",
     links: [
-      { href: "/role/Software%20Engineer", label: "Software Engineer" },
-      { href: "/role/Frontend%20Developer", label: "Frontend Developer" },
-      { href: "/role/Data%20Analyst", label: "Data Analyst" },
-      { href: "/role/Product%20Manager", label: "Product Manager" },
+      { href: `/${region}/role/Software%20Engineer`, label: "Software Engineer" },
+      { href: `/${region}/role/Frontend%20Developer`, label: "Frontend Developer" },
+      { href: `/${region}/role/Data%20Analyst`, label: "Data Analyst" },
+      { href: `/${region}/role/Product%20Manager`, label: "Product Manager" },
     ],
   },
 ];
@@ -45,12 +54,12 @@ const footerSections = [
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="grid grid-cols-2 gap-12 md:grid-cols-4 lg:grid-cols-5">
       <div class="col-span-2 lg:col-span-1">
-        <a href="/" class="flex items-center gap-2 mb-8 group translate-3d-lift">
+        <a href={`/${region}`} class="flex items-center gap-2 mb-8 group translate-3d-lift">
           <img src="/favicon.svg" alt="TechJobMarket Logo" class="h-6 w-6 group-hover:rotate-12 transition-transform" />
           <span class="text-xl font-bold group-hover:text-brand-cyan transition-colors tracking-tight">TechJobMarket</span>
         </a>
         <p class="text-sm text-muted-foreground max-w-xs leading-relaxed italic opacity-80">
-          The intelligence platform for the <strong>current US tech job market</strong>. Providing real-time insights into hiring trends and salary data.
+          The intelligence platform for the <strong>current {regionConfig.name} tech job market</strong>. Providing real-time insights into hiring trends and salary data.
         </p>
       </div>
       
@@ -75,9 +84,10 @@ const footerSections = [
         © 2026 TechJobMarket Intelligence Terminal. Not a job board.
       </p>
       <div class="flex gap-8">
-        <a href="/privacy-policy" class="text-[10px] font-mono text-muted-foreground hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
-        <a href="/terms-and-conditions" class="text-[10px] font-mono text-muted-foreground hover:text-white transition-colors uppercase tracking-widest">Terms</a>
+        <a href={`/${region}/privacy-policy`} class="text-[10px] font-mono text-muted-foreground hover:text-white transition-colors uppercase tracking-widest">Privacy</a>
+        <a href={`/${region}/terms-and-conditions`} class="text-[10px] font-mono text-muted-foreground hover:text-white transition-colors uppercase tracking-widest">Terms</a>
       </div>
     </div>
   </div>
 </footer>
+

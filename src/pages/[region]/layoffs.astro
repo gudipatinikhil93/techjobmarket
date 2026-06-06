@@ -1,52 +1,45 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
-import Footer from '../components/Footer.astro';
-import { getRecentLayoffs, getTopAffectedSectors } from '../services/layoffService';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getRecentLayoffs, getTopAffectedSectors } from '../../services/layoffService';
+import { getRegion, getRegionConfig } from '../../regions';
 
-const recentLayoffs = await getRecentLayoffs(50); // Get more for the dedicated page
-const topSectors = await getTopAffectedSectors(10);
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+const recentLayoffs = await getRecentLayoffs(50, region); // Get more for the dedicated page
+const topSectors = await getTopAffectedSectors(10, region);
 
 const totalImpacted = recentLayoffs.reduce((acc, curr) => acc + (curr.layoffs_count || 0), 0);
 ---
 
 <Layout 
-  title="US Tech Layoff Tracker & Trends 2026 | Impact & Analysis"
-  description="Stay informed on US tech layoffs and corporate restructuring in 2026. Track impacted companies, sectors, and analyze the current job market's volatility."
+  title={`${regionConfig.name} Tech Layoff Tracker & Trends 2026 | Impact & Analysis`}
+  description={`Stay informed on ${regionConfig.name} tech layoffs and corporate restructuring in 2026. Track impacted companies, sectors, and analyze the current job market's volatility.`}
+  region={region}
 >
-  <script type="application/ld+json">
+  <script type="application/ld+json" define:vars={{ region, regionConfig }}>
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "US Tech Layoff Tracker 2026 | Workforce Changes",
-    "description": "Track workforce changes, corporate restructuring, and layoff events in the US tech sector for 2026.",
-    "url": "https://techjobmarket.com/layoffs",
+    "name": `${regionConfig.name} Tech Layoff Tracker 2026 | Workforce Changes`,
+    "description": `Track workforce changes, corporate restructuring, and layoff events in the ${regionConfig.name} tech sector for 2026.`,
+    "url": `https://techjobmarket.com/${region}/layoffs`,
     "mainEntity": {
       "@type": "Dataset",
-      "name": "US Tech Layoffs Dataset",
-      "description": "A dataset of recent layoff events, including company, date, sector, and number of affected employees in the US tech sector, sourced from Layoffs.fyi and public filings.",
+      "name": `${regionConfig.name} Tech Layoffs Dataset`,
+      "description": `A dataset of recent layoff events in the ${regionConfig.name} tech sector.`,
       "creator": {
         "@type": "Organization",
         "name": "TechJobMarket"
       },
-      "url": "https://techjobmarket.com/layoffs",
-      "keywords": ["tech layoffs", "workforce reduction", "corporate restructuring", "job losses", "tech job market"],
-      "variableMeasured": [
-        { "@type": "StatisticalVariable", "name": "company" },
-        { "@type": "StatisticalVariable", "name": "date" },
-        { "@type": "StatisticalVariable", "name": "sector" },
-        { "@type": "StatisticalVariable", "name": "impacted employees", "description": "Number of employees affected by the layoff" },
-        { "@type": "StatisticalVariable", "name": "percentage affected", "description": "Percentage of workforce affected by the layoff" }
-      ],
-      "distribution": {
-        "@type": "DataDownload",
-        "encodingFormat": "text/csv",
-        "contentUrl": "https://techjobmarket.com/api/layoffs-data.csv" // Placeholder, if CSV download is available
-      }
+      "url": `https://techjobmarket.com/${region}/layoffs`,
+      "keywords": ["tech layoffs", "workforce reduction", "corporate restructuring", "job losses", `${regionConfig.name} tech job market`]
     }
   }
   </script>
-  <Navbar />
+  <Navbar region={region} />
   
   <main class="py-24 bg-black min-h-screen selection:bg-brand-magenta/30 cinematic-glow relative overflow-hidden">
     <!-- Atmospheric Layer -->
@@ -59,7 +52,7 @@ const totalImpacted = recentLayoffs.reduce((acc, curr) => acc + (curr.layoffs_co
       <div class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-12">
         <div>
           <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 text-balance">Tech Layoff Tracker</h1>
-          <p class="text-muted-foreground text-lg max-w-xl">Monitoring workforce restructurings across the US tech ecosystem. Data is sourced from Layoffs.fyi and verified public filings.</p>
+          <p class="text-muted-foreground text-lg max-w-xl">Monitoring workforce restructurings across the {regionConfig.name} tech ecosystem. Data is sourced from Layoffs.fyi and verified public filings.</p>
         </div>
         <div class="bg-white/[0.02] border border-white/10 p-6 rounded-2xl flex gap-8 glass-panel">
           <div>
@@ -122,7 +115,7 @@ const totalImpacted = recentLayoffs.reduce((acc, curr) => acc + (curr.layoffs_co
                       </div>
                       <div class="flex items-center gap-1">
                         <span class="text-[10px] text-muted-foreground font-mono">Date:</span>
-                        <span class="text-[10px] font-mono text-white/50">{new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        <span class="text-[10px] font-mono text-white/50">{new Date(item.date).toLocaleDateString(regionConfig.locale, { month: 'short', day: 'numeric' })}</span>
                       </div>
                       {item.source_url && (
                         <a href={item.source_url} target="_blank" rel="noopener noreferrer" class="hidden sm:block text-[10px] text-brand-cyan hover:underline">Source</a>
@@ -155,5 +148,5 @@ const totalImpacted = recentLayoffs.reduce((acc, curr) => acc + (curr.layoffs_co
     </div>
   </main>
   
-  <Footer />
+  <Footer region={region} />
 </Layout>

@@ -1,0 +1,491 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { 
+  getTopCities, 
+  getMarketPulse, 
+  getHiringTrends, 
+  getSalaryBenchmarks,
+  getRemoteTrend,
+  getAIHiringMomentum,
+  getJuniorHiringDifficulty,
+  getTopSkills
+} from '../services/jobService';
+import { getMarketOutlook } from '../../services/outlookService';
+import { getLatestInsights } from '../../services/aiService';
+import { getRecentLayoffs } from '../../services/layoffService';
+import FAQSection from '../../components/FAQSection.astro';
+import MarketInsightCard from '../../components/MarketInsightCard.astro';
+import MiniChart from '../../components/MiniChart.astro';
+import { getRegion, getRegionConfig } from '../../regions';
+
+const region = getRegion(Astro.params);
+const regionConfig = getRegionConfig(region);
+
+// Fetch real data from services
+const marketPulse = await getMarketPulse(region);
+const aiIntelligence = await getLatestInsights(region);
+const topCities = await getTopCities(region);
+const salaryBenchmarks = await getSalaryBenchmarks(region);
+const hiringTrends = await getHiringTrends(region);
+const marketOutlook = await getMarketOutlook(region); 
+const remoteTrend = await getRemoteTrend(region);
+const aiMomentum = await getAIHiringMomentum(region);
+const juniorDifficulty = await getJuniorHiringDifficulty(region);
+const recentLayoffs = await getRecentLayoffs(50, region); // Fetch more to calculate pressure
+const topSkills = await getTopSkills(region);
+
+// Calculate Layoff Pressure (Simple count in last 30 days)
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+const recentLayoffsCount = recentLayoffs.filter(l => new Date(l.date) >= thirtyDaysAgo).reduce((acc, l) => acc + (l.layoffs_count || 0), 0);
+const previousLayoffsCount = recentLayoffs.filter(l => new Date(l.date) < thirtyDaysAgo).reduce((acc, l) => acc + (l.layoffs_count || 0), 0);
+const layoffTrend = previousLayoffsCount > 0 ? ((recentLayoffsCount - previousLayoffsCount) / previousLayoffsCount * 100).toFixed(0) : "0";
+
+// Market Status Logic
+const hiringVelocity = marketPulse.hiringIndex;
+let marketStatus = "Stable";
+let statusColor = "text-white";
+let statusBg = "bg-white/10";
+
+if (hiringVelocity > 7.5) {
+  marketStatus = "Accelerating";
+  statusColor = "text-brand-cyan";
+  statusBg = "bg-brand-cyan/10";
+} else if (hiringVelocity < 5.0) {
+  marketStatus = "Cooling";
+  statusColor = "text-brand-magenta";
+  statusBg = "bg-brand-magenta/10";
+}
+
+// Format numbers
+const formatSalary = (num: number) => {
+  if (regionConfig.currency.format === 'INR') {
+    return `₹${(num / 100000).toFixed(1)}L`;
+  }
+  return `$${(num / 1000).toFixed(0)}k`;
+};
+
+const FAQ_CONTENT = [
+  {
+    question: `How is the current ${regionConfig.name} job market?`,
+    answer: `The current ${regionConfig.name} tech job market in 2026 is dynamic, characterized by significant shifts. While there's a hiring slowdown in some areas, particularly after recent layoffs, demand for specialized skills in AI, cloud computing, and advanced software engineering remains robust. Our data indicates a cautious but active market, with companies prioritizing efficiency and high-impact roles.`
+  },
+  {
+    question: "What is the current job market like?",
+    answer: `The 2026 job market is competitive, especially in tech, due to factors like oversaturation in generalist roles and a focus on AI-driven efficiency. We're observing a dual market: high demand for niche, AI-fluent professionals and increased competition for entry-level or less specialized positions. Understanding current job market trends 2026 is vital for effective job searching.`
+  },
+  {
+    question: "How to keep skills current in changing job market?",
+    answer: `To keep skills current in today's rapidly changing job market, continuous learning is paramount. Focus on emerging software engineering trends, particularly in AI, machine learning, and cloud native technologies. Our analytics show a rising demand for skills in areas like generative AI, MLOps, and secure cloud infrastructure.`
+  },
+  {
+    question: "How bad is the current job market?",
+    answer: `While the narrative of the "bad job market" is influenced by recent layoffs and a general hiring slowdown, it's more nuanced. Data suggests the market isn't universally "bad" but rather highly selective. Companies are hiring strategically, leading to increased competition for many roles. Job seekers need to differentiate themselves with highly relevant, future-proof skills.`
+  },
+  {
+    question: `How is the current IT job market in ${regionConfig.name}?`,
+    answer: `The current IT job market in ${regionConfig.name} is undergoing a transformation driven by cloud adoption and AI integration. There's a significant demand for cloud architects, AI/ML engineers, cybersecurity specialists, and data scientists. However, traditional IT roles may face oversaturation and increased competition.`
+  },
+];
+
+const jsonLdSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": FAQ_CONTENT.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout 
+	title={regionConfig.seo.defaultTitle}
+	description={regionConfig.seo.defaultDescription}
+	heroActive={true}
+	region={region}
+>
+	<Navbar region={region} />
+	
+	<main class="min-h-screen text-white selection:bg-brand-cyan/30 bg-transparent">
+		
+		<!-- 1. HERO MARKET STATUS -->
+		<section class="relative pt-32 pb-24 lg:pt-56 lg:pb-32 overflow-hidden border-b border-white/5 bg-black/20">
+			<!-- Hero Atmospheric Layer (Optimized) -->
+			<div class="absolute inset-0 -z-10 pointer-events-none overflow-hidden opacity-50 md:opacity-100" aria-hidden="true">
+				<div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(0,124,240,0.06)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(235,54,127,0.03)_0%,transparent_50%)]"></div>
+			</div>
+
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+				
+				<div class="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-20 animate-fade-in-up">
+					<div class="max-w-4xl">
+						<div class="flex items-center gap-4 mb-8">
+							<div class={`px-3.5 py-1.5 rounded-full ${statusBg} border border-white/10 flex items-center gap-2.5 shadow-lg backdrop-blur-md`}>
+								<span class="relative flex h-2 w-2">
+									<span class={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusColor.replace('text-', 'bg-')}`}></span>
+									<span class={`relative inline-flex rounded-full h-2 w-2 ${statusColor.replace('text-', 'bg-')}`}></span>
+								</span>
+								<span class={`text-[10px] font-mono font-bold uppercase tracking-[0.2em] ${statusColor}`}>{regionConfig.labels.marketStatus} {marketStatus}</span>
+							</div>
+							<span class="text-[10px] font-mono text-white/30 uppercase tracking-[0.2em]">Live Intelligence Feed • 2026</span>
+						</div>
+
+						<h1 class="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[0.85] text-balance">
+							The State of the <br/>
+							<span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/40 italic">{regionConfig.name} Tech Labor Market</span>
+						</h1>
+						
+						<p class="text-xl md:text-2xl text-muted-foreground/80 leading-relaxed max-w-3xl font-medium">
+							Live market briefing aggregating real-time hiring velocity, layoff pressure, and compensation benchmarks across major {regionConfig.name} tech hubs.
+						</p>
+					</div>
+
+					<div class="flex flex-col gap-4 p-8 rounded-3xl glass-panel min-w-[280px] hover:bg-black/40 transition-[transform,background-color] duration-300 ease-out group relative overflow-hidden hover:translate-3d-lift">
+						<!-- Subtle Inner Glow -->
+						<div class="absolute inset-0 bg-gradient-to-br from-brand-cyan/[0.03] to-transparent pointer-events-none"></div>
+						
+						<span class="text-[10px] font-mono text-muted-foreground uppercase tracking-[0.3em] group-hover:text-white/70 transition-colors">Market Confidence</span>
+						<div class="flex items-end gap-4">
+							<span class="text-5xl font-bold tracking-tighter" data-count-target={(hiringVelocity * 10).toFixed(0)}>{(hiringVelocity * 10).toFixed(0)}<span class="text-xl text-muted-foreground font-light ml-1">/100</span></span>
+							<div class="flex-1 h-3 bg-white/5 rounded-full overflow-hidden mb-3">
+								<div class="h-full bg-brand-cyan transition-all duration-1000 shadow-[0_0_20px_rgba(80,227,194,0.5)]" style={`width: ${hiringVelocity * 10}%`}></div>
+							</div>
+						</div>
+						<p class="text-[10px] text-muted-foreground/60 italic font-mono tracking-tight">Real-time volume vs historical 5yr baseline.</p>
+					</div>
+				</div>
+
+				<!-- Dashboard Snapshot Grid -->
+				<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 animate-fade-in-up [animation-delay:200ms]">
+					<MarketInsightCard 
+						title="Hiring Momentum" 
+						value={`${marketPulse.totalJobs}`} 
+						countTarget={marketPulse.totalJobs}
+						countFormat="number"
+						subValue="open roles"
+						trend={{ value: `${((marketPulse.recentJobs / marketPulse.totalJobs) * 100).toFixed(1)}% new`, isUp: true }}
+					>
+						<MiniChart data={hiringTrends.map(t => t.value)} color="#50e3c2" />
+					</MarketInsightCard>
+
+					<MarketInsightCard 
+						title="Layoff Pressure" 
+						value={`${recentLayoffsCount}`} 
+						countTarget={recentLayoffsCount}
+						countFormat="number"
+						subValue="impacted"
+						type={recentLayoffsCount > 500 ? 'negative' : 'default'}
+						trend={{ value: `${layoffTrend}%`, isUp: recentLayoffsCount < previousLayoffsCount }}
+					>
+						<div class="mt-4 flex gap-1 h-2">
+							{recentLayoffs.slice(0, 12).map(l => (
+								<div 
+									class={`flex-1 rounded-sm transition-all hover:scale-y-125 ${l.layoffs_count > 100 ? 'bg-brand-magenta shadow-[0_0_8px_rgba(235,54,127,0.4)]' : 'bg-white/20'}`}
+									title={`${l.company}: ${l.layoffs_count}`}
+								></div>
+							))}
+						</div>
+					</MarketInsightCard>
+
+					<MarketInsightCard 
+						title="AI Hiring Share" 
+						value={`${aiMomentum.percentage}%`} 
+						countTarget={aiMomentum.percentage}
+						countFormat="percent"
+						subValue="of listings"
+						type="positive"
+						trend={{ value: "Expanding", isUp: true, neutral: true }}
+					>
+						<div class="mt-4 h-2 w-full bg-white/5 rounded-full overflow-hidden">
+							<div class="h-full bg-brand-cyan shadow-[0_0_12px_rgba(80,227,194,0.5)] transition-all duration-1000" style={`width: ${aiMomentum.percentage}%`}></div>
+						</div>
+					</MarketInsightCard>
+
+					<MarketInsightCard 
+						title="Salary Climate" 
+						value={formatSalary(marketPulse.avgSalary)} 
+						countTarget={marketPulse.avgSalary}
+						countFormat="currency"
+						subValue="median base"
+						trend={{ value: "Stable", isUp: true, neutral: true }}
+					>
+						<div class="mt-4 flex items-end justify-between h-8 gap-1">
+							{[40, 60, 45, 70, 55, 80, 75].map(h => (
+								<div class="flex-1 bg-white/10 rounded-t-sm group-hover:bg-brand-amber/40 transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" style={`height: ${h}%`}></div>
+							))}
+						</div>
+					</MarketInsightCard>
+				</div>
+			</div>
+		</section>
+
+		<!-- 2. AI MARKET BRIEFING (TICKER STYLE) -->
+		<section class="py-16 bg-transparent border-b border-white/5 reveal-on-scroll">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="flex flex-col lg:flex-row gap-10 lg:items-center">
+					<div class="shrink-0 flex items-center gap-3">
+						<div class="px-2.5 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-mono font-bold text-brand-cyan uppercase shadow-sm">Gemini Insight</div>
+						<span class="text-xs font-bold uppercase tracking-widest text-white/40">Market Intelligence Briefing</span>
+					</div>
+					<div class="grid md:grid-cols-3 gap-10 flex-1">
+						{aiIntelligence.intelligence_briefing.slice(0, 3).map((insight: string) => (
+							<p class="text-sm text-muted-foreground leading-relaxed border-l border-white/10 pl-6 py-1 italic hover:text-white/80 transition-colors">
+								"{insight}"
+							</p>
+						))}
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 3. VISUAL INTELLIGENCE GRID -->
+		<section class="py-32 relative overflow-hidden reveal-on-scroll">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="grid lg:grid-cols-12 gap-12">
+					
+					<!-- Left: Deeper Insights -->
+					<div class="lg:col-span-8 space-y-16">
+						
+						<!-- Intelligence Previews -->
+						<div class="grid sm:grid-cols-2 gap-6">
+							<a href={`/${region}/roles`} class="group p-8 rounded-2xl glass-card">
+								<div class="flex justify-between items-start mb-6">
+									<div class="h-12 w-12 rounded-xl bg-brand-blue/10 flex items-center justify-center text-brand-blue group-hover:scale-110 transition-transform">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+									</div>
+									<span class="text-[10px] font-mono text-brand-cyan uppercase tracking-wider">Explore Roles →</span>
+								</div>
+								<h3 class="text-xl font-bold mb-3">Roles & Demand</h3>
+								<p class="text-sm text-muted-foreground mb-6 leading-relaxed">AI Infrastructure and Backend engineering remain the strongest hiring categories this month.</p>
+								<div class="flex flex-wrap gap-2">
+									{topSkills.slice(0, 3).map(s => <span class="px-2.5 py-1 rounded-full bg-white/5 text-[10px] text-muted-foreground border border-white/5">#{s.skill}</span>)}
+								</div>
+							</a>
+
+							<a href={`/${region}/layoffs`} class="group p-8 rounded-2xl glass-card">
+								<div class="flex justify-between items-start mb-6">
+									<div class="h-12 w-12 rounded-xl bg-brand-magenta/10 flex items-center justify-center text-brand-magenta group-hover:scale-110 transition-transform">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+									</div>
+									<span class="text-[10px] font-mono text-brand-magenta uppercase tracking-wider">Explore Layoffs →</span>
+								</div>
+								<h3 class="text-xl font-bold mb-3">Layoff Analysis</h3>
+								<p class="text-sm text-muted-foreground mb-6 leading-relaxed">Recruiting and general support functions are facing the highest pressure across big tech.</p>
+								<div class="flex items-center gap-2 text-[10px] font-mono text-muted-foreground uppercase">
+									<span class="text-brand-magenta font-bold">High Volatility</span> • {recentLayoffsCount} impacted
+								</div>
+							</a>
+
+							<a href={`/${region}/skills`} class="group p-8 rounded-2xl glass-card">
+								<div class="flex justify-between items-start mb-6">
+									<div class="h-12 w-12 rounded-xl bg-brand-cyan/10 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+									</div>
+									<span class="text-[10px] font-mono text-brand-cyan uppercase tracking-wider">Explore Skills →</span>
+								</div>
+								<h3 class="text-xl font-bold mb-3">Skill Intelligence</h3>
+								<p class="text-sm text-muted-foreground mb-6 leading-relaxed">Kubernetes, Python, and TypeScript demand continues to rise despite broader market cooling.</p>
+								<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mt-4">
+									<div class="h-full bg-brand-cyan shadow-[0_0_10px_rgba(80,227,194,0.3)]" style="width: 70%"></div>
+								</div>
+							</a>
+
+							<a href={`/${region}/salaries`} class="group p-8 rounded-2xl glass-card">
+								<div class="flex justify-between items-start mb-6">
+									<div class="h-12 w-12 rounded-xl bg-brand-amber/10 flex items-center justify-center text-brand-amber group-hover:scale-110 transition-transform">
+										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+									</div>
+									<span class="text-[10px] font-mono text-brand-amber uppercase tracking-wider">Explore Salaries →</span>
+								</div>
+								<h3 class="text-xl font-bold mb-3">Salary Benchmarks</h3>
+								<p class="text-sm text-muted-foreground mb-6 leading-relaxed">Compensation bands are compressing for mid-level roles, while senior specialists maintain leverage.</p>
+								<div class="flex items-end gap-1.5 h-6">
+									{[30, 50, 80, 40, 60, 90].map(h => <div class="flex-1 bg-brand-amber/30 rounded-t-[1px] group-hover:bg-brand-amber/50 transition-colors" style={`height: ${h}%`}></div>)}
+								</div>
+							</a>
+						</div>
+
+						<!-- Geographic Momentum -->
+						<div class="p-10 rounded-3xl glass-panel relative overflow-hidden">
+							<!-- Subtle Ambient Glow -->
+							<div class="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 blur-[100px] -z-10"></div>
+							
+							<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+								<div>
+									<h2 class="text-2xl font-bold mb-3">Geographic Hiring Velocity</h2>
+									<p class="text-sm text-muted-foreground">Concentration of active volume across top-tier {regionConfig.name} tech hubs.</p>
+								</div>
+								<a href={`/${region}/cities`} class="text-[10px] font-mono uppercase tracking-widest text-brand-cyan hover:text-white transition-colors border-b border-brand-cyan/20 pb-1">View Detailed Hub Analysis →</a>
+							</div>
+
+							<div class="space-y-8">
+								{topCities.map(city => {
+									const maxJobs = Math.max(...topCities.map(c => c.job_count));
+									const width = (city.job_count / maxJobs) * 100;
+									return (
+										<div class="group">
+											<div class="flex justify-between items-end mb-4">
+												<span class="text-sm font-bold group-hover:text-brand-cyan transition-colors">{city.city}</span>
+												<span class="text-xs font-mono text-muted-foreground group-hover:text-white transition-colors">{city.job_count} active roles</span>
+											</div>
+											<div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+												<div class="h-full bg-brand-cyan/80 transition-all duration-1000 group-hover:bg-brand-cyan group-hover:shadow-[0_0_15px_rgba(80,227,194,0.4)]" style={`width: ${width}%`}></div>
+											</div>
+										</div>
+									)
+								})}
+							</div>
+						</div>
+					</div>
+
+					<!-- Right: Meta Data & Market Pulse -->
+					<div class="lg:col-span-4 space-y-8">
+						
+						<!-- Market Confidence Card -->
+						<div class="p-8 rounded-2xl glass-panel border-brand-cyan/20 relative overflow-hidden group">
+							<div class="absolute inset-0 bg-brand-cyan/[0.02] group-hover:bg-brand-cyan/[0.04] transition-colors -z-10"></div>
+							<h3 class="text-[10px] font-mono text-brand-cyan uppercase tracking-widest mb-6">Junior Market Status</h3>
+							<div class="flex items-baseline gap-3 mb-4">
+								<span class="text-4xl font-bold tracking-tighter">{juniorDifficulty.percentage}%</span>
+								<span class="text-xs text-muted-foreground font-medium">Hiring Share</span>
+							</div>
+							<p class="text-sm text-muted-foreground leading-relaxed mb-8">
+								Junior and entry-level hiring remains highly constrained. Oversaturation in entry-level applicant pools is driving extreme selectivity.
+							</p>
+							<div class="flex items-center gap-2.5 text-[10px] font-mono text-brand-magenta font-bold uppercase tracking-widest">
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+								High Competition Barrier
+							</div>
+						</div>
+
+						<!-- Remote Work Status -->
+						<div class="p-8 rounded-2xl glass-panel relative overflow-hidden group">
+							<h3 class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-6">Remote Flexibility</h3>
+							<div class="flex items-baseline gap-3 mb-6">
+								<span class="text-4xl font-bold tracking-tighter">{remoteTrend.percentage}%</span>
+								<span class="text-xs text-muted-foreground font-medium">Remote Roles</span>
+							</div>
+							<div class="space-y-4">
+								<div class="flex justify-between text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+									<span>Hybrid / Office</span>
+									<span>Remote</span>
+								</div>
+								<div class="flex h-2.5 w-full rounded-full bg-white/5 overflow-hidden">
+									<div class="h-full bg-white/10 group-hover:bg-white/15 transition-colors" style={`width: ${100 - remoteTrend.percentage}%`}></div>
+									<div class="h-full bg-brand-cyan shadow-[0_0_12px_rgba(80,227,194,0.3)]" style={`width: ${remoteTrend.percentage}%`}></div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Trust & Sources -->
+						<div class="p-8 rounded-2xl glass-card">
+							<h3 class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-8">Data Architecture</h3>
+							<div class="space-y-8">
+								<div class="flex gap-5">
+									<div class="shrink-0 h-10 w-10 rounded-lg glass flex items-center justify-center text-muted-foreground group-hover:text-white transition-colors">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14a2 2 0 0 1 2 2v2"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+									</div>
+									<div>
+										<h4 class="text-xs font-bold text-white mb-1.5">Live Pipeline</h4>
+										<p class="text-[10px] text-muted-foreground leading-relaxed">Aggregated from 12+ premium sources including Greenhouse, Ashby, and Indeed.</p>
+									</div>
+								</div>
+								<div class="flex gap-5">
+									<div class="shrink-0 h-10 w-10 rounded-lg glass flex items-center justify-center text-muted-foreground group-hover:text-white transition-colors">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+									</div>
+									<div>
+										<h4 class="text-xs font-bold text-white mb-1.5">AI Verified</h4>
+										<p class="text-[10px] text-muted-foreground leading-relaxed">Intelligence briefings generated by Google Gemini 2.0 Flash.</p>
+									</div>
+								</div>
+								<div class="flex gap-5">
+									<div class="shrink-0 h-10 w-10 rounded-lg glass flex items-center justify-center text-muted-foreground group-hover:text-white transition-colors">
+										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+									</div>
+									<div>
+										<h4 class="text-xs font-bold text-white mb-1.5">Weekly Snapshots</h4>
+										<p class="text-[10px] text-muted-foreground leading-relaxed">Historical trends captured every Sunday for long-term drift analysis.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- 4. PROFESSIONAL ANALYSIS -->
+		<section class="py-32 bg-white/[0.01] backdrop-blur-sm border-y border-white/5 reveal-on-scroll">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="max-w-4xl">
+					<div class="flex items-center gap-4 mb-10">
+						<div class="h-px w-12 bg-brand-cyan/30"></div>
+						<span class="text-[10px] font-mono text-brand-cyan uppercase tracking-[0.3em] font-bold">In-Depth Market Analysis</span>
+					</div>
+					
+					<h2 class="text-4xl md:text-6xl font-bold mb-12 tracking-tighter leading-[1.1] text-balance">
+						"Market dynamics are shifting from <br/>
+						<span class="text-muted-foreground/60 italic">growth-at-all-costs to strategic efficiency."</span>
+					</h2>
+
+					<div class="prose prose-invert max-w-none text-muted-foreground/80 leading-relaxed columns-1 md:columns-2 gap-16 text-lg">
+						<p class="mb-6 whitespace-pre-wrap">
+							{aiIntelligence.professional_analysis}
+						</p>
+					</div>
+					
+					{aiIntelligence.data_limitations && (
+						<div class="mt-16 flex items-center gap-3 p-4 rounded-xl glass border border-white/5 w-fit hover:border-white/10 transition-all cursor-help group">
+							<span class="text-[10px] font-mono text-muted-foreground/60 italic group-hover:text-muted-foreground transition-colors">Note: {aiIntelligence.data_limitations}</span>
+							<span class="h-4 w-px bg-white/10 mx-2"></span>
+							<span class="text-[10px] font-mono font-bold text-brand-cyan uppercase tracking-widest">Confidence Index: {aiIntelligence.confidence_score}</span>
+						</div>
+					)}
+				</div>
+			</div>
+		</section>
+
+		<!-- 5. SEO INTELLIGENCE & FAQ -->
+		<section class="py-32 border-t border-white/5 bg-transparent reveal-on-scroll">
+			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div class="grid lg:grid-cols-2 gap-24 items-start">
+					
+					<div class="prose prose-invert prose-lg max-w-none text-muted-foreground leading-relaxed">
+						<h2 class="text-3xl font-bold text-white mb-10 tracking-tight">The {regionConfig.name} Tech Job Market 2026</h2>
+						<div class="space-y-6 text-base">
+							<p>
+								As we navigate through 2026, many professionals are asking: <strong>what is the current job market like?</strong> The <strong>current job market in {regionConfig.name}</strong> has undergone a significant transformation, moving into a period of strategic efficiency. For those tracking the <strong>{regionConfig.name} job market</strong>, the narrative is no longer just about volume, but about the "velocity of skill transition."
+							</p>
+							<p>
+								The <strong>current job market for software engineers</strong> remains competitive, particularly for senior-level roles in cloud architecture and distributed systems. Developers who can bridge the gap between legacy infrastructure and modern AI-driven solutions are finding themselves at the center of the <strong>{regionConfig.name} job market</strong> demand.
+							</p>
+							<p>
+								One of the most dominant <strong>current job market trends</strong> is the explosive growth in <strong>AI hiring</strong>. As businesses across all sectors integrate generative AI, the demand for machine learning engineers has skyrocketed. This shift is redefining <strong>skills demand</strong>, making AI-fluency a "must-have" in the <strong>{regionConfig.name} job market</strong>.
+							</p>
+						</div>
+						<a href={`/${region}/about`} class="inline-flex items-center gap-2 mt-10 text-brand-cyan hover:text-white transition-colors font-mono text-[10px] uppercase tracking-[0.2em] font-bold">
+							Our Research Methodology 
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+						</a>
+					</div>
+
+					<div class="glass-panel p-8 rounded-3xl">
+						<FAQSection faqs={FAQ_CONTENT} regionName={regionConfig.name} />
+					</div>
+				</div>
+			</div>
+		</section>
+
+	</main>
+
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLdSchema)} />
+
+	<Footer region={region} />
+</Layout>

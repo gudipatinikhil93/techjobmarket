@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import { normalizeTitle, cleanSalary, normalizeCity, extractSkills } from './normalization';
 import type { RawJob } from '../scraper/adapter';
 
-export async function processAndStoreJobs(rawJobs: RawJob[]) {
+export async function processAndStoreJobs(rawJobs: RawJob[], region: string = 'us') {
   if (!rawJobs.length) return [];
 
   // 1. Pre-process and Deduplicate in memory
@@ -11,14 +11,20 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
   for (const job of rawJobs) {
     const normalizedTitle = normalizeTitle(job.title);
     const company = job.company;
-    const city = normalizeCity(job.city);
+    const city = normalizeCity(job.city, region);
+
+    // Skip if it's a cross-region leak (e.g., SF job in India pipeline)
+    if (city === 'CROSS_REGION_LEAK') {
+      console.warn(`[JobService] Skipping job from ${job.city} for region ${region} (leaked from other region)`);
+      continue;
+    }
     
     // Extract skills from title AND description AND any provided skills/tags
     const textToAnalyze = `${job.title} ${job.description || job.original_json?.snippet || ""} ${(job.skills || []).join(" ")}`;
     const finalSkills = extractSkills(textToAnalyze);
 
     // Deduplicate by URL primarily, but also fallback to a composite key of Title + Company
-    const compositeKey = `${normalizedTitle}-${company}`.toLowerCase();
+    const compositeKey = `${normalizedTitle}-${company}-${region}`.toLowerCase();
     
     // If URL already exists in this batch, or composite key already exists, skip it to prevent duplicates
     if (!uniqueJobsMap.has(job.url) && !uniqueJobsMap.has(compositeKey)) {
@@ -27,6 +33,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
         normalized_title: normalizedTitle,
         company: company,
         city: city,
+        region: region,
         salary_min: cleanSalary(job.salary_min),
         salary_max: cleanSalary(job.salary_max),
         skills: finalSkills,
@@ -40,7 +47,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
   }
 
   const processedJobs = Array.from(uniqueJobsMap.values()).filter(j => typeof j === 'object');
-  console.log(`[JobService] Deduped from ${rawJobs.length} raw jobs down to ${processedJobs.length} unique jobs.`);
+  console.log(`[JobService] Deduped from ${rawJobs.length} raw jobs down to ${processedJobs.length} unique jobs in region ${region}.`);
 
   // Chunking for large datasets
   const chunkSize = 100;
@@ -57,7 +64,7 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
       .select();
 
     if (error) {
-      console.error(`Error storing chunk starting at ${i}:`, error);
+      console.error(`Error storing chunk starting at ${i} for region ${region}:`, error);
       continue;
     }
     if (data) results.push(...data);
@@ -70,58 +77,62 @@ export async function processAndStoreJobs(rawJobs: RawJob[]) {
  * Captures historical snapshots for roles and cities.
  * Should be run weekly after scraping.
  */
-export async function captureSnapshots() {
-  console.log('Capturing historical snapshots...');
+export async function captureSnapshots(region: string = 'us') {
+  console.log(`Capturing historical snapshots for region ${region}...`);
   
   // Role Snapshots
-  const { data: roleData, error: roleError } = await supabase.rpc('capture_role_snapshots');
-  if (roleError) console.error('Error capturing role snapshots:', roleError);
+  const { data: roleData, error: roleError } = await supabase.rpc('capture_role_snapshots', { p_region: region });
+  if (roleError) console.error(`Error capturing role snapshots for ${region}:`, roleError);
 
   // City Snapshots
-  const { data: cityData, error: cityError } = await supabase.rpc('capture_city_snapshots');
-  if (cityError) console.error('Error capturing city snapshots:', cityError);
+  const { data: cityData, error: cityError } = await supabase.rpc('capture_city_snapshots', { p_region: region });
+  if (cityError) console.error(`Error capturing city snapshots for ${region}:`, cityError);
 
   return { success: !roleError && !cityError };
 }
 
-export async function getTrendingRoles() {
+export async function getTrendingRoles(region: string = 'us') {
   const { data, error } = await supabase
     .from('trending_roles')
     .select('*')
+    .eq('region', region)
     .order('growth_percentage', { ascending: false })
     .limit(8);
 
   if (error) {
-    console.error('Error fetching trending roles:', error);
+    console.error(`Error fetching trending roles for ${region}:`, error);
     return [];
   }
 
   return data;
 }
 
-export async function getDecliningRoles() {
+export async function getDecliningRoles(region: string = 'us') {
   const { data, error } = await supabase
     .from('trending_roles')
     .select('*')
+    .eq('region', region)
     .order('growth_percentage', { ascending: true })
     .limit(8);
 
   if (error) {
-    console.error('Error fetching declining roles:', error);
+    console.error(`Error fetching declining roles for ${region}:`, error);
     return [];
   }
 
   return data;
 }
 
-export async function getRemoteTrend() {
+export async function getRemoteTrend(region: string = 'us') {
   const { count: totalCount } = await supabase
     .from('jobs')
-    .select('*', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true })
+    .eq('region', region);
 
   const { count: remoteCount } = await supabase
     .from('jobs')
     .select('*', { count: 'exact', head: true })
+    .eq('region', region)
     .eq('city', 'Remote');
 
   if (!totalCount) return { percentage: 0, total: 0, remote: 0 };
@@ -133,10 +144,11 @@ export async function getRemoteTrend() {
   };
 }
 
-export async function getAIHiringMomentum() {
+export async function getAIHiringMomentum(region: string = 'us') {
   const { data, error } = await supabase
     .from('jobs')
-    .select('normalized_title, skills');
+    .select('normalized_title, skills')
+    .eq('region', region);
 
   if (error || !data) return { percentage: 0 };
 
@@ -152,10 +164,11 @@ export async function getAIHiringMomentum() {
   };
 }
 
-export async function getJuniorHiringDifficulty() {
+export async function getJuniorHiringDifficulty(region: string = 'us') {
   const { data, error } = await supabase
     .from('jobs')
-    .select('title');
+    .select('title')
+    .eq('region', region);
 
   if (error || !data) return { percentage: 0 };
 
@@ -173,46 +186,50 @@ export async function getJuniorHiringDifficulty() {
   };
 }
 
-export async function getTopCities() {
+export async function getTopCities(region: string = 'us') {
   const { data, error } = await supabase
     .from('top_cities')
     .select('*')
+    .eq('region', region)
     .limit(5);
 
   if (error) {
-    console.error('Error fetching top cities:', error);
+    console.error(`Error fetching top cities for ${region}:`, error);
     return [];
   }
 
   return data;
 }
 
-export async function getMarketPulse() {
+export async function getMarketPulse(region: string = 'us') {
   const { count: totalCount } = await supabase
     .from('jobs')
-    .select('*', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true })
+    .eq('region', region);
 
   const { count: recentCount } = await supabase
     .from('jobs')
     .select('*', { count: 'exact', head: true })
+    .eq('region', region)
     .gt('posted_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Look at last 30 days for better pulse
 
   // Calculate real average salary from live jobs instead of static benchmarks
   const { data: salaryData } = await supabase
     .from('jobs')
     .select('salary_min, salary_max')
+    .eq('region', region)
     .not('salary_min', 'is', null)
     .not('salary_max', 'is', null);
 
-  let avgSalary = 160000; // Fallback
+  let avgSalary = region === 'us' ? 160000 : 2500000; // Fallback (160k USD or 25L INR)
   if (salaryData && salaryData.length > 0) {
     const sum = salaryData.reduce((acc, curr) => acc + (Number(curr.salary_min) + Number(curr.salary_max)) / 2, 0);
     avgSalary = sum / salaryData.length;
   }
 
-  // Hiring Index: Based on US market volume (scale adjusted for higher volume)
-  // Assuming a baseline of ~500 jobs means healthy, 1000+ means booming
-  const hiringIndex = totalCount ? Math.min(10, (totalCount / 100) + 5.0) : 8.2;
+  // Hiring Index: Based on market volume (scale adjusted)
+  const baseline = region === 'us' ? 100 : 50; 
+  const hiringIndex = totalCount ? Math.min(10, (totalCount / baseline) + 5.0) : 8.2;
 
   return {
     totalJobs: totalCount || 0,
@@ -222,53 +239,57 @@ export async function getMarketPulse() {
   };
 }
 
-export async function getAllCities() {
+export async function getAllCities(region: string = 'us') {
   const { data, error } = await supabase
     .from('top_cities')
     .select('*')
+    .eq('region', region)
     .order('job_count', { ascending: false });
 
   if (error) {
-    console.error('Error fetching all cities:', error);
+    console.error(`Error fetching all cities for ${region}:`, error);
     return [];
   }
   return data;
 }
 
-export async function getAllRoles() {
+export async function getAllRoles(region: string = 'us') {
   const { data, error } = await supabase
     .from('trending_roles')
     .select('*')
+    .eq('region', region)
     .order('job_count', { ascending: false });
 
   if (error) {
-    console.error('Error fetching all roles:', error);
+    console.error(`Error fetching all roles for ${region}:`, error);
     return [];
   }
   return data;
 }
 
-export async function getTopSkills() {
+export async function getTopSkills(region: string = 'us') {
   const { data, error } = await supabase
     .from('top_skills')
     .select('*')
+    .eq('region', region)
     .limit(10);
 
   if (error) {
-    console.error('Error fetching top skills:', error);
+    console.error(`Error fetching top skills for ${region}:`, error);
     return [];
   }
   return data;
 }
 
-export async function getHiringTrends() {
+export async function getHiringTrends(region: string = 'us') {
   const { data, error } = await supabase
     .from('role_snapshots')
     .select('captured_at, job_count')
+    .eq('region', region)
     .order('captured_at', { ascending: true });
 
   if (error) {
-    console.error('Error fetching hiring trends:', error);
+    console.error(`Error fetching hiring trends for ${region}:`, error);
     return [];
   }
 
@@ -290,20 +311,21 @@ export async function getHiringTrends() {
   }));
 }
 
-export async function getSkillGrowth() {
-  const { data, error } = await supabase.rpc('get_skill_growth');
+export async function getSkillGrowth(region: string = 'us') {
+  const { data, error } = await supabase.rpc('get_skill_growth', { p_region: region });
   if (error) {
-    console.error('Error fetching skill growth:', error);
+    console.error(`Error fetching skill growth for ${region}:`, error);
     return [];
   }
   return data;
 }
 
-export async function getSalaryBenchmarks() {
+export async function getSalaryBenchmarks(region: string = 'us') {
   // Try to compute real benchmarks from ingested jobs
   const { data: realJobs, error } = await supabase
     .from('jobs')
     .select('normalized_title, salary_min, salary_max')
+    .eq('region', region)
     .not('salary_min', 'is', null)
     .not('salary_max', 'is', null);
 
@@ -338,12 +360,14 @@ export async function getSalaryBenchmarks() {
   const { data: staticData, error: staticError } = await supabase
     .from('salary_benchmarks')
     .select('*')
+    .eq('region', region)
     .limit(10);
 
   if (staticError) {
-    console.error('Error fetching salary benchmarks:', staticError);
+    console.error(`Error fetching salary benchmarks for ${region}:`, staticError);
     return [];
   }
   return staticData;
 }
+
 
