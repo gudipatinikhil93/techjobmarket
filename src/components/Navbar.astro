@@ -12,15 +12,16 @@ const navLinks = [
 <nav class="sticky top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur-xl">
   <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
     <div class="flex items-center gap-8">
-      <a href="/" class="flex items-center gap-2 group">
-        <img src="/favicon.svg" alt="TechJobMarket Logo" class="h-6 w-6" />
-        <span class="text-xl font-bold tracking-tight">TechJob<span class="text-brand-cyan">Market</span></span>
+      <a href="/" class="flex items-center gap-2 group transition-transform active:scale-95">
+        <img src="/favicon.svg" alt="TechJobMarket Logo" class="h-6 w-6 group-hover:animate-subtle-pulse" />
+        <span class="text-xl font-bold tracking-tight">TechJob<span class="text-brand-cyan transition-colors group-hover:text-white">Market</span></span>
       </a>
       
       <div class="hidden md:flex items-center gap-6">
         {navLinks.map(link => (
-          <a href={link.href} class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+          <a href={link.href} class="text-sm font-medium text-muted-foreground hover:text-white transition-all relative group/link">
             {link.label}
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-cyan transition-all group-hover/link:w-full opacity-50"></span>
           </a>
         ))}
       </div>

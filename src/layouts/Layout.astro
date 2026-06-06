@@ -103,8 +103,110 @@ const currentOrigin = Astro.url.origin;
 			gtag('config', 'G-2V7Y2B2ZGX');
 		</script>
 	</head>
-	<body class="min-h-screen selection:bg-brand-cyan selection:text-black">
+	<body class="min-h-screen selection:bg-brand-cyan selection:text-black relative">
+		<!-- Atmospheric Background -->
+		<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+			<!-- Terminal Grid Layer -->
+			<div class="absolute inset-0 terminal-grid opacity-[0.25]"></div>
+			<div class="absolute inset-0 scanline"></div>
+
+			<!-- Atmospheric Glows (Layered for Depth) -->
+			<!-- Primary Blue Glow (Top Left) -->
+			<div class="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-atmosphere-blue rounded-full blur-[160px] opacity-90 mix-blend-screen animate-float"></div>
+			
+			<!-- Muted Red Edge Glow (Bottom Right) -->
+			<div class="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-atmosphere-red rounded-full blur-[140px] opacity-70 mix-blend-soft-light"></div>
+			
+			<!-- Secondary Cyan Accent (Top Right) -->
+			<div class="absolute top-[10%] right-[-15%] w-[40%] h-[40%] bg-atmosphere-cyan rounded-full blur-[140px] opacity-50 mix-blend-overlay"></div>
+			
+			<!-- Deep Center Glow (Dimensionality) -->
+			<div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-atmosphere-glow rounded-full blur-[180px] opacity-40 mix-blend-screen"></div>
+
+			<!-- Bottom Muted Base (Stability) -->
+			<div class="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-atmosphere-muted to-transparent opacity-30"></div>
+		</div>
+
 		<slot />
+
+		<script>
+			// Scroll Reveal Logic
+			const observerOptions = {
+				threshold: 0.1,
+				rootMargin: "0px 0px -50px 0px"
+			};
+
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add('is-visible');
+						observer.unobserve(entry.target);
+					}
+				});
+			}, observerOptions);
+
+			// Count-up Animation Logic
+			function animateCountUp(el: HTMLElement) {
+				const target = parseInt(el.dataset.countTarget || "0");
+				const duration = 1500;
+				const start = 0;
+				const startTime = performance.now();
+
+				function update(currentTime: number) {
+					const elapsed = currentTime - startTime;
+					const progress = Math.min(elapsed / duration, 1);
+					
+					// Ease out expo
+					const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+					
+					const currentCount = Math.floor(easeProgress * target);
+					
+					if (el.dataset.countFormat === 'currency') {
+						el.textContent = new Intl.NumberFormat('en-US', {
+							style: 'currency',
+							currency: 'USD',
+							maximumFractionDigits: 0
+						}).format(currentCount).replace('$', '$');
+					} else if (el.dataset.countFormat === 'percent') {
+						el.textContent = `${currentCount}%`;
+					} else {
+						el.textContent = currentCount.toLocaleString();
+					}
+
+					if (progress < 1) {
+						requestAnimationFrame(update);
+					}
+				}
+
+				requestAnimationFrame(update);
+			}
+
+			// Initialize
+			function init() {
+				// Reveal sections
+				document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+					observer.observe(el);
+				});
+
+				// Trigger count-up on visible
+				const countObserver = new IntersectionObserver((entries) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							animateCountUp(entry.target as HTMLElement);
+							countObserver.unobserve(entry.target);
+						}
+					});
+				}, { threshold: 0.5 });
+
+				document.querySelectorAll('[data-count-target]').forEach(el => {
+					countObserver.observe(el);
+				});
+			}
+
+			// Run on load and after swaps
+			init();
+			document.addEventListener('astro:after-swap', init);
+		</script>
 	</body>
 </html>
 

@@ -104,13 +104,20 @@ const jsonLdSchema = {
 	<main class="bg-black min-h-screen text-white selection:bg-brand-cyan/30">
 		
 		<!-- 1. HERO MARKET STATUS -->
-		<section class="relative pt-32 pb-16 lg:pt-48 lg:pb-24 overflow-hidden border-b border-white/5">
+		<section class="relative pt-32 pb-16 lg:pt-48 lg:pb-24 overflow-hidden border-b border-white/5 cinematic-glow">
+			<!-- Hero Atmospheric Layer -->
+			<div class="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+				<div class="absolute top-[20%] left-[10%] w-[40%] h-[40%] bg-brand-blue/10 rounded-full blur-[120px] animate-pulse"></div>
+				<div class="absolute bottom-[10%] right-[20%] w-[30%] h-[30%] bg-brand-magenta/5 rounded-full blur-[100px]"></div>
+				<div class="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60"></div>
+			</div>
+
 			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 				
-				<div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+				<div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 animate-fade-in-up">
 					<div class="max-w-3xl">
 						<div class="flex items-center gap-3 mb-6">
-							<div class={`px-3 py-1 rounded-full ${statusBg} border border-white/10 flex items-center gap-2`}>
+							<div class={`px-3 py-1 rounded-full ${statusBg} border border-white/10 flex items-center gap-2 shadow-sm backdrop-blur-md`}>
 								<span class="relative flex h-2 w-2">
 									<span class={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusColor.replace('text-', 'bg-')}`}></span>
 									<span class={`relative inline-flex rounded-full h-2 w-2 ${statusColor.replace('text-', 'bg-')}`}></span>
@@ -130,12 +137,12 @@ const jsonLdSchema = {
 						</p>
 					</div>
 
-					<div class="flex flex-col gap-2 p-6 rounded-2xl bg-white/[0.02] border border-white/10 min-w-[240px]">
-						<span class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Market Confidence</span>
+					<div class="flex flex-col gap-2 p-6 rounded-2xl bg-white/[0.02] border border-white/10 min-w-[240px] hover:bg-white/[0.04] transition-colors group glass-panel">
+						<span class="text-[10px] font-mono text-muted-foreground uppercase tracking-widest group-hover:text-white/70 transition-colors">Market Confidence</span>
 						<div class="flex items-end gap-3">
-							<span class="text-4xl font-bold tracking-tighter">{(hiringVelocity * 10).toFixed(0)}<span class="text-lg text-muted-foreground">/100</span></span>
+							<span class="text-4xl font-bold tracking-tighter" data-count-target={(hiringVelocity * 10).toFixed(0)}>{(hiringVelocity * 10).toFixed(0)}<span class="text-lg text-muted-foreground">/100</span></span>
 							<div class="flex-1 h-2 bg-white/5 rounded-full overflow-hidden mb-2">
-								<div class="h-full bg-brand-cyan transition-all duration-1000" style={`width: ${hiringVelocity * 10}%`}></div>
+								<div class="h-full bg-brand-cyan transition-all duration-1000 shadow-[0_0_15px_rgba(80,227,194,0.4)]" style={`width: ${hiringVelocity * 10}%`}></div>
 							</div>
 						</div>
 						<p class="text-[10px] text-muted-foreground italic">Based on hiring volume vs historical baseline.</p>
@@ -143,10 +150,12 @@ const jsonLdSchema = {
 				</div>
 
 				<!-- Dashboard Snapshot Grid -->
-				<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+				<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 animate-fade-in-up [animation-delay:200ms]">
 					<MarketInsightCard 
 						title="Hiring Momentum" 
 						value={`${marketPulse.totalJobs}`} 
+						countTarget={marketPulse.totalJobs}
+						countFormat="number"
 						subValue="open roles"
 						trend={{ value: `${((marketPulse.recentJobs / marketPulse.totalJobs) * 100).toFixed(1)}% new`, isUp: true }}
 					>
@@ -156,6 +165,8 @@ const jsonLdSchema = {
 					<MarketInsightCard 
 						title="Layoff Pressure" 
 						value={`${recentLayoffsCount}`} 
+						countTarget={recentLayoffsCount}
+						countFormat="number"
 						subValue="impacted"
 						type={recentLayoffsCount > 500 ? 'negative' : 'default'}
 						trend={{ value: `${layoffTrend}%`, isUp: recentLayoffsCount < previousLayoffsCount }}
@@ -163,7 +174,7 @@ const jsonLdSchema = {
 						<div class="mt-4 flex gap-1 h-2">
 							{recentLayoffs.slice(0, 12).map(l => (
 								<div 
-									class={`flex-1 rounded-sm ${l.layoffs_count > 100 ? 'bg-brand-magenta' : 'bg-white/20'}`}
+									class={`flex-1 rounded-sm transition-all hover:scale-y-125 ${l.layoffs_count > 100 ? 'bg-brand-magenta shadow-[0_0_8px_rgba(235,54,127,0.4)]' : 'bg-white/20'}`}
 									title={`${l.company}: ${l.layoffs_count}`}
 								></div>
 							))}
@@ -173,46 +184,46 @@ const jsonLdSchema = {
 					<MarketInsightCard 
 						title="AI Hiring Share" 
 						value={`${aiMomentum.percentage}%`} 
+						countTarget={aiMomentum.percentage}
+						countFormat="percent"
 						subValue="of listings"
 						type="positive"
 						trend={{ value: "Expanding", isUp: true, neutral: true }}
 					>
 						<div class="mt-4 h-2 w-full bg-white/5 rounded-full overflow-hidden">
-							<div class="h-full bg-brand-cyan shadow-[0_0_10px_rgba(80,227,194,0.5)]" style={`width: ${aiMomentum.percentage}%`}></div>
+							<div class="h-full bg-brand-cyan shadow-[0_0_12px_rgba(80,227,194,0.5)] transition-all duration-1000" style={`width: ${aiMomentum.percentage}%`}></div>
 						</div>
 					</MarketInsightCard>
 
 					<MarketInsightCard 
 						title="Salary Climate" 
 						value={formatSalary(marketPulse.avgSalary)} 
+						countTarget={marketPulse.avgSalary}
+						countFormat="currency"
 						subValue="median base"
 						trend={{ value: "Stable", isUp: true, neutral: true }}
 					>
 						<div class="mt-4 flex items-end justify-between h-8 gap-1">
 							{[40, 60, 45, 70, 55, 80, 75].map(h => (
-								<div class="flex-1 bg-white/10 rounded-t-sm" style={`height: ${h}%`}></div>
+								<div class="flex-1 bg-white/10 rounded-t-sm group-hover:bg-brand-amber/40 transition-colors shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" style={`height: ${h}%`}></div>
 							))}
 						</div>
 					</MarketInsightCard>
 				</div>
 			</div>
-
-			<!-- Decorative background elements -->
-			<div class="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-blue/10 rounded-full blur-[120px] -z-10 pointer-events-none translate-x-1/3 -translate-y-1/3"></div>
-			<div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-magenta/5 rounded-full blur-[100px] -z-10 pointer-events-none -translate-x-1/2 translate-y-1/2"></div>
 		</section>
 
 		<!-- 2. AI MARKET BRIEFING (TICKER STYLE) -->
-		<section class="py-12 bg-black border-b border-white/5">
+		<section class="py-12 bg-black border-b border-white/5 reveal-on-scroll">
 			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div class="flex flex-col lg:flex-row gap-8 lg:items-center">
 					<div class="shrink-0 flex items-center gap-3">
-						<div class="px-2 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-mono font-bold text-brand-cyan uppercase">Gemini Insight</div>
+						<div class="px-2 py-1 rounded bg-brand-cyan/10 border border-brand-cyan/20 text-[10px] font-mono font-bold text-brand-cyan uppercase shadow-sm">Gemini Insight</div>
 						<span class="text-xs font-bold uppercase tracking-widest text-white/40">Market Intelligence Briefing</span>
 					</div>
 					<div class="grid md:grid-cols-3 gap-8 flex-1">
 						{aiIntelligence.intelligence_briefing.slice(0, 3).map((insight: string) => (
-							<p class="text-sm text-muted-foreground leading-relaxed border-l border-white/10 pl-4 py-1 italic">
+							<p class="text-sm text-muted-foreground leading-relaxed border-l border-white/10 pl-4 py-1 italic hover:text-white/80 transition-colors">
 								"{insight}"
 							</p>
 						))}
@@ -222,7 +233,7 @@ const jsonLdSchema = {
 		</section>
 
 		<!-- 3. VISUAL INTELLIGENCE GRID -->
-		<section class="py-24 relative overflow-hidden">
+		<section class="py-24 relative overflow-hidden reveal-on-scroll">
 			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div class="grid lg:grid-cols-12 gap-12">
 					
@@ -395,7 +406,7 @@ const jsonLdSchema = {
 		</section>
 
 		<!-- 4. PROFESSIONAL ANALYSIS -->
-		<section class="py-24 bg-white/[0.02] border-y border-white/5">
+		<section class="py-24 bg-white/[0.02] border-y border-white/5 reveal-on-scroll">
 			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div class="max-w-4xl">
 					<div class="flex items-center gap-3 mb-8">
@@ -416,8 +427,8 @@ const jsonLdSchema = {
 					</div>
 					
 					{aiIntelligence.data_limitations && (
-						<div class="mt-12 flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 w-fit">
-							<span class="text-[10px] font-mono text-muted-foreground italic">Note: {aiIntelligence.data_limitations}</span>
+						<div class="mt-12 flex items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 w-fit hover:border-white/10 transition-colors cursor-help group">
+							<span class="text-[10px] font-mono text-muted-foreground italic group-hover:text-muted-foreground/80 transition-colors">Note: {aiIntelligence.data_limitations}</span>
 							<span class="h-3 w-px bg-white/10 mx-2"></span>
 							<span class="text-[10px] font-mono font-bold text-brand-cyan uppercase">Confidence: {aiIntelligence.confidence_score}</span>
 						</div>
@@ -427,7 +438,7 @@ const jsonLdSchema = {
 		</section>
 
 		<!-- 5. SEO INTELLIGENCE & FAQ -->
-		<section class="py-24 border-t border-white/5 bg-black">
+		<section class="py-24 border-t border-white/5 bg-black reveal-on-scroll">
 			<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div class="grid lg:grid-cols-2 gap-24">
 					
