@@ -1,9 +1,29 @@
 @import "tailwindcss" source("../");
-@import "@fontsource/geist/latin-400.css";
-@import "@fontsource/geist/latin-500.css";
-@import "@fontsource/geist/latin-600.css";
-@import "@fontsource/geist/latin-700.css";
-@import "@fontsource/geist-mono/latin-400.css";
+
+/* Optimized Font Loading (Manual Hosting) */
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/geist-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/geist-latin-600-normal.woff2') format('woff2');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --font-sans: "Geist", "Inter", "system-ui", "sans-serif";
@@ -73,18 +93,58 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/[0.03] backdrop-blur-md border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)];
+    @apply bg-white/[0.03] border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)];
     transform: translate3d(0, 0, 0);
+  }
+
+  @media (min-width: 769px) {
+    .glass {
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  /* Mobile-Optimized Glass */
+  @media (max-width: 768px) {
+    .glass {
+      @apply bg-white/[0.05];
+      /* No backdrop-filter on mobile for maximum performance */
+    }
   }
 
   .glass-panel {
-    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)];
+    @apply bg-black/60 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)];
     transform: translate3d(0, 0, 0);
   }
 
+  @media (min-width: 769px) {
+    .glass-panel {
+      backdrop-filter: blur(20px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .glass-panel {
+      @apply bg-black/85;
+      /* No backdrop-filter on mobile */
+    }
+  }
+
   .glass-card {
-    @apply bg-white/[0.02] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.15] transition-[background-color,border-color,transform] duration-300 ease-out;
+    @apply bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.15] transition-[background-color,border-color,transform] duration-300 ease-out;
     transform: translate3d(0, 0, 0);
+  }
+
+  @media (min-width: 769px) {
+    .glass-card {
+      backdrop-filter: blur(8px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .glass-card {
+      @apply bg-white/[0.04];
+      /* No backdrop-filter on mobile */
+    }
   }
   
   .cinematic-glow {

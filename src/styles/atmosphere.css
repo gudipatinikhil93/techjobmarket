@@ -62,6 +62,14 @@
   will-change: transform;
 }
 
+@media (max-width: 768px) {
+  .atm-glow-container {
+    filter: blur(20px); /* Dramatically reduced for mobile GPU */
+    mix-blend-mode: normal; /* Faster blending */
+    opacity: 0.6;
+  }
+}
+
 .atm-glow-blue {
   position: absolute;
   top: 5%;
@@ -118,8 +126,12 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.15) 100%);
-  /* Very light backdrop filter for performance */
-  backdrop-filter: saturate(110%);
+}
+
+@media (min-width: 769px) {
+  .atm-diffusion {
+    backdrop-filter: saturate(110%);
+  }
 }
 
 /* Layer 6: Scanlines (Optimized) */
@@ -137,6 +149,13 @@
   animation: atm-scanline 25s linear infinite;
   pointer-events: none;
   will-change: transform;
+  display: none; /* Default off, enabled on desktop */
+}
+
+@media (min-width: 1024px) {
+  .atm-scanline {
+    display: block;
+  }
 }
 
 /* Animations (Refined for smoothness) */
@@ -160,13 +179,18 @@
 .hero-active .atm-glow-blue {
   width: 80%;
   height: 80%;
-  filter: blur(100px);
+}
+
+@media (min-width: 769px) {
+  .hero-active .atm-glow-blue {
+    filter: blur(100px);
+  }
 }
 
 /* Mobile & Performance Mode Optimizations */
 @media (max-width: 1024px) {
   .atm-glow-container {
-    filter: blur(50px);
+    filter: blur(40px);
     inset: -2%;
   }
   .atm-grid {
@@ -176,17 +200,20 @@
 
 @media (max-width: 768px) {
   .atm-glow-container {
-    filter: blur(30px);
+    filter: none; /* Remove filter on mobile for performance */
+    mix-blend-mode: normal;
+    opacity: 0.5;
+  }
+  .atm-glow-blue, .atm-glow-red, .atm-glow-cyan {
+    animation: none !important; /* Static glows on mobile */
+    transform: none !important;
+    filter: blur(30px); /* Move blur to individual elements on mobile */
   }
   .atm-diffusion {
-    backdrop-filter: none;
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.05);
   }
   .atm-grain {
-    opacity: 0.04;
-  }
-  .atm-scanline {
-    display: none; /* Save battery/GPU on mobile */
+    opacity: 0.03;
   }
   .atm-glow-cyan {
     display: none; /* Simplify on mobile */

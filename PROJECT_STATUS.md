@@ -1,14 +1,15 @@
 # Project Status - US Tech Job Market Intelligence
 
 ## Current Architecture
-- **Framework:** AstroJS 4.x (SSR Mode)
-- **Styling:** Tailwind CSS 4.x (Alpha)
+- **Framework:** AstroJS 6.x (SSR Mode)
+- **Styling:** Tailwind CSS 4.x
 - **Database:** Supabase (PostgreSQL) with specialized schema for market analysis.
 - **Data Pipeline:** Custom TypeScript scrapers with Apify and Playwright adapters.
-- **Deployment:** Vercel (planned/integrated).
+- **Deployment:** Cloudflare Workers.
 - **Automation:** GitHub Actions for weekly data ingestion and AI insight generation.
 
 ## Completed Systems
+- **Mobile Performance Pass:** Fixed Geist font 404s, implemented manual .woff2 hosting, deferred analytics, optimized glass/blur effects for mobile GPUs, and consolidated IntersectionObservers to reduce main-thread work. (June 2026)
 - **Visible US Market Atmosphere:** Transformed the site into a premium US financial intelligence terminal. Implemented 10-15% perceptible atmospheric layering, cinematic lighting depth, and desaturated regional accents across all primary and secondary pages. (June 2026)
 - **Premium Motion Design:** Implemented subtle atmospheric US theming, scroll-reveal system, metric count-up animations, and micro-interactions. (June 2026)
 - **Production Performance Optimization:** Performed a COMPLETE production-grade cleanup. Reduced CSS bloat, optimized atmospheric rendering (GPU-efficient), slashed favicon size by 95% (264KB → 12KB), implemented security headers middleware, and fixed accessibility contrast issues. (June 2026)
