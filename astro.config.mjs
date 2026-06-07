@@ -2,6 +2,9 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 
+// Allow SITE_URL to be overridden by environment variables for staging/previews
+const SITE_URL = process.env.SITE_URL || 'https://techjobmarket.com';
+
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
@@ -11,5 +14,6 @@ export default defineConfig({
     },
     mode: 'directory'
   }),
-  site: 'https://techjobmarket.com', // REQUIRED: Your final deployed domain for sitemap generation
+  site: SITE_URL, // REQUIRED: Your final deployed domain for sitemap generation
 });
+

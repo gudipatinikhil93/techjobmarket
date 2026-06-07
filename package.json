@@ -11,8 +11,11 @@
     "preview": "astro preview",
     "astro": "astro",
     "pipeline:update": "tsx scripts/pipeline.ts",
-    "scrape:test": "tsx scripts/test-scrape.ts"
+    "scrape:test": "tsx scripts/test-scrape.ts",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:prod": "wrangler deploy"
   },
+
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@fontsource/geist": "^5.2.9",

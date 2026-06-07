@@ -1,6 +1,7 @@
 name = "techjobmarket-us"
 compatibility_date = "2024-11-01"
 
+# Production Routes
 [[routes]]
 pattern = "techjobmarket.com"
 custom_domain = true
@@ -11,3 +12,21 @@ custom_domain = true
 
 [observability]
 enabled = true
+
+# Staging Environment for India Region Development
+[env.staging]
+name = "techjobmarket-staging"
+# This will deploy to techjobmarket-staging.<your-subdomain>.workers.dev
+# Custom domain for staging can be added here once verified in Cloudflare dashboard
+# [[routes]]
+# pattern = "staging.techjobmarket.com"
+# custom_domain = true
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+SITE_URL = "https://techjobmarket-staging.techjobmarket-us.workers.dev"
+# Add staging-specific Supabase credentials here if different from production
+# SUPABASE_URL = "your_staging_supabase_url"
+# SUPABASE_ANON_KEY = "your_staging_supabase_anon_key"
+
+
